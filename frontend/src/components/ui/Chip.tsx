@@ -12,8 +12,8 @@ export function Chip({ selected = false, className, children, ...rest }: ChipPro
       type="button"
       aria-pressed={selected}
       className={clsx(
-        'h-10 shrink-0 rounded-full px-4 text-[0.9375rem] font-medium transition-colors duration-150',
-        selected ? 'bg-ink text-white' : 'bg-surface text-ink ring-1 ring-inset ring-line hover:bg-canvas',
+        'h-11 shrink-0 rounded-full px-4 text-[0.9375rem] font-medium transition-colors duration-150',
+        selected ? 'bg-ink text-white' : 'bg-surface text-ink ring-1 ring-inset ring-control hover:bg-canvas',
         className,
       )}
       {...rest}

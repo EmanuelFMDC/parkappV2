@@ -22,6 +22,8 @@
     "searchPlaceholder": "Search a destination or address",
     "filtersLabel": "Filters",
     "filters": { "all": "All", "covered": "Covered", "ev": "EV charging", "cheap": "Cheapest", "secure": "Attended" },
+    "results_one": "{{count}} parking lot found",
+    "results_other": "{{count}} parking lots found",
     "nearby": "Near your destination",
     "emptyTitle": "No parking matches those filters",
     "emptyBody": "Remove a filter to see more options.",

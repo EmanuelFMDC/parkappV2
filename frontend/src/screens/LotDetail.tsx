@@ -33,7 +33,7 @@ export default function LotDetail() {
   }
 
   const full = lot.free === 0
-  const occupancy = Math.round(((lot.total - lot.free) / lot.total) * 100)
+  const freePct = Math.round((lot.free / lot.total) * 100)
 
   return (
     <>
@@ -63,10 +63,11 @@ export default function LotDetail() {
               role="progressbar"
               aria-valuemin={0}
               aria-valuemax={100}
-              aria-valuenow={occupancy}
+              aria-valuenow={freePct}
+              aria-valuetext={`${lot.free} / ${lot.total}`}
               aria-label={t('lot.spots')}
             >
-              <div className="h-full rounded-full bg-accent" style={{ width: `${occupancy}%` }} />
+              <div className="h-full rounded-full bg-accent" style={{ width: `${freePct}%` }} />
             </div>
           </div>
         </section>
@@ -78,7 +79,8 @@ export default function LotDetail() {
             <Badge tone="success">{t('common.available', { count: lot.free })}</Badge>
           )}
           <Badge tone="neutral" icon={<Star className="size-3.5 fill-accent text-accent" aria-hidden />}>
-            {lot.rating}
+            <span aria-hidden>{lot.rating}</span>
+            <span className="sr-only">{t('common.rating', { value: lot.rating })}</span>
           </Badge>
         </section>
 

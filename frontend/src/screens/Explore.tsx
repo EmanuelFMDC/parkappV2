@@ -59,6 +59,10 @@ export default function Explore() {
         <LotMap lots={visible} />
       </div>
 
+      <p role="status" className="sr-only">
+        {t('explore.results', { count: visible.length })}
+      </p>
+
       <section className="px-4 pt-6" aria-labelledby="nearby">
         <h2 id="nearby" className="mb-3 text-title font-semibold">
           {t('explore.nearby')}

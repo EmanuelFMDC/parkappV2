@@ -21,7 +21,7 @@ export function Input({ label, error, icon, hideLabel, className, ...rest }: Inp
         className={clsx(
           'flex h-touch items-center gap-3 rounded-control bg-surface px-4 ring-1 ring-inset transition-shadow',
           'focus-within:ring-2 focus-within:ring-primary',
-          error ? 'ring-2 ring-danger-600' : 'ring-line',
+          error ? 'ring-2 ring-danger-600' : 'ring-control',
         )}
       >
         {icon && <span className="text-ink-subtle">{icon}</span>}

@@ -39,12 +39,10 @@ export function LotCard({ lot }: { lot: Lot }) {
         ) : (
           <Badge tone={lowSpots ? 'accent' : 'success'}>{t('common.available', { count: lot.free })}</Badge>
         )}
-        <span
-          className="flex items-center gap-1 text-caption font-semibold text-ink-muted"
-          aria-label={t('common.rating', { value: lot.rating })}
-        >
+        <span className="flex items-center gap-1 text-caption font-semibold text-ink-muted">
           <Star className="size-4 fill-accent text-accent" aria-hidden />
-          {lot.rating}
+          <span aria-hidden>{lot.rating}</span>
+          <span className="sr-only">{t('common.rating', { value: lot.rating })}</span>
         </span>
       </div>
 

@@ -22,6 +22,8 @@
     "searchPlaceholder": "Busca destino o dirección",
     "filtersLabel": "Filtros",
     "filters": { "all": "Todos", "covered": "Techado", "ev": "Carga eléctrica", "cheap": "Más barato", "secure": "Vigilado" },
+    "results_one": "{{count}} estacionamiento encontrado",
+    "results_other": "{{count}} estacionamientos encontrados",
     "nearby": "Cerca de tu destino",
     "emptyTitle": "No hay estacionamientos con esos filtros",
     "emptyBody": "Quita un filtro para ver más opciones.",

@@ -34,12 +34,14 @@
   --color-ink-muted: #4a5573;
   --color-ink-subtle: #66708f;
   --color-line: #dfe3ec;
+  /* Borders of interactive controls: >= 3:1 on surface and canvas (WCAG 1.4.11) */
+  --color-control: #7d88a6;
   --color-canvas: #f6f7fa;
   --color-surface: #ffffff;
 
   /* Semantic */
   --color-success-50: #e5f5ec;
-  --color-success-600: #12804b;
+  --color-success-600: #0f6e40;
   --color-danger-50: #fdeceb;
   --color-danger-600: #c9302c;
 
@@ -120,7 +122,7 @@
     text-wrap: balance;
   }
   :focus-visible {
-    outline: 3px solid var(--color-ticket-400);
+    outline: 3px solid var(--color-signal-700);
     outline-offset: 2px;
     border-radius: var(--radius-control);
   }

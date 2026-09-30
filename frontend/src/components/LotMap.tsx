@@ -48,10 +48,10 @@ export function LotMap({ lots }: { lots: Lot[] }) {
             type="button"
             onClick={() => navigate(`/lot/${lot.id}`)}
             style={{ left: `${lot.map.x}%`, top: `${lot.map.y}%` }}
-            aria-label={`${lot.name}, ${formatMoney(lot.pricePerHour, i18n.language)} ${t('common.perHour')}`}
+            aria-label={`${lot.name}, ${formatMoney(lot.pricePerHour, i18n.language)} ${t('common.perHour')}${full ? `, ${t('common.full')}` : ''}`}
             className={clsx(
-              'absolute -translate-x-1/2 -translate-y-1/2 rounded-full px-3 py-1.5 text-[0.9375rem] font-bold tabular-nums shadow-raised transition-transform hover:scale-105',
-              full ? 'bg-line text-ink-subtle line-through' : 'bg-ink text-white',
+              'absolute -translate-x-1/2 -translate-y-1/2 grid min-h-11 min-w-11 place-items-center rounded-full px-3 text-[0.9375rem] font-bold tabular-nums shadow-raised transition-transform hover:scale-105',
+              full ? 'bg-line text-ink-muted line-through' : 'bg-ink text-white',
             )}
           >
             {formatMoney(lot.pricePerHour, i18n.language)}

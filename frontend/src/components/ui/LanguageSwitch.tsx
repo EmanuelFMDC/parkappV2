@@ -13,7 +13,7 @@ export function LanguageSwitch({ hideLabel }: { hideLabel?: boolean }) {
       hideLabel={hideLabel}
       value={current}
       onChange={(l) => void i18n.changeLanguage(l)}
-      options={languages.map((l) => ({ value: l, label: names[l] }))}
+      options={languages.map((l) => ({ value: l, label: names[l], lang: l }))}
     />
   )
 }
