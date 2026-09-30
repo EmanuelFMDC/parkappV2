@@ -10,6 +10,8 @@ const Confirmation = lazy(() => import('./screens/Confirmation'))
 const Spot = lazy(() => import('./screens/Spot'))
 const History = lazy(() => import('./screens/History'))
 const Profile = lazy(() => import('./screens/Profile'))
+const Vehicles = lazy(() => import('./screens/Vehicles'))
+const PaymentMethods = lazy(() => import('./screens/PaymentMethods'))
 
 export default function App() {
   return (
@@ -25,6 +27,8 @@ export default function App() {
               <Route path="spot" element={<Spot />} />
               <Route path="history" element={<History />} />
               <Route path="profile" element={<Profile />} />
+              <Route path="profile/vehicles" element={<Vehicles />} />
+              <Route path="profile/payment" element={<PaymentMethods />} />
               <Route path="*" element={<Explore />} />
             </Route>
           </Routes>

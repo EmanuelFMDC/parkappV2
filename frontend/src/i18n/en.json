@@ -92,6 +92,25 @@
     "emptyTitle": "No visits yet",
     "emptyBody": "Your receipts will show up here after your first reservation."
   },
+  "vehicles": {
+    "title": "My vehicles",
+    "plate": "License plate",
+    "nickname": "Name (optional)",
+    "nicknamePlaceholder": "My car",
+    "add": "Save vehicle",
+    "remove": "Remove {{plate}}",
+    "emptyTitle": "No saved vehicles yet",
+    "emptyBody": "Save your plate and we'll use it on every reservation.",
+    "default": "Default"
+  },
+  "payments": {
+    "title": "Payment methods",
+    "card": "Card ending in {{last}}",
+    "expires": "Expires {{date}}",
+    "default": "Default",
+    "note": "For now you can only pay with this card."
+  },
+  "profileLinks": { "helpSubject": "ParkApp help" },
   "profile": {
     "title": "Profile",
     "language": "Language",

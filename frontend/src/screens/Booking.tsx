@@ -6,6 +6,7 @@ import { Button, Input, Segmented, TopBar } from '../components/ui'
 import { SERVICE_FEE, getLot } from '../data/lots'
 import { formatMoney } from '../lib/format'
 import { useSession } from '../lib/session'
+import { savedPlate } from '../lib/vehicles'
 
 type Arrival = 'now' | 'in30' | 'in60'
 const arrivalMinutes: Record<Arrival, number> = { now: 0, in30: 30, in60: 60 }
@@ -22,7 +23,7 @@ export default function Booking() {
   const { start } = useSession()
   const lot = getLot(id)
 
-  const [plate, setPlate] = useState('')
+  const [plate, setPlate] = useState(savedPlate)
   const [arrival, setArrival] = useState<Arrival>('now')
   const [hours, setHours] = useState<(typeof durations)[number]>('2')
   const [error, setError] = useState<string>()

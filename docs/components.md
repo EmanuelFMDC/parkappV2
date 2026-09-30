@@ -154,4 +154,5 @@ Four tabs: Explorar, Mi lugar, Historial, Perfil. `<nav aria-label>`, `NavLink` 
 ## Known gaps
 - No modal or bottom sheet component yet. When added: focus trap, Escape, return focus, `aria-modal`.
 - No dark theme. Tokens are structured so a `dark` set can override the semantic roles.
-- Profile list rows are visual only.
+- Saved vehicles live in `localStorage` on the device (`src/lib/vehicles.ts`); the first one is the default and pre-fills the plate in Booking. Payment methods shows one fixed demo card.
+- Adding or removing payment methods is not built.

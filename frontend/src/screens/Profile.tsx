@@ -1,11 +1,24 @@
-import { ChevronRight, CircleHelp, CreditCard, Plus } from 'lucide-react'
+import { CarFront, ChevronRight, CircleHelp, CreditCard } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 import { LanguageSwitch, Switch, TopBar } from '../components/ui'
+
+const rowClass = 'flex h-touch w-full items-center gap-3 px-4 text-left font-medium hover:bg-canvas'
 
 export default function Profile() {
   const { t } = useTranslation()
   const [alerts, setAlerts] = useState(true)
+
+  const rows = [
+    { icon: CreditCard, label: t('profile.paymentMethods'), to: '/profile/payment' },
+    { icon: CarFront, label: t('profile.vehicles'), to: '/profile/vehicles' },
+    {
+      icon: CircleHelp,
+      label: t('profile.help'),
+      href: `mailto:ayuda@parkapp.example?subject=${encodeURIComponent(t('profileLinks.helpSubject'))}`,
+    },
+  ]
 
   return (
     <>
@@ -37,19 +50,28 @@ export default function Profile() {
         </section>
 
         <ul className="divide-y divide-line rounded-surface bg-surface ring-1 ring-line">
-          {[
-            { icon: CreditCard, label: t('profile.paymentMethods') },
-            { icon: Plus, label: t('profile.addVehicle') },
-            { icon: CircleHelp, label: t('profile.help') },
-          ].map(({ icon: Icon, label }) => (
-            <li key={label}>
-              <button type="button" className="flex h-touch w-full items-center gap-3 px-4 text-left font-medium hover:bg-canvas">
+          {rows.map(({ icon: Icon, label, to, href }) => {
+            const content = (
+              <>
                 <Icon className="size-5 text-primary" aria-hidden />
                 <span className="flex-1">{label}</span>
                 <ChevronRight className="size-5 text-ink-subtle" aria-hidden />
-              </button>
-            </li>
-          ))}
+              </>
+            )
+            return (
+              <li key={label}>
+                {to ? (
+                  <Link to={to} className={rowClass}>
+                    {content}
+                  </Link>
+                ) : (
+                  <a href={href} className={rowClass}>
+                    {content}
+                  </a>
+                )}
+              </li>
+            )
+          })}
         </ul>
       </div>
     </>

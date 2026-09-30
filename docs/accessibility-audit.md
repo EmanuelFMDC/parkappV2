@@ -4,7 +4,7 @@
 > Not covered: real screen reader testing (VoiceOver, NVDA, TalkBack), 200% zoom on a device, and automated axe scan. Code review catches structure and contrast, not how assistive tech actually announces things. Run those before launch.
 
 ## Summary
-**Issues found:** 13 | **Critical:** 0 | **Major:** 6 | **Minor:** 7 | **Fixed in this pass:** 12 | **Open:** 1
+**Issues found:** 13 | **Critical:** 0 | **Major:** 6 | **Minor:** 7 | **Fixed:** 13 | **Open:** 0 (manual testing still pending, see Priority Fixes)
 
 ## Findings
 
@@ -35,7 +35,7 @@
 | # | Issue | WCAG | Severity | Status |
 |---|-------|------|----------|--------|
 | 12 | Filtering the list changed results silently | 4.1.3 Status messages | 🟡 Major | ✅ Fixed. `role="status"` announces "3 estacionamientos encontrados" |
-| 13 | Profile rows (payment methods, add vehicle, help) are buttons with no action | 2.1.1 / 4.1.2 | 🟢 Minor | ⚠️ Open. Real controls with no behavior yet. Wire them up, or render as disabled until the screens exist |
+| 13 | Profile rows (payment methods, add vehicle, help) are buttons with no action | 2.1.1 / 4.1.2 | 🟢 Minor | ✅ Fixed. Rows are now real links: `/profile/payment`, `/profile/vehicles`, and a `mailto:` for help |
 
 ## Color Contrast Check (after fixes)
 | Element | Foreground | Background | Ratio | Required | Pass |
@@ -78,7 +78,6 @@ No modals or custom popovers exist yet, so there are no focus traps. If a bottom
 | Results | "3 estacionamientos encontrados", status | Polite live region |
 
 ## Priority Fixes (remaining)
-1. **Wire up or disable the Profile rows** (#13). They look tappable and do nothing.
-2. **Test with VoiceOver (iOS) and TalkBack** on the booking flow, focus on the `Segmented` radios and the `role="timer"`.
-3. **Check 200% zoom and 320px width** on Explore and Booking. The layout is rem-based and single column, so it should reflow, but it is unverified.
-4. **The "Cómo llegar" button opens a new tab** with no warning. Add "(abre en una pestaña nueva)" to its accessible name when the real map provider is connected.
+1. **Test with VoiceOver (iOS) and TalkBack** on the booking flow, focus on the `Segmented` radios and the `role="timer"`.
+2. **Check 200% zoom and 320px width** on Explore and Booking. The layout is rem-based and single column, so it should reflow, but it is unverified.
+3. **The "Cómo llegar" button opens a new tab** with no warning. Add "(abre en una pestaña nueva)" to its accessible name when the real map provider is connected.

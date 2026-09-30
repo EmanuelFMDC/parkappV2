@@ -92,6 +92,25 @@
     "emptyTitle": "Aún no hay visitas",
     "emptyBody": "Tus recibos aparecerán aquí después de tu primera reserva."
   },
+  "vehicles": {
+    "title": "Mis vehículos",
+    "plate": "Placa",
+    "nickname": "Nombre (opcional)",
+    "nicknamePlaceholder": "Mi coche",
+    "add": "Guardar vehículo",
+    "remove": "Quitar {{plate}}",
+    "emptyTitle": "Aún no guardas vehículos",
+    "emptyBody": "Guarda tu placa y la usaremos en cada reserva.",
+    "default": "Predeterminado"
+  },
+  "payments": {
+    "title": "Métodos de pago",
+    "card": "Tarjeta terminada en {{last}}",
+    "expires": "Vence {{date}}",
+    "default": "Predeterminada",
+    "note": "Por ahora solo puedes pagar con esta tarjeta."
+  },
+  "profileLinks": { "helpSubject": "Ayuda con ParkApp" },
   "profile": {
     "title": "Perfil",
     "language": "Idioma",
