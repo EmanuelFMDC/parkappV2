@@ -133,11 +133,22 @@ Decisión del dueño del proyecto tras revisar el frontend: separar el flujo del
 
 - **Una cuenta, dos modos** (como Airbnb). Se descartaron dos apps o dos cuentas: la spec pide un solo código (Capacitor) y una identidad verificada por persona, y muchos anfitriones también van a eventos.
 - **Cada modo tiene su barra:** conductor = Explorar, Mis reservas, Perfil; anfitrión = Mis cocheras, Reservas, Perfil. "Reservas recibidas" pasa de ser un selector escondido dentro de una pestaña a una pestaña propia.
-- **El modo lo decide la dirección** (`/host...`), sin estado oculto ni redirecciones al abrir la app. Ventaja: enlaces, recarga y botón de atrás siempre coinciden con la pantalla. Costo: la app no recuerda el último modo usado; se puede añadir si hace falta.
+- **El modo lo decide la dirección** (`/host...`), sin estado oculto ni redirecciones al abrir la app. Ventaja: enlaces, recarga y botón de atrás siempre coinciden con la pantalla. Costo: la app no recordaba el último modo usado (resuelto en D-019).
 - **Señal visual:** en modo anfitrión una franja oscura "Modo anfitrión" con el botón para volver, en todas las pantallas con barra. No se repite el mismo botón en el Perfil.
 - **Puntos de entrada:** tarjeta "Modo anfitrión" en el Perfil e invitación discreta en Explorar. Se puede mirar el modo anfitrión sin cuenta; se pide al empezar a publicar.
 - **El Perfil existe en ambos modos** (`/profile` y `/host/profile`); en modo anfitrión no muestra autos.
 - **Sin cambios de contrato ni de API.** Los enlaces viejos `/host?tab=bookings` redirigen a `/host/bookings`.
+
+## D-019 · La app recuerda el último modo usado (2026-10-01)
+
+Resuelve la limitación de D-018. Reglas, pensadas para no romper la regla de que la dirección manda:
+
+- **Se guarda** el modo (`localStorage`, solo en el dispositivo) cada vez que la persona está en una pantalla con barra inferior; las pantallas de un flujo (publicar, reservar) no cuentan como elegir modo.
+- **Se restaura solo el modo anfitrión**, solo al abrir la app en la raíz `/` sin parámetros, **una vez por pestaña del navegador** (`sessionStorage`) y solo si la cuenta de anfitrión está lista. Así nadie cae en una invitación al abrir la app.
+- **Nunca se redirige** por un enlace, una recarga ni al tocar "Explorar" o "Cambiar a modo conductor" después: elegir conductor es una decisión que se respeta.
+- **Cerrar sesión lo olvida**, para que la siguiente persona en un teléfono compartido empiece desde cero.
+- Si el almacenamiento no está disponible, la app abre en modo conductor.
+- Cubierto por pruebas unitarias (`modePreference`, `modeMemory`) y e2e (`mode-switch`, "opening the app again").
 
 ## Pendientes de decidir
 

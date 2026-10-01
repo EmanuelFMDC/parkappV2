@@ -94,3 +94,8 @@ Se añadió a `backend/openapi.draft.yaml`: `GET` y `POST /api/host/spaces`, `PA
 - **De punta a punta (móvil y escritorio, con axe):** pasar de conductor a anfitrión y de vuelta, moverse entre las pestañas de cada modo, que el botón de atrás y adelante sigan al modo, la invitación en Explorar, mirar el modo anfitrión sin cuenta, la redirección de enlaces viejos y la traducción del aviso.
 - **Capturas nuevas:** `0-explore-invitation`, `10-profile-driver-mode` y `11-profile-host-mode` en `docs/host/screenshots/`.
 - **Defecto que encontró la revisión:** en el Perfil de modo anfitrión aparecían dos botones idénticos "Cambiar a modo conductor" (el aviso y una tarjeta). Se dejó solo el aviso. Además, "Completar mi cuenta" y "Cerrar sesión" salían pegados.
+
+## Recordar el último modo (D-019)
+
+- La app guarda el modo en el dispositivo y, al abrirla en `/`, lleva a un anfitrión con cuenta lista a su modo. Una sola vez por pestaña; enlaces, recargas y "Explorar" nunca saltan. Cerrar sesión lo olvida.
+- **Pruebas:** 14 de integración (`modeMemory.test.tsx`), las de `modePreference.test.ts` y 4 e2e que abren la app en una pestaña nueva (`mode-switch.spec.ts`).

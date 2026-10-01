@@ -103,4 +103,80 @@ test.describe('one account, two modes', () => {
     await expect(page.getByRole('navigation', { name: 'Main navigation' })).toBeVisible()
     await expectAccessible(page)
   })
+
+  test.describe('opening the app again', () => {
+    test('a ready host comes back to host mode, once, and tapping Explorar later stays in driver mode', async ({
+      page,
+    }) => {
+      await signInAsSeeded(page, HOST_ID, HOST_PHONE)
+      await page.goto('/profile')
+      await page.getByRole('button', { name: 'Cambiar a modo anfitrión' }).click()
+      await expect(tab(page, 'Mis cocheras')).toBeVisible()
+
+      // A new tab is the closest thing to opening the app again: same device, fresh session.
+      const reopened = await page.context().newPage()
+      await reopened.goto('/')
+      await expect(reopened).toHaveURL(/\/host$/)
+      await expect(reopened.getByText('Modo anfitrión', { exact: true })).toBeVisible()
+      await expectAccessible(reopened)
+
+      // Going to the driver side sticks: it is a choice, not something to undo
+      await reopened.getByRole('button', { name: 'Cambiar a modo conductor' }).click()
+      await expect(reopened).toHaveURL(/localhost:\d+\/$/)
+      await reopened.waitForTimeout(500)
+      await expect(reopened).toHaveURL(/localhost:\d+\/$/)
+
+      // Reloading the tab does not jump either
+      await reopened.reload()
+      await expect(tab(reopened, 'Explorar')).toBeVisible()
+
+      // And the next time the app opens, it is in the mode they left it in: driver
+      const third = await page.context().newPage()
+      await third.goto('/')
+      await expect(tab(third, 'Explorar')).toBeVisible()
+      await expect(third).toHaveURL(/localhost:\d+\/$/)
+    })
+
+    test('a link is never overridden by the remembered mode', async ({ page }) => {
+      await signInAsSeeded(page, HOST_ID, HOST_PHONE)
+      await page.goto('/profile')
+      await page.getByRole('button', { name: 'Cambiar a modo anfitrión' }).click()
+      await expect(tab(page, 'Mis cocheras')).toBeVisible()
+
+      const reopened = await page.context().newPage()
+      await reopened.goto('/bookings')
+      await expect(reopened).toHaveURL(/\/bookings$/)
+      await expect(tab(reopened, 'Mis reservas')).toBeVisible()
+    })
+
+    test('someone who is not a host yet is not sent to the invitation on every launch', async ({
+      page,
+    }) => {
+      await page.goto('/profile')
+      await page.getByRole('button', { name: 'Cambiar a modo anfitrión' }).click()
+      await expect(page.getByRole('button', { name: 'Empezar a publicar' })).toBeVisible()
+
+      const reopened = await page.context().newPage()
+      await reopened.goto('/')
+      await expect(reopened.getByRole('heading', { level: 1 })).toHaveText('¿A qué evento vas?')
+      await expect(reopened).toHaveURL(/localhost:\d+\/$/)
+    })
+
+    test('signing out forgets the mode for the next person on the phone', async ({ page }) => {
+      await signInAsSeeded(page, HOST_ID, HOST_PHONE)
+      await page.goto('/profile')
+      await page.getByRole('button', { name: 'Cambiar a modo anfitrión' }).click()
+      await expect(tab(page, 'Mis cocheras')).toBeVisible()
+      await page.goto('/host/profile')
+      await page.getByRole('button', { name: 'Cerrar sesión' }).click()
+      await expect(
+        page.getByRole('button', { name: 'Crear cuenta o iniciar sesión' }),
+      ).toBeVisible()
+
+      const reopened = await page.context().newPage()
+      await reopened.goto('/')
+      await expect(reopened).toHaveURL(/localhost:\d+\/$/)
+      await expect(tab(reopened, 'Explorar')).toBeVisible()
+    })
+  })
 })

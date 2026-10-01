@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { clearMode } from '../../lib/modePreference'
 import { useServices } from '../../services/context'
 import { AuthContext, type AuthState } from './context'
 
@@ -12,6 +13,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () =>
       auth.onAuthChange((next) => {
         setUser(next)
+        if (!next) clearMode()
         // Whatever was cached belonged to the previous person.
         queryClient.removeQueries({ queryKey: ['bookings'] })
         queryClient.removeQueries({ queryKey: ['me'] })
