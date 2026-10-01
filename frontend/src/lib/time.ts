@@ -51,3 +51,16 @@ export function localToUtcIso(date: string, time: string): string {
   const corrected = guess - zoneOffsetMs(first)
   return new Date(corrected).toISOString()
 }
+
+/** The Mexico City wall-clock date ("2026-09-30") and time ("18:00") of a UTC instant. */
+export function utcToLocalParts(utcIso: string): { date: string; time: string } {
+  const instant = new Date(utcIso)
+  const date = new Intl.DateTimeFormat('en-CA', { timeZone: APP_TIME_ZONE }).format(instant)
+  const time = new Intl.DateTimeFormat('en-GB', {
+    timeZone: APP_TIME_ZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).format(instant)
+  return { date, time }
+}

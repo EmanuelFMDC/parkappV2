@@ -1,0 +1,191 @@
+{
+  "nav": {
+    "explore": "Explore",
+    "bookings": "My bookings",
+    "profile": "Profile"
+  },
+  "map": {
+    "pinUnavailable": "{{title}}, {{price}} per hour, unavailable"
+  },
+  "fields": {
+    "date": "Date",
+    "time": "Time"
+  },
+  "common": {
+    "loading": "Loading…",
+    "retry": "Try again",
+    "hoursShort": "h",
+    "minutesShort": "min"
+  },
+  "wizard": {
+    "steps": {
+      "venue": "Venue",
+      "space": "Garage",
+      "time": "Time",
+      "pay": "Payment"
+    }
+  },
+  "features": {
+    "covered": "Covered",
+    "gate": "Electric gate",
+    "camera": "Security camera",
+    "ev_charger": "EV charging",
+    "lit": "Well lit"
+  },
+  "vehicles": {
+    "compact": "Compact",
+    "sedan": "Sedan",
+    "suv": "SUV",
+    "pickup": "Pickup"
+  },
+  "errors": {
+    "code": {
+      "space_unavailable": "Someone just booked this garage for part of your time. Pick another or change the time.",
+      "too_short": "The minimum booking is 1 hour.",
+      "too_long": "The maximum booking is 24 hours.",
+      "in_the_past": "Arrival can't be in the past.",
+      "invalid_plate": "Enter the full license plate.",
+      "invalid_window": "Check the dates and times.",
+      "booking_expired": "Your held spot expired. Choose your garage again.",
+      "too_late": "Free cancellation has ended: less than 10 minutes to go.",
+      "not_cancellable": "This booking can no longer be cancelled.",
+      "unauthorized": "Sign in to continue.",
+      "not_found": "We couldn't find what you're looking for.",
+      "payment_failed": "The payment didn't go through. Try again.",
+      "unknown": "Something went wrong. Try again."
+    }
+  },
+  "auth": {
+    "title": "Sign in to ParkApp",
+    "phone": "Phone",
+    "phoneHint": "10 digits. We'll text you a code.",
+    "phonePlaceholder": "33 1234 5678",
+    "sendCode": "Send code",
+    "code": "6-digit code",
+    "codeHint": "In this test version the code is 000000.",
+    "verify": "Verify",
+    "changePhone": "Change phone",
+    "or": "or",
+    "google": "Continue with Google",
+    "invalidPhone": "Enter a 10-digit phone number.",
+    "invalidCode": "That code isn't right. Try again.",
+    "signOut": "Sign out",
+    "signInToSee": "Sign in to see your bookings"
+  },
+  "driver": {
+    "venue": {
+      "title": "Which event are you going to?",
+      "intro": "Pick the venue and the event. We show garages within 3 km.",
+      "venues": "Venues",
+      "events": "Upcoming events at {{venue}}",
+      "eventsEmpty": "There are no upcoming events at this venue.",
+      "pickVenue": "Pick a venue to see its events.",
+      "cta": "See garages",
+      "ctaHint": "Pick an event to continue",
+      "arrive": "You arrive 2 hours early and stay up to 1 hour after. You can change this later."
+    },
+    "spaces": {
+      "title": "Garages near {{venue}}",
+      "window": "{{from}} to {{to}}",
+      "summary_one": "{{count}} garage available",
+      "summary_other": "{{count}} garages available",
+      "filters": "Filters",
+      "unavailable": "Unavailable",
+      "distance": "{{distance}} from the venue",
+      "emptyTitle": "No garages match those filters",
+      "emptyBody": "Remove a filter to see more options.",
+      "clearFilters": "Clear filters",
+      "loading": "Looking for garages…",
+      "error": "We couldn't load the garages.",
+      "sheet": "Nearby garages"
+    },
+    "detail": {
+      "host": "Host: {{name}}",
+      "verified": "Verified host",
+      "memberSince": "On ParkApp since {{date}}",
+      "about": "About this garage",
+      "size": "Dimensions",
+      "sizeValue": "{{length}} × {{width}} cm, entrance height {{height}} cm",
+      "fits": "Fits",
+      "reviews": "Reviews",
+      "reviewsEmpty": "No reviews yet.",
+      "addressNote": "The exact address is shown once you confirm your booking.",
+      "total": "Total for your time",
+      "continue": "Choose time",
+      "unavailable": "This garage is no longer available for your time. Pick another or change the time.",
+      "notFoundTitle": "We can't find this garage",
+      "notFoundBody": "Go back to the list and pick another.",
+      "backToList": "See garages"
+    },
+    "time": {
+      "title": "Your time",
+      "arrival": "Arrival",
+      "departure": "Departure",
+      "plate": "Car license plate",
+      "plateHint": "The host uses it to recognize your car.",
+      "plateError": "Enter the full plate, for example JAL-482-A.",
+      "duration": "Duration: {{value}}",
+      "subtotal": "Garage",
+      "fee": "Service fee",
+      "total": "Total",
+      "continue": "Continue to payment",
+      "unavailable": "This garage is no longer available at this time."
+    },
+    "pay": {
+      "title": "Payment",
+      "summary": "Your booking",
+      "signIn": "Sign in to book",
+      "method": "Payment method",
+      "card": "Sample card ending in 4242",
+      "note": "This is a simulation: nothing is charged.",
+      "cta": "Pay and book · {{total}}",
+      "paying": "Booking…",
+      "freeCancel": "Free cancellation until 10 minutes before you arrive.",
+      "addressNote": "You'll see the exact address and your access code once it's confirmed.",
+      "pickAnother": "Pick another garage"
+    }
+  },
+  "bookings": {
+    "title": "My bookings",
+    "emptyTitle": "No bookings yet",
+    "emptyBody": "When you book a garage, your ticket shows up here.",
+    "find": "Find a garage",
+    "loadError": "We couldn't load your bookings.",
+    "status": {
+      "pending_payment": "Payment pending",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "expired": "Expired",
+      "completed": "Completed"
+    },
+    "detail": {
+      "newTitle": "Spot booked",
+      "newBody": "Show the code at the entrance or scan it at the gate.",
+      "pending": "Your spot is held until {{time}}. Finish paying to confirm it.",
+      "expired": "The hold expired. Find another garage.",
+      "cancelledNote": "This booking was cancelled.",
+      "where": "Where to park",
+      "total": "Total",
+      "cancel": "Cancel booking",
+      "cancelTitle": "Cancel this booking?",
+      "cancelBody": "Cancellation is free until 10 minutes before you arrive.",
+      "cancelConfirm": "Yes, cancel",
+      "cancelKeep": "Keep booking",
+      "notFoundTitle": "We can't find this booking",
+      "notFoundBody": "It may belong to another account.",
+      "back": "My bookings"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "account": "Account",
+    "signedOut": "You're not signed in.",
+    "signedInAs": "Signed in: {{who}}",
+    "language": "Language"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The page you're looking for doesn't exist.",
+    "home": "Go to the start"
+  }
+}

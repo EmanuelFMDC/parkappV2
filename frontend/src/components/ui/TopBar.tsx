@@ -9,21 +9,30 @@ interface TopBarProps {
   as?: 'h1' | 'h2' | 'p'
   onBack?: () => void
   trailing?: ReactNode
+  /** Span the full width (map screens). Otherwise align with the 3xl content column. */
+  wide?: boolean
 }
 
-export function TopBar({ title, as: Title = 'h1', onBack, trailing }: TopBarProps) {
+export function TopBar({ title, as: Title = 'h1', onBack, trailing, wide }: TopBarProps) {
   const { t } = useTranslation()
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center gap-1 bg-canvas/90 px-3 backdrop-blur">
-      {onBack && (
-        <IconButton label={t('ui.back')} icon={<ArrowLeft />} onClick={onBack} className="-ml-1" />
-      )}
-      <Title
-        className={`flex-1 truncate font-display text-title font-semibold ${onBack ? '' : 'pl-1'}`}
-      >
-        {title}
-      </Title>
-      {trailing}
+    <header className="sticky top-0 z-20 bg-canvas/90 backdrop-blur">
+      <div className={`flex h-16 items-center gap-1 px-3 ${wide ? '' : 'mx-auto max-w-3xl'}`}>
+        {onBack && (
+          <IconButton
+            label={t('ui.back')}
+            icon={<ArrowLeft />}
+            onClick={onBack}
+            className="-ml-1"
+          />
+        )}
+        <Title
+          className={`flex-1 truncate font-display text-title font-semibold ${onBack ? '' : 'pl-1'}`}
+        >
+          {title}
+        </Title>
+        {trailing}
+      </div>
     </header>
   )
 }

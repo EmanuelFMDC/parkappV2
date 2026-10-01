@@ -29,7 +29,7 @@ export function CardsSection() {
                   priceCents={s.priceCents}
                   rating={s.rating}
                   reviewCount={s.reviewCount}
-                  photoTone={s.tone}
+                  photoUrl={`placeholder://${s.tone}`}
                   selected={selected === s.id}
                   onSelect={() => setSelected(s.id)}
                   tags={s.tags.map((tag) => (

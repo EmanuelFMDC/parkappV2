@@ -4,6 +4,8 @@ import { LogoMark } from './Logo'
 interface TicketStubProps {
   title: string
   address: string
+  /** Already formatted, for example "sáb 17 oct". Shown above the times when set. */
+  dateLabel?: string
   /** Already formatted in Mexico City time. */
   startLabel: string
   endLabel: string
@@ -14,21 +16,28 @@ interface TicketStubProps {
 
 /** Deterministic barcode-like bars from the code. Visual only; the code is printed as text below. */
 function Bars({ code }: { code: string }) {
-  let x = 0
-  const bars = Array.from(code).flatMap((ch) => {
+  const widths = Array.from(code).flatMap((ch) => {
     const n = ch.charCodeAt(0)
-    return [1 + (n % 3), 1 + ((n >> 2) % 2), 1 + ((n >> 1) % 3)]
+    return [1 + (n % 3), 1 + ((n >> 2) % 2), 1 + ((n >> 1) % 3), 1 + ((n >> 3) % 2)]
   })
+  const unit = 1.4
+  let x = 0
+  const rects = widths.map((w, i) => {
+    const rect = i % 2 === 0 ? { x, w: w * unit } : null
+    x += w * unit
+    return rect
+  })
+  // The viewBox is as wide as the bars, so they always span the whole width of the stub.
   return (
-    <svg viewBox="0 0 160 40" className="h-12 w-full" preserveAspectRatio="none" aria-hidden>
-      {bars.map((w, i) => {
-        const rect =
-          i % 2 === 0 ? (
-            <rect key={i} x={x} y="0" width={w * 1.4} height="40" className="fill-ink" />
-          ) : null
-        x += w * 1.4
-        return rect
-      })}
+    <svg
+      viewBox={`0 0 ${x} 40`}
+      className="h-12 w-full max-w-[18rem]"
+      preserveAspectRatio="none"
+      aria-hidden
+    >
+      {rects.map((r, i) =>
+        r ? <rect key={i} x={r.x} y="0" width={r.w} height="40" className="fill-ink" /> : null,
+      )}
     </svg>
   )
 }
@@ -40,6 +49,7 @@ function Bars({ code }: { code: string }) {
 export function TicketStub({
   title,
   address,
+  dateLabel,
   startLabel,
   endLabel,
   plate,
@@ -53,11 +63,16 @@ export function TicketStub({
         <div className="flex items-start gap-3 p-5 pb-5">
           <LogoMark className="size-12 shrink-0" />
           <div className="min-w-0">
-            <h3 className="truncate font-display text-title font-bold">{title}</h3>
+            <h3 className="line-clamp-2 font-display text-title font-bold leading-tight">
+              {title}
+            </h3>
             <p className="text-caption text-signal-200">{address}</p>
           </div>
         </div>
 
+        {dateLabel && (
+          <p className="px-5 pb-3 text-caption font-semibold text-signal-200">{dateLabel}</p>
+        )}
         <dl className="grid grid-cols-2 gap-x-4 gap-y-4 px-5 pb-8">
           <div>
             <dt className="text-caption text-signal-200">{t('ticket.entry')}</dt>

@@ -1,0 +1,191 @@
+{
+  "nav": {
+    "explore": "Explorar",
+    "bookings": "Mis reservas",
+    "profile": "Perfil"
+  },
+  "map": {
+    "pinUnavailable": "{{title}}, {{price}} por hora, no disponible"
+  },
+  "fields": {
+    "date": "Fecha",
+    "time": "Hora"
+  },
+  "common": {
+    "loading": "Cargando…",
+    "retry": "Reintentar",
+    "hoursShort": "h",
+    "minutesShort": "min"
+  },
+  "wizard": {
+    "steps": {
+      "venue": "Recinto",
+      "space": "Cochera",
+      "time": "Horario",
+      "pay": "Pago"
+    }
+  },
+  "features": {
+    "covered": "Techado",
+    "gate": "Portón eléctrico",
+    "camera": "Cámara de seguridad",
+    "ev_charger": "Carga eléctrica",
+    "lit": "Bien iluminado"
+  },
+  "vehicles": {
+    "compact": "Compacto",
+    "sedan": "Sedán",
+    "suv": "SUV",
+    "pickup": "Pick-up"
+  },
+  "errors": {
+    "code": {
+      "space_unavailable": "Alguien acaba de reservar esta cochera en parte de tu horario. Elige otra o cambia el horario.",
+      "too_short": "La reserva mínima es de 1 hora.",
+      "too_long": "La reserva máxima es de 24 horas.",
+      "in_the_past": "La llegada no puede ser en el pasado.",
+      "invalid_plate": "Escribe la placa completa.",
+      "invalid_window": "Revisa las fechas y las horas.",
+      "booking_expired": "Tu lugar apartado venció. Vuelve a elegir tu cochera.",
+      "too_late": "Ya no se puede cancelar gratis: faltan menos de 10 minutos.",
+      "not_cancellable": "Esta reserva ya no se puede cancelar.",
+      "unauthorized": "Inicia sesión para continuar.",
+      "not_found": "No encontramos lo que buscas.",
+      "payment_failed": "El pago no se pudo completar. Intenta de nuevo.",
+      "unknown": "Algo salió mal. Intenta de nuevo."
+    }
+  },
+  "auth": {
+    "title": "Entra a ParkApp",
+    "phone": "Teléfono",
+    "phoneHint": "10 dígitos. Te enviamos un código por SMS.",
+    "phonePlaceholder": "33 1234 5678",
+    "sendCode": "Enviar código",
+    "code": "Código de 6 dígitos",
+    "codeHint": "En esta versión de prueba el código es 000000.",
+    "verify": "Verificar",
+    "changePhone": "Cambiar teléfono",
+    "or": "o",
+    "google": "Continuar con Google",
+    "invalidPhone": "Escribe un teléfono de 10 dígitos.",
+    "invalidCode": "El código no es correcto. Prueba de nuevo.",
+    "signOut": "Cerrar sesión",
+    "signInToSee": "Inicia sesión para ver tus reservas"
+  },
+  "driver": {
+    "venue": {
+      "title": "¿A qué evento vas?",
+      "intro": "Elige el recinto y el evento. Te mostramos cocheras a menos de 3 km.",
+      "venues": "Recintos",
+      "events": "Próximos eventos en {{venue}}",
+      "eventsEmpty": "No hay eventos próximos en este recinto.",
+      "pickVenue": "Elige un recinto para ver sus eventos.",
+      "cta": "Ver cocheras",
+      "ctaHint": "Elige un evento para continuar",
+      "arrive": "Llegas 2 horas antes y te quedas hasta 1 hora después. Puedes cambiarlo más adelante."
+    },
+    "spaces": {
+      "title": "Cocheras cerca de {{venue}}",
+      "window": "{{from}} a {{to}}",
+      "summary_one": "{{count}} cochera disponible",
+      "summary_other": "{{count}} cocheras disponibles",
+      "filters": "Filtros",
+      "unavailable": "No disponible",
+      "distance": "A {{distance}} del recinto",
+      "emptyTitle": "No hay cocheras con esos filtros",
+      "emptyBody": "Quita un filtro para ver más opciones.",
+      "clearFilters": "Quitar filtros",
+      "loading": "Buscando cocheras…",
+      "error": "No pudimos cargar las cocheras.",
+      "sheet": "Cocheras cercanas"
+    },
+    "detail": {
+      "host": "Anfitrión: {{name}}",
+      "verified": "Anfitrión verificado",
+      "memberSince": "En ParkApp desde {{date}}",
+      "about": "Sobre la cochera",
+      "size": "Dimensiones",
+      "sizeValue": "{{length}} × {{width}} cm, altura de entrada {{height}} cm",
+      "fits": "Caben",
+      "reviews": "Reseñas",
+      "reviewsEmpty": "Aún no hay reseñas.",
+      "addressNote": "La dirección exacta se muestra cuando confirmas tu reserva.",
+      "total": "Total por tu horario",
+      "continue": "Elegir horario",
+      "unavailable": "Esta cochera ya no está disponible en tu horario. Elige otra o cambia el horario.",
+      "notFoundTitle": "No encontramos esta cochera",
+      "notFoundBody": "Vuelve a la lista y elige otra.",
+      "backToList": "Ver cocheras"
+    },
+    "time": {
+      "title": "Tu horario",
+      "arrival": "Llegada",
+      "departure": "Salida",
+      "plate": "Placa del auto",
+      "plateHint": "El anfitrión la usa para reconocer tu auto.",
+      "plateError": "Escribe la placa completa, por ejemplo JAL-482-A.",
+      "duration": "Duración: {{value}}",
+      "subtotal": "Cochera",
+      "fee": "Cargo por servicio",
+      "total": "Total",
+      "continue": "Continuar al pago",
+      "unavailable": "Esta cochera ya no está disponible en este horario."
+    },
+    "pay": {
+      "title": "Pago",
+      "summary": "Tu reserva",
+      "signIn": "Inicia sesión para reservar",
+      "method": "Forma de pago",
+      "card": "Tarjeta de ejemplo terminada en 4242",
+      "note": "Es una simulación: no se hace ningún cargo.",
+      "cta": "Pagar y reservar · {{total}}",
+      "paying": "Reservando…",
+      "freeCancel": "Cancelación gratis hasta 10 minutos antes de tu llegada.",
+      "addressNote": "Verás la dirección exacta y tu código de acceso al confirmar.",
+      "pickAnother": "Elegir otra cochera"
+    }
+  },
+  "bookings": {
+    "title": "Mis reservas",
+    "emptyTitle": "Aún no tienes reservas",
+    "emptyBody": "Cuando reserves una cochera, tu boleto aparece aquí.",
+    "find": "Buscar cochera",
+    "loadError": "No pudimos cargar tus reservas.",
+    "status": {
+      "pending_payment": "Pago pendiente",
+      "confirmed": "Confirmada",
+      "cancelled": "Cancelada",
+      "expired": "Expirada",
+      "completed": "Completada"
+    },
+    "detail": {
+      "newTitle": "Lugar reservado",
+      "newBody": "Muestra el código en la entrada o escanéalo en la pluma.",
+      "pending": "Tu lugar está apartado hasta las {{time}}. Termina el pago para confirmarlo.",
+      "expired": "El apartado venció. Busca otra cochera.",
+      "cancelledNote": "Esta reserva fue cancelada.",
+      "where": "Dónde estacionar",
+      "total": "Total",
+      "cancel": "Cancelar reserva",
+      "cancelTitle": "¿Cancelar esta reserva?",
+      "cancelBody": "La cancelación es gratis hasta 10 minutos antes de tu llegada.",
+      "cancelConfirm": "Sí, cancelar",
+      "cancelKeep": "Mantener reserva",
+      "notFoundTitle": "No encontramos esta reserva",
+      "notFoundBody": "Puede que sea de otra cuenta.",
+      "back": "Mis reservas"
+    }
+  },
+  "profile": {
+    "title": "Perfil",
+    "account": "Cuenta",
+    "signedOut": "No has iniciado sesión.",
+    "signedInAs": "Sesión iniciada: {{who}}",
+    "language": "Idioma"
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "body": "La página que buscas no existe.",
+    "home": "Ir al inicio"
+  }
+}

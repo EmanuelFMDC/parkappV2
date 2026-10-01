@@ -2,6 +2,9 @@
 .env
 .env.*
 !.env.example
+# Mode flags only (no secrets): enable the in-browser mock API
+!.env.development
+!.env.e2e
 *.pem
 *.key
 service-account*.json

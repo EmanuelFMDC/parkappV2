@@ -10,6 +10,8 @@ export interface MapPin {
   /** Position in percent. */
   x: number
   y: number
+  /** Taken for the chosen window: shown grayed out. */
+  unavailable?: boolean
 }
 
 interface MapPlaceholderProps {
@@ -82,11 +84,16 @@ export function MapPlaceholder({ pins, activeId, onSelect, venue }: MapPlacehold
             type="button"
             onClick={() => onSelect(pin.id)}
             aria-pressed={active}
-            aria-label={t('map.pin', { title: pin.title, price })}
+            aria-label={t(pin.unavailable ? 'map.pinUnavailable' : 'map.pin', {
+              title: pin.title,
+              price,
+            })}
             style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
             className={clsx(
               'absolute z-20 grid min-h-touch min-w-touch -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full px-3 text-[0.9375rem] font-bold tabular-nums shadow-pin transition-transform duration-150',
-              active ? 'scale-110 bg-primary text-white' : 'bg-surface text-ink hover:scale-105',
+              active && 'scale-110 bg-primary text-white',
+              !active && pin.unavailable && 'bg-line text-ink-muted line-through',
+              !active && !pin.unavailable && 'bg-surface text-ink hover:scale-105',
             )}
           >
             {price}

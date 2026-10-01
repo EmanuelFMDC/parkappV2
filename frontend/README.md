@@ -13,7 +13,7 @@ React 19 + TypeScript (estricto) + Vite + Tailwind v4, como PWA. Gestor de paque
 | `npm run test:e2e`                            | Pruebas de punta a punta (Playwright, usa el Chrome instalado) |
 | `npm run api:types`                           | Regenera `src/api/schema.d.ts` desde el contrato OpenAPI       |
 
-Sistema de diseño: `npm run dev` y abrir **/design-system**. Documentación y capturas en [`docs/design-system/`](../docs/design-system/README.md).
+Pantallas del conductor: [`docs/driver/`](../docs/driver/README.md). Sistema de diseño: `npm run dev` y abrir **/design-system**. Documentación y capturas en [`docs/design-system/`](../docs/design-system/README.md).
 
 ## Estructura
 

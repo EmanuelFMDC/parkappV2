@@ -16,12 +16,31 @@ export interface AuthService {
 }
 
 export const MOCK_SMS_CODE = '000000'
+const STORAGE_KEY = 'parkapp.mock.user'
 
-export function createMockAuthService(): AuthService {
-  let user: AuthUser | null = null
+type MockStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>
+
+function readStored(storage: MockStorage | null): AuthUser | null {
+  try {
+    const raw = storage?.getItem(STORAGE_KEY)
+    return raw ? (JSON.parse(raw) as AuthUser) : null
+  } catch {
+    return null
+  }
+}
+
+/** In-memory auth. Pass a storage to keep the demo session across page reloads. */
+export function createMockAuthService(storage: MockStorage | null = null): AuthService {
+  let user: AuthUser | null = readStored(storage)
   const listeners = new Set<(user: AuthUser | null) => void>()
   const set = (next: AuthUser | null) => {
     user = next
+    try {
+      if (next) storage?.setItem(STORAGE_KEY, JSON.stringify(next))
+      else storage?.removeItem(STORAGE_KEY)
+    } catch {
+      /* storage unavailable: the session lives in memory only */
+    }
     listeners.forEach((l) => l(user))
     return next
   }

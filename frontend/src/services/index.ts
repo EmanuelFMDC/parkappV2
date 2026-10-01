@@ -18,10 +18,11 @@ export interface Services {
   push: PushService
 }
 
-export function createMockServices(): Services {
+export function createMockServices(options: { persist?: boolean } = {}): Services {
+  const storage = options.persist && typeof localStorage !== 'undefined' ? localStorage : null
   return {
     maps: createMockMapService(),
-    auth: createMockAuthService(),
+    auth: createMockAuthService(storage),
     payments: createMockPaymentService(),
     identity: createMockIdentityService(),
     storage: createMockStorageService(),

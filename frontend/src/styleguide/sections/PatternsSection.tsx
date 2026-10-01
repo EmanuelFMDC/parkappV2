@@ -70,7 +70,7 @@ function MapAndList({ className, initial }: { className: string; initial: SheetS
                     priceCents={s.priceCents}
                     rating={s.rating}
                     reviewCount={s.reviewCount}
-                    photoTone={s.tone}
+                    photoUrl={`placeholder://${s.tone}`}
                     selected={selectedId === s.id}
                     onSelect={() => setSelectedId(s.id)}
                     onHoverChange={(h) => setHoverId(h ? s.id : null)}

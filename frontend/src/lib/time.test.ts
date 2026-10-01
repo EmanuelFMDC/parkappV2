@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatDateTime, localToUtcIso } from './time'
+import { formatDateTime, localToUtcIso, utcToLocalParts } from './time'
 
 describe('localToUtcIso', () => {
   it('converts Mexico City wall time to UTC (UTC-6, no DST since 2022)', () => {
@@ -33,5 +33,19 @@ describe('formatDateTime', () => {
       hourCycle: 'h23',
     })
     expect(back).toBe('20:15')
+  })
+})
+
+describe('utcToLocalParts', () => {
+  it('reads a UTC instant as Mexico City wall time', () => {
+    expect(utcToLocalParts('2026-10-01T00:30:00.000Z')).toEqual({
+      date: '2026-09-30',
+      time: '18:30',
+    })
+  })
+
+  it('round-trips with localToUtcIso, including across midnight UTC', () => {
+    const parts = utcToLocalParts(localToUtcIso('2026-12-31', '23:30'))
+    expect(parts).toEqual({ date: '2026-12-31', time: '23:30' })
   })
 })

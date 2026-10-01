@@ -22,7 +22,7 @@ export function BottomNav({ items, current, onSelect, position = 'fixed' }: Bott
     <nav
       aria-label={t('ui.mainNav')}
       className={clsx(
-        'inset-x-0 bottom-0 z-30 mx-auto max-w-md border-t border-line bg-surface pb-[env(safe-area-inset-bottom)]',
+        'inset-x-0 bottom-0 z-30 mx-auto max-w-3xl border-t border-line bg-surface pb-[env(safe-area-inset-bottom)]',
         position === 'fixed' ? 'fixed' : 'relative',
       )}
     >

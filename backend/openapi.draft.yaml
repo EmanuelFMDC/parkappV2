@@ -1,0 +1,457 @@
+# DRAFT API contract written by the frontend (D-014).
+# The Django Ninja backend (Phase 5) must satisfy this, or change it by agreement.
+# Rules: money = integer cents; instants = UTC ISO 8601; exact address only after a booking is confirmed.
+openapi: 3.1.0
+info:
+  title: ParkApp API (draft)
+  version: 0.1.0
+servers:
+  - url: /
+paths:
+  /api/health:
+    get:
+      operationId: getHealth
+      summary: Service health
+      responses:
+        '200':
+          description: Service is up
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
+
+  /api/venues:
+    get:
+      operationId: listVenues
+      summary: Event venues ParkApp operates around
+      responses:
+        '200':
+          description: Venues
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Venue' }
+
+  /api/venues/{venueId}/events:
+    get:
+      operationId: listVenueEvents
+      summary: Upcoming events at a venue
+      parameters:
+        - { name: venueId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Upcoming events, soonest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/VenueEvent' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/venues/{venueId}/spaces:
+    get:
+      operationId: searchSpaces
+      summary: Spaces within 3 km of a venue, with availability for a time window
+      description: Poll this every few seconds for near real-time availability (no WebSockets).
+      parameters:
+        - { name: venueId, in: path, required: true, schema: { type: string } }
+        - { name: startsAt, in: query, required: true, schema: { type: string, format: date-time } }
+        - { name: endsAt, in: query, required: true, schema: { type: string, format: date-time } }
+      responses:
+        '200':
+          description: Spaces sorted by distance to the venue
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/SpaceSummary' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/Invalid' }
+
+  /api/spaces/{spaceId}:
+    get:
+      operationId: getSpace
+      summary: Space detail (no exact address)
+      parameters:
+        - { name: spaceId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Space
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Space' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/spaces/{spaceId}/reviews:
+    get:
+      operationId: listSpaceReviews
+      summary: Reviews of a space, newest first
+      parameters:
+        - { name: spaceId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Reviews
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Review' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/spaces/{spaceId}/quote:
+    get:
+      operationId: quoteSpace
+      summary: Price for a time window (computed by the server, never by the client)
+      parameters:
+        - { name: spaceId, in: path, required: true, schema: { type: string } }
+        - { name: startsAt, in: query, required: true, schema: { type: string, format: date-time } }
+        - { name: endsAt, in: query, required: true, schema: { type: string, format: date-time } }
+      responses:
+        '200':
+          description: Quote
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Quote' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/Invalid' }
+
+  /api/bookings:
+    get:
+      operationId: listMyBookings
+      summary: The signed-in driver's bookings, newest first
+      security: [{ bearer: [] }]
+      responses:
+        '200':
+          description: Bookings
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Booking' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      operationId: createBooking
+      summary: Hold a space while the driver pays (pre-booking expires at expiresAt)
+      security: [{ bearer: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BookingCreate' }
+      responses:
+        '201':
+          description: Held. Status is pending_payment
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Booking' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: The space is already booked for part of that window
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Problem' }
+        '422': { $ref: '#/components/responses/Invalid' }
+
+  /api/bookings/{bookingId}:
+    get:
+      operationId: getBooking
+      summary: One of the signed-in driver's bookings
+      security: [{ bearer: [] }]
+      parameters:
+        - { name: bookingId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Booking
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Booking' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/bookings/{bookingId}/confirm:
+    post:
+      operationId: confirmBooking
+      summary: Confirm after payment succeeded; reveals the exact address and access code
+      security: [{ bearer: [] }]
+      parameters:
+        - { name: bookingId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [paymentIntentId]
+              properties:
+                paymentIntentId: { type: string }
+      responses:
+        '200':
+          description: Confirmed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Booking' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: The pre-booking expired or was cancelled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Problem' }
+
+  /api/bookings/{bookingId}/cancel:
+    post:
+      operationId: cancelBooking
+      summary: Cancel a booking (free until 10 minutes before it starts)
+      security: [{ bearer: [] }]
+      parameters:
+        - { name: bookingId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Cancelled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Booking' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: Too late to cancel, or already cancelled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Problem' }
+
+  /api/me:
+    get:
+      operationId: getMe
+      summary: The signed-in user
+      security: [{ bearer: [] }]
+      responses:
+        '200':
+          description: Profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Me' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    patch:
+      operationId: updateMe
+      summary: Update language preference
+      security: [{ bearer: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                language: { type: string, enum: [es-MX, en] }
+      responses:
+        '200':
+          description: Profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Me' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      description: Firebase ID token, verified by the backend as a JWT
+  responses:
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Unauthorized:
+      description: Missing or invalid token
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Invalid:
+      description: Invalid input
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Problem' }
+  schemas:
+    Health:
+      type: object
+      required: [status, version]
+      properties:
+        status: { type: string, enum: [ok] }
+        version: { type: string }
+    Problem:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: Stable machine-readable code, for example space_unavailable
+        message: { type: string }
+    LatLng:
+      type: object
+      required: [lat, lng]
+      properties:
+        lat: { type: number }
+        lng: { type: number }
+    Venue:
+      type: object
+      required: [id, name, area, location, radiusM]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        area: { type: string, description: Municipality or neighborhood }
+        location: { $ref: '#/components/schemas/LatLng' }
+        radiusM: { type: integer, description: Operating radius in meters, at most 3000 }
+    VenueEvent:
+      type: object
+      required: [id, venueId, title, startsAt, endsAt]
+      properties:
+        id: { type: string }
+        venueId: { type: string }
+        title: { type: string }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+    SpaceFeature:
+      type: string
+      enum: [covered, gate, camera, ev_charger, lit]
+    SpaceSummary:
+      type: object
+      required:
+        [id, title, neighborhood, location, distanceM, priceCentsPerHour, rating, reviewCount, features, photoUrls, available]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        neighborhood: { type: string }
+        location: { $ref: '#/components/schemas/LatLng' }
+        distanceM: { type: integer, description: Meters to the requested venue }
+        priceCentsPerHour: { type: integer }
+        rating: { type: number }
+        reviewCount: { type: integer }
+        features:
+          type: array
+          items: { $ref: '#/components/schemas/SpaceFeature' }
+        photoUrls:
+          type: array
+          items: { type: string }
+        available:
+          type: boolean
+          description: Free for the whole requested window
+    Dimensions:
+      type: object
+      required: [lengthCm, widthCm, heightCm]
+      properties:
+        lengthCm: { type: integer }
+        widthCm: { type: integer }
+        heightCm: { type: integer, description: Clear height at the entrance }
+    Space:
+      allOf:
+        - $ref: '#/components/schemas/SpaceSummary'
+        - type: object
+          required: [description, dimensions, host, vehicleTypes]
+          properties:
+            description: { type: string }
+            dimensions: { $ref: '#/components/schemas/Dimensions' }
+            vehicleTypes:
+              type: array
+              items: { type: string, enum: [compact, sedan, suv, pickup] }
+            host:
+              type: object
+              required: [displayName, verified, memberSince]
+              properties:
+                displayName: { type: string }
+                verified: { type: boolean }
+                memberSince: { type: string, format: date }
+    Review:
+      type: object
+      required: [id, authorName, rating, comment, createdAt]
+      properties:
+        id: { type: string }
+        authorName: { type: string }
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        comment: { type: string }
+        createdAt: { type: string, format: date-time }
+    Quote:
+      type: object
+      required: [subtotalCents, serviceFeeCents, totalCents, minutes]
+      properties:
+        minutes: { type: integer }
+        subtotalCents: { type: integer }
+        serviceFeeCents: { type: integer }
+        totalCents: { type: integer }
+    BookingCreate:
+      type: object
+      required: [spaceId, startsAt, endsAt, plate]
+      properties:
+        spaceId: { type: string }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+        plate: { type: string }
+    BookingStatus:
+      type: string
+      enum: [pending_payment, confirmed, cancelled, expired, completed]
+    Booking:
+      type: object
+      required:
+        [id, status, space, venueName, startsAt, endsAt, plate, subtotalCents, serviceFeeCents, totalCents, expiresAt, accessCode, createdAt]
+      properties:
+        id: { type: string }
+        status: { $ref: '#/components/schemas/BookingStatus' }
+        space:
+          type: object
+          required: [id, title, neighborhood, address, photoUrl, spotLabel]
+          properties:
+            id: { type: string }
+            title: { type: string }
+            neighborhood: { type: string }
+            address:
+              type: [string, 'null']
+              description: Exact address. Only present once status is confirmed or completed
+            photoUrl: { type: [string, 'null'] }
+            spotLabel:
+              type: [string, 'null']
+              description: Where to park inside the property, shown after confirmation
+        venueName: { type: string }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+        plate: { type: string }
+        subtotalCents: { type: integer }
+        serviceFeeCents: { type: integer }
+        totalCents: { type: integer }
+        expiresAt:
+          type: [string, 'null']
+          format: date-time
+          description: When an unpaid pre-booking is released
+        accessCode:
+          type: [string, 'null']
+          description: Shown once the booking is confirmed
+        createdAt: { type: string, format: date-time }
+    Me:
+      type: object
+      required: [id, displayName, phone, language]
+      properties:
+        id: { type: string }
+        displayName: { type: [string, 'null'] }
+        phone: { type: [string, 'null'] }
+        language: { type: string, enum: [es-MX, en] }

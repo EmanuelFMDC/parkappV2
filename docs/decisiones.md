@@ -24,7 +24,7 @@ Stripe, Truora, Firebase y Google Maps no se instalan ni configuran hasta que se
 ## D-007 · Prototipo previo del frontend
 Antes de esta especificación se construyó un prototipo de estacionamientos genéricos (7 pantallas del conductor, design system, auditoría de accesibilidad). No encaja con el dominio P2P ni con el orden de trabajo. Se conserva en el tag `prototype-v1` y el frontend se rehace según el plan por fases. De ahí se reutilizan solo ideas ya validadas (tokens de contraste, `TicketStub`, patrones de accesibilidad), no el código tal cual.
 
-## D-008 · Orden de fases: el backend va antes de las pantallas (2026-09-30)
+## D-008 · Orden de fases: el backend va antes de las pantallas (2026-09-30) — REEMPLAZADA por D-014
 Fase 0 (base del monorepo) → Fase 1 (cimientos del frontend) → Fase 2 (design system, con parada para aprobación) → Fase 5 (backend) → Fase 3 (conductor) → Fase 4 (anfitrión) → Fase 6 (integración y despliegue).
 **Por qué:** el contrato OpenAPI sale del modelo real (restricción de doble reserva, permisos, campos exactos) y el frontend genera sus tipos con `openapi-typescript` sin inventar un contrato a mano que luego haya que corregir.
 
@@ -54,6 +54,27 @@ Un solo paquete JavaScript en el monorepo, así que las ventajas de pnpm no comp
 - **Corrección de tokens del prototipo:** el aro de foco pasó de ámbar (1,7:1) a azul (9,4:1) y se creó `control` (3,5:1) para bordes de campos.
 - **Mapa y fotos son ilustraciones** hasta conectar Google Maps y Cloud Storage detrás de sus interfaces.
 - **Capturas** en `docs/design-system/screenshots/`. Se omiten las vistas de página completa porque pesan hasta 2,2 MB y superan el límite de 500 KB del hook de pre-commit.
+
+## D-014 · Primero se termina el frontend; el backend queda para después (2026-09-30)
+Decisión del dueño del proyecto tras aprobar el design system. Orden nuevo: Fase 3 (conductor) → Fase 4 (anfitrión) → Fase 5 (backend) → Fase 6 (integración y despliegue).
+- **El contrato lo escribe el frontend.** Sin backend que lo exporte, `backend/openapi.draft.yaml` es el borrador que Django Ninja deberá cumplir (o ajustar con acuerdo). Los tipos del cliente se generan de ese archivo.
+- **API simulada en el navegador con MSW**, ahora también en desarrollo y en las pruebas de punta a punta, no solo en pruebas unitarias. La base en memoria implementa las reglas del dominio: sin doble reserva (responde 409), precios en centavos enteros, fechas en UTC, dirección exacta solo tras confirmar.
+- **Cambiar al backend real será cambiar `VITE_API_URL`** y quitar el modo simulado; las pantallas no se tocan.
+- **Riesgo asumido:** un contrato escrito sin modelo real puede necesitar ajustes cuando exista el backend. Se mitiga manteniéndolo pequeño y revisándolo al empezar la Fase 5.
+- **Docker ya no es necesario por ahora.**
+- **Datos de ejemplo:** los recintos usan los nombres de la spec con coordenadas aproximadas; hay que verificarlas antes de producción.
+
+## D-015 · Fase 3: pantallas del conductor (2026-09-30)
+- **Cuatro pasos:** Recinto, Cochera (lista y detalle), Horario, Pago. El inicio de sesión no es un paso aparte: aparece dentro del pago, solo si hace falta.
+- **El viaje vive en la URL** (recinto y horario) y la placa en `sessionStorage`, nunca en la URL, para no exponer datos personales en enlaces.
+- **Horario por defecto:** llegada 2 horas antes del evento y salida 1 hora después de que termina. Editable en el paso 3.
+- **La reserva se crea al pagar.** Nace `pending_payment` con apartado de 10 minutos; se confirma solo si el pago tuvo éxito. Dirección exacta y código solo tras confirmar.
+- **Disponibilidad con polling de 15 s** más refetch al volver a la ventana. Sin WebSockets.
+- **El precio lo calcula el servidor** (`/quote`); el cliente nunca suma.
+- **La API simulada se elimina de producción** (código y worker), no solo se apaga con una bandera.
+- **Mapa con escala de raíz cuadrada:** la mayoría de las cocheras están a menos de 1 km y con escala lineal tapaban el marcador del recinto.
+- **Los textos que vienen de la API** (títulos de cocheras, reseñas) no se traducen: son contenido de los anfitriones.
+- **Diferido:** reseñas nuevas, notificaciones, cobro por cancelación tardía y aplicar el idioma del perfil al iniciar sesión.
 
 ## Pendientes de decidir
 - Verificar condiciones vigentes de Stripe Connect para México antes de implementar pagos.
