@@ -1,0 +1,21 @@
+{
+  "app": {
+    "name": "ParkApp",
+    "tagline": "Estaciona cerca de tu evento"
+  },
+  "home": {
+    "title": "Cocheras cerca de tu evento",
+    "intro": "Pronto podrás reservar un lugar por horas en Guadalajara.",
+    "status": {
+      "label": "Estado del servicio",
+      "loading": "Revisando…",
+      "ok": "Funcionando (versión {{version}})",
+      "error": "Sin conexión con el servidor"
+    }
+  },
+  "language": {
+    "label": "Idioma",
+    "es-MX": "Español",
+    "en": "English"
+  }
+}

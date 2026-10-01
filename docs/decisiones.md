@@ -36,6 +36,16 @@ Un solo paquete JavaScript en el monorepo, así que las ventajas de pnpm no comp
 ## D-011 · Documentos del prototipo archivados (2026-09-30)
 `docs/accessibility-audit.md` y `docs/components.md` describen el prototipo y pasan a `docs/prototipo-v1/`. Se rehacen al terminar la Fase 2.
 
+## D-012 · Fase 1: cimientos del frontend (2026-09-30)
+- **TypeScript fijado en 5.9.** `openapi-typescript` exige `typescript@^5`; la 6.0 que trae Vite rompía la instalación y forzarla arriesgaba la generación de tipos.
+- **Cliente de API:** `openapi-fetch`, la librería compañera de `openapi-typescript`, para tener llamadas tipadas desde el contrato.
+- **Contrato provisional:** `backend/openapi.bootstrap.yaml` solo define `/api/health` para probar la cadena de generación de tipos. Se elimina en la Fase 5, cuando el contrato se exporta desde Django Ninja (D-008).
+- **MSW solo en pruebas.** No hay worker en el navegador porque el backend llega antes de las pantallas.
+- **Playwright usa el Chrome ya instalado** (`channel: 'chrome'`), sin descargar navegadores. Las pruebas fijan `es-MX` y `America/Mexico_City`; una prueba aparte cubre navegador en inglés.
+- **Idiomas:** `es-MX` y `en`. Cualquier locale `es-*` se mapea a `es-MX`; el resto, a `es-MX` salvo `en-*`. Preferencia en `localStorage` por ahora; se sincroniza con el perfil cuando exista el backend.
+- **Guardas en código:** `formatCents` y los mocks de pago lanzan error con decimales; ESLint prohíbe `parseFloat`.
+- **Pendiente en CI:** el job del frontend ejecuta formato, lint, pruebas unitarias y build. Playwright aún no corre en CI (no verificado en un runner).
+
 ## Pendientes de decidir
 - Verificar condiciones vigentes de Stripe Connect para México antes de implementar pagos.
 - Verificar disponibilidad de la región `northamerica-south1` en Cloud Run y Cloud SQL.

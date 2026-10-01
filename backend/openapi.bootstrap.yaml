@@ -1,0 +1,30 @@
+# TEMPORARY bootstrap contract (Phase 1).
+# Only exists so the frontend type-generation pipeline can be exercised.
+# In Phase 5 the real contract is exported from Django Ninja (D-008) and this file is deleted.
+openapi: 3.1.0
+info:
+  title: ParkApp API (bootstrap)
+  version: 0.0.0
+paths:
+  /api/health:
+    get:
+      operationId: getHealth
+      summary: Service health
+      responses:
+        '200':
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+components:
+  schemas:
+    Health:
+      type: object
+      required: [status, version]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        version:
+          type: string
