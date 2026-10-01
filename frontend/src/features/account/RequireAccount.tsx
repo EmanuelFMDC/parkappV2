@@ -3,15 +3,16 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { Page } from '../../components/layout/Page'
 import { Skeleton } from '../../components/ui'
 import { useAccount } from './hooks'
+import type { Role } from './stage'
 
 /**
  * Routes inside this guard need a complete, verified account. Anyone else is sent to create one
  * and comes back to exactly where they were, with the same venue and time window.
  */
-export function RequireAccount() {
+export function RequireAccount({ role = 'driver' }: { role?: Role }) {
   const { t } = useTranslation()
   const { pathname, search } = useLocation()
-  const { stage, loading } = useAccount()
+  const { stage, loading } = useAccount(role)
 
   if (loading) {
     return (
@@ -24,7 +25,10 @@ export function RequireAccount() {
     )
   }
   if (stage !== 'ready') {
-    return <Navigate to={`/account/new?next=${encodeURIComponent(pathname + search)}`} replace />
+    const as = role === 'host' ? '&as=host' : ''
+    return (
+      <Navigate to={`/account/new?next=${encodeURIComponent(pathname + search)}${as}`} replace />
+    )
   }
   return <Outlet />
 }

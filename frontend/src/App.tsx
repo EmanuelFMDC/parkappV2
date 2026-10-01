@@ -10,6 +10,12 @@ const SpaceDetailPage = lazy(() => import('./pages/driver/SpaceDetailPage'))
 const TimePage = lazy(() => import('./pages/driver/TimePage'))
 const PayPage = lazy(() => import('./pages/driver/PayPage'))
 const OnboardingPage = lazy(() => import('./pages/account/OnboardingPage'))
+const HostHomePage = lazy(() => import('./pages/host/HostHomePage'))
+const LocationStep = lazy(() => import('./pages/host/LocationStep'))
+const SizeStep = lazy(() => import('./pages/host/SizeStep'))
+const PhotosStep = lazy(() => import('./pages/host/PhotosStep'))
+const PriceStep = lazy(() => import('./pages/host/PriceStep'))
+const HostDonePage = lazy(() => import('./pages/host/DonePage'))
 const BookingsPage = lazy(() => import('./pages/driver/BookingsPage'))
 const BookingPage = lazy(() => import('./pages/driver/BookingPage'))
 const ProfilePage = lazy(() => import('./pages/driver/ProfilePage'))
@@ -36,6 +42,15 @@ export default function App() {
                 <Route path="book/:spaceId/pay" element={<PayPage />} />
               </Route>
               <Route path="bookings" element={<BookingsPage />} />
+              <Route path="host" element={<HostHomePage />} />
+              {/* Publishing needs personal data and a verified identity, but no car. */}
+              <Route element={<RequireAccount role="host" />}>
+                <Route path="host/new/location" element={<LocationStep />} />
+                <Route path="host/new/size" element={<SizeStep />} />
+                <Route path="host/new/photos" element={<PhotosStep />} />
+                <Route path="host/new/price" element={<PriceStep />} />
+                <Route path="host/new/done" element={<HostDonePage />} />
+              </Route>
               <Route path="bookings/:bookingId" element={<BookingPage />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="*" element={<NotFoundPage />} />

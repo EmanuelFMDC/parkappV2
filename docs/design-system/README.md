@@ -76,6 +76,10 @@ Regla: lo que la persona debe _encontrar_ (borde de un campo, el riel de un inte
 - **Vitest (66 pruebas):** contraste y tokens, componentes (botón, campo, selección, interruptor, pasos, tarjeta, panel), dinero, fechas, i18n y servicios.
 - **Playwright (8 pruebas × móvil y escritorio; 15 se ejecutan y 1 solo aplica a escritorio):** axe WCAG 2.1 A y AA sin violaciones en español e inglés; ningún control interactivo menor de 44 px; el panel funciona con teclado y su contenido colapsado queda fuera del orden de foco; arrastrar el asa cambia la altura con ajuste a la más cercana; seleccionar o pasar el cursor sobre una tarjeta resalta su pin; el panel es hoja en contenedor angosto y lista lateral en uno ancho.
 
+## Componentes añadidos después de aprobar el sistema
+
+Se crearon al construir las pantallas del conductor y del anfitrión y **todavía no tienen sección en la página `/design-system`**: `Checkbox`, `Select`, `Textarea`, `RadioCard`, `ConfirmDialog` (sobre el `<dialog>` nativo), `DateTimeField`, `SpaceImage` y `Rating` con el estado "Nueva". Cumplen los mismos tokens y los cubre axe en las pantallas donde se usan; falta documentarlos y mostrarlos en la muestra.
+
 ## Límites conocidos
 
 - **Mapa y fotos son ilustraciones de marcador.** Mapa real con Google Maps y fotos reales desde Cloud Storage llegan cuando se pida.

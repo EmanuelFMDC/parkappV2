@@ -155,7 +155,8 @@ paths:
       description: >
         Requires a complete account: personal data, at least one vehicle and a verified identity.
         Otherwise 403 with code profile_incomplete, vehicle_required or identity_required.
-        422 vehicle_not_supported when the vehicle type does not fit the space.
+        422 vehicle_not_supported when the vehicle type does not fit the space,
+        422 own_space when the driver is the host of that space.
       security: [{ bearer: [] }]
       requestBody:
         required: true
@@ -336,8 +337,9 @@ paths:
       operationId: startIdentityVerification
       summary: Start identity verification (INE and selfie through the identity provider)
       description: >
-        Sets identityStatus to pending. The provider reports the result asynchronously
-        (webhook); clients poll GET /api/me until it is verified or rejected.
+        Requires a completed profile (not a vehicle: hosts have none). Sets identityStatus to
+        pending. The provider reports the result asynchronously (webhook); clients poll
+        GET /api/me until it is verified or rejected.
       security: [{ bearer: [] }]
       responses:
         '200':
@@ -347,6 +349,99 @@ paths:
               schema: { $ref: '#/components/schemas/Me' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/host/spaces:
+    get:
+      operationId: listHostSpaces
+      summary: The signed-in host's own spaces, newest first
+      security: [{ bearer: [] }]
+      responses:
+        '200':
+          description: Spaces
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/HostSpace' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      operationId: createHostSpace
+      summary: Publish a space. It starts in pending_review until back-office approves it
+      description: >
+        Requires personal data and a verified identity (403 profile_incomplete or
+        identity_required). The location must be within the venue's operating radius.
+      security: [{ bearer: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/HostSpaceCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HostSpace' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: The host already published a space at this address
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Problem' }
+        '422': { $ref: '#/components/responses/Invalid' }
+
+  /api/host/spaces/{spaceId}:
+    patch:
+      operationId: updateHostSpace
+      summary: Pause or resume a published space, or change its price
+      security: [{ bearer: [] }]
+      parameters:
+        - { name: spaceId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/HostSpaceUpdate' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HostSpace' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: A space under review or rejected cannot be paused or resumed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Problem' }
+        '422': { $ref: '#/components/responses/Invalid' }
+
+  /api/host/bookings:
+    get:
+      operationId: listHostBookings
+      summary: Bookings other drivers made on the host's spaces
+      description: Shows the driver's first name, verification badge and car. Never phone, email or ID.
+      security: [{ bearer: [] }]
+      responses:
+        '200':
+          description: Bookings, soonest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/HostBooking' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
 
 components:
   securitySchemes:
@@ -581,3 +676,99 @@ components:
         vehicles:
           type: array
           items: { $ref: '#/components/schemas/Vehicle' }
+    SpaceStatus:
+      type: string
+      enum: [pending_review, active, paused, rejected]
+    Municipality:
+      type: string
+      enum: [Zapopan, Guadalajara, San Pedro Tlaquepaque, Tonalá, Tlajomulco de Zúñiga]
+    HostSpace:
+      type: object
+      required:
+        [id, status, title, description, venue, street, neighborhood, municipality, references, location, distanceM, dimensions, vehicleTypes, features, priceCentsPerHour, photoUrls, reviewNote, createdAt]
+      properties:
+        id: { type: string }
+        status: { $ref: '#/components/schemas/SpaceStatus' }
+        title: { type: string }
+        description: { type: string }
+        venue:
+          type: object
+          required: [id, name]
+          properties:
+            id: { type: string }
+            name: { type: string }
+        street: { type: string, description: Exact address; only the host and confirmed drivers see it }
+        neighborhood: { type: string }
+        municipality: { $ref: '#/components/schemas/Municipality' }
+        references: { type: string, description: Landmarks to find the place; may be empty }
+        location: { $ref: '#/components/schemas/LatLng' }
+        distanceM: { type: integer }
+        dimensions: { $ref: '#/components/schemas/Dimensions' }
+        vehicleTypes:
+          type: array
+          items: { $ref: '#/components/schemas/VehicleType' }
+        features:
+          type: array
+          items: { $ref: '#/components/schemas/SpaceFeature' }
+        priceCentsPerHour: { type: integer }
+        photoUrls:
+          type: array
+          items: { type: string }
+        reviewNote:
+          type: [string, 'null']
+          description: Why back-office rejected the space, when it did
+        createdAt: { type: string, format: date-time }
+    HostSpaceCreate:
+      type: object
+      required:
+        [venueId, street, neighborhood, municipality, location, dimensions, vehicleTypes, features, title, description, photoKeys, priceCentsPerHour, acceptHostTerms]
+      properties:
+        venueId: { type: string }
+        street: { type: string }
+        neighborhood: { type: string }
+        municipality: { $ref: '#/components/schemas/Municipality' }
+        references: { type: string }
+        location: { $ref: '#/components/schemas/LatLng' }
+        dimensions: { $ref: '#/components/schemas/Dimensions' }
+        vehicleTypes:
+          type: array
+          items: { $ref: '#/components/schemas/VehicleType' }
+        features:
+          type: array
+          items: { $ref: '#/components/schemas/SpaceFeature' }
+        title: { type: string, description: 5 to 60 characters }
+        description: { type: string, description: Up to 500 characters }
+        photoKeys:
+          type: array
+          description: Object keys returned by the signed-upload step; 3 to 8 photos
+          items: { type: string }
+        priceCentsPerHour: { type: integer, description: Between 2000 and 50000 cents }
+        acceptHostTerms: { type: boolean, description: Must be true }
+    HostSpaceUpdate:
+      type: object
+      properties:
+        status: { type: string, enum: [active, paused] }
+        priceCentsPerHour: { type: integer }
+    HostBooking:
+      type: object
+      required: [id, status, space, startsAt, endsAt, driver, subtotalCents, createdAt]
+      properties:
+        id: { type: string }
+        status: { $ref: '#/components/schemas/BookingStatus' }
+        space:
+          type: object
+          required: [id, title]
+          properties:
+            id: { type: string }
+            title: { type: string }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+        driver:
+          type: object
+          required: [firstName, identityVerified, vehicle]
+          properties:
+            firstName: { type: string }
+            identityVerified: { type: boolean }
+            vehicle: { $ref: '#/components/schemas/Vehicle' }
+        subtotalCents: { type: integer, description: The price of the booking before the service fee }
+        createdAt: { type: string, format: date-time }

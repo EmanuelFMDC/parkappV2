@@ -85,3 +85,66 @@ export async function pickAkronFirstEvent(page: Page) {
   await page.getByRole('button', { name: 'Ver cocheras' }).click()
   await expect(page).toHaveURL(/\/venues\/akron\/spaces\?/)
 }
+
+export const HOST_PHONE = '3311111111'
+export const HOST_ID = `mock-user-${HOST_PHONE}`
+export const OTHER_PHONE = '3322222222'
+export const OTHER_ID = `mock-user-${OTHER_PHONE}`
+
+/** A complete draft for Estadio Akron, 600 m east of the venue. The photo keys stand in for uploads. */
+export const READY_DRAFT = {
+  venueId: 'akron',
+  street: 'Av. Patria 1234',
+  neighborhood: 'Jardines Universidad',
+  municipality: 'Zapopan',
+  references: 'Portón negro junto a la farmacia',
+  location: { lat: 20.6817, lng: -103.45684 },
+  lengthCm: '520',
+  widthCm: '300',
+  heightCm: '230',
+  vehicleTypes: ['compact', 'sedan', 'suv'],
+  typesTouched: false,
+  features: ['covered', 'gate'],
+  photos: [
+    { key: 'mock/a.jpg', name: 'a.jpg' },
+    { key: 'mock/b.jpg', name: 'b.jpg' },
+    { key: 'mock/c.jpg', name: 'c.jpg' },
+  ],
+  title: 'Cochera techada junto al estadio',
+  description: 'Entrada amplia y portón eléctrico.',
+  price: '60',
+  acceptTerms: true,
+}
+
+/** Puts a ready-to-publish draft in the tab, as if the host had filled in the four steps. */
+export async function seedDraft(page: Page, over: Record<string, unknown> = {}) {
+  await page.evaluate(
+    (draft) => sessionStorage.setItem('parkapp.host.draft', JSON.stringify(draft)),
+    {
+      ...READY_DRAFT,
+      ...over,
+    },
+  )
+}
+
+/** Signs in with a phone whose account is already complete (seeded), landing on the home page. */
+export async function signInAsSeeded(page: Page, id: string, phone: string) {
+  await page.goto('/')
+  await waitForMockDb(page)
+  await page.evaluate(({ userId }) => window.__mockDb!.seedVerifiedAccount(userId), { userId: id })
+  await page.goto('/account/new?next=%2F')
+  await signInWithPhone(page, phone)
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('¿A qué evento vas?')
+}
+
+export async function signOut(page: Page) {
+  await page.goto('/profile')
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click()
+  await expect(page.getByRole('button', { name: 'Crear cuenta o iniciar sesión' })).toBeVisible()
+}
+
+/** A 1x1 PNG, enough for an upload test. */
+export const TINY_PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+  'base64',
+)

@@ -138,7 +138,7 @@ export interface paths {
         put?: never;
         /**
          * Hold a space while the driver pays (pre-booking expires at expiresAt)
-         * @description Requires a complete account: personal data, at least one vehicle and a verified identity. Otherwise 403 with code profile_incomplete, vehicle_required or identity_required. 422 vehicle_not_supported when the vehicle type does not fit the space.
+         * @description Requires a complete account: personal data, at least one vehicle and a verified identity. Otherwise 403 with code profile_incomplete, vehicle_required or identity_required. 422 vehicle_not_supported when the vehicle type does not fit the space, 422 own_space when the driver is the host of that space.
          */
         post: operations["createBooking"];
         delete?: never;
@@ -278,9 +278,67 @@ export interface paths {
         put?: never;
         /**
          * Start identity verification (INE and selfie through the identity provider)
-         * @description Sets identityStatus to pending. The provider reports the result asynchronously (webhook); clients poll GET /api/me until it is verified or rejected.
+         * @description Requires a completed profile (not a vehicle: hosts have none). Sets identityStatus to pending. The provider reports the result asynchronously (webhook); clients poll GET /api/me until it is verified or rejected.
          */
         post: operations["startIdentityVerification"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/host/spaces": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The signed-in host's own spaces, newest first */
+        get: operations["listHostSpaces"];
+        put?: never;
+        /**
+         * Publish a space. It starts in pending_review until back-office approves it
+         * @description Requires personal data and a verified identity (403 profile_incomplete or identity_required). The location must be within the venue's operating radius.
+         */
+        post: operations["createHostSpace"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/host/spaces/{spaceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Pause or resume a published space, or change its price */
+        patch: operations["updateHostSpace"];
+        trace?: never;
+    };
+    "/api/host/bookings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Bookings other drivers made on the host's spaces
+         * @description Shows the driver's first name, verification badge and car. Never phone, email or ID.
+         */
+        get: operations["listHostBookings"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -460,6 +518,84 @@ export interface components {
             privacyAcceptedAt: string | null;
             identityStatus: components["schemas"]["IdentityStatus"];
             vehicles: components["schemas"]["Vehicle"][];
+        };
+        /** @enum {string} */
+        SpaceStatus: "pending_review" | "active" | "paused" | "rejected";
+        /** @enum {string} */
+        Municipality: "Zapopan" | "Guadalajara" | "San Pedro Tlaquepaque" | "Tonalá" | "Tlajomulco de Zúñiga";
+        HostSpace: {
+            id: string;
+            status: components["schemas"]["SpaceStatus"];
+            title: string;
+            description: string;
+            venue: {
+                id: string;
+                name: string;
+            };
+            /** @description Exact address; only the host and confirmed drivers see it */
+            street: string;
+            neighborhood: string;
+            municipality: components["schemas"]["Municipality"];
+            /** @description Landmarks to find the place; may be empty */
+            references: string;
+            location: components["schemas"]["LatLng"];
+            distanceM: number;
+            dimensions: components["schemas"]["Dimensions"];
+            vehicleTypes: components["schemas"]["VehicleType"][];
+            features: components["schemas"]["SpaceFeature"][];
+            priceCentsPerHour: number;
+            photoUrls: string[];
+            /** @description Why back-office rejected the space, when it did */
+            reviewNote: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        HostSpaceCreate: {
+            venueId: string;
+            street: string;
+            neighborhood: string;
+            municipality: components["schemas"]["Municipality"];
+            references?: string;
+            location: components["schemas"]["LatLng"];
+            dimensions: components["schemas"]["Dimensions"];
+            vehicleTypes: components["schemas"]["VehicleType"][];
+            features: components["schemas"]["SpaceFeature"][];
+            /** @description 5 to 60 characters */
+            title: string;
+            /** @description Up to 500 characters */
+            description: string;
+            /** @description Object keys returned by the signed-upload step; 3 to 8 photos */
+            photoKeys: string[];
+            /** @description Between 2000 and 50000 cents */
+            priceCentsPerHour: number;
+            /** @description Must be true */
+            acceptHostTerms: boolean;
+        };
+        HostSpaceUpdate: {
+            /** @enum {string} */
+            status?: "active" | "paused";
+            priceCentsPerHour?: number;
+        };
+        HostBooking: {
+            id: string;
+            status: components["schemas"]["BookingStatus"];
+            space: {
+                id: string;
+                title: string;
+            };
+            /** Format: date-time */
+            startsAt: string;
+            /** Format: date-time */
+            endsAt: string;
+            driver: {
+                firstName: string;
+                identityVerified: boolean;
+                vehicle: components["schemas"]["Vehicle"];
+            };
+            /** @description The price of the booking before the service fee */
+            subtotalCents: number;
+            /** Format: date-time */
+            createdAt: string;
         };
     };
     responses: {
@@ -979,6 +1115,127 @@ export interface operations {
             };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+        };
+    };
+    listHostSpaces: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Spaces */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        items: components["schemas"]["HostSpace"][];
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    createHostSpace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HostSpaceCreate"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HostSpace"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            /** @description The host already published a space at this address */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            422: components["responses"]["Invalid"];
+        };
+    };
+    updateHostSpace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                spaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HostSpaceUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HostSpace"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            /** @description A space under review or rejected cannot be paused or resumed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            422: components["responses"]["Invalid"];
+        };
+    };
+    listHostBookings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bookings, soonest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        items: components["schemas"]["HostBooking"][];
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
         };
     };
 }

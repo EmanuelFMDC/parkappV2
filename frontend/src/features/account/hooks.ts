@@ -3,7 +3,7 @@ import { useApi } from '../../api/context'
 import type { Me, ProfileInput, VehicleInput } from '../../api/types'
 import { unwrap } from '../../api/unwrap'
 import { useAuth } from '../auth/context'
-import { accountStage, type AccountStage } from './stage'
+import { accountStage, type AccountStage, type Role } from './stage'
 
 const POLL_IDENTITY_MS = 2000
 
@@ -28,12 +28,12 @@ export interface Account {
   loading: boolean
 }
 
-export function useAccount(): Account {
+export function useAccount(role: Role = 'driver'): Account {
   const { user } = useAuth()
   const me = useMe()
   if (!user) return { stage: 'signed_out', me: undefined, loading: false }
   if (me.isPending) return { stage: 'signed_out', me: undefined, loading: true }
-  return { stage: accountStage(me.data), me: me.data, loading: false }
+  return { stage: accountStage(me.data, role), me: me.data, loading: false }
 }
 
 /** Account mutations all return the updated account, which replaces the cached copy. */

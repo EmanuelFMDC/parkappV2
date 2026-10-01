@@ -1,0 +1,158 @@
+{
+  "nav": {
+    "host": "Host"
+  },
+  "ui": {
+    "newListing": "New"
+  },
+  "account": {
+    "hostWhy": "To list a garage we need to know who you are, so drivers can trust you. We ask once."
+  },
+  "errors": {
+    "code": {
+      "venue_required": "Pick the nearby venue.",
+      "location_required": "Mark your garage entrance on the map.",
+      "outside_radius": "The garage must be within 3 km of the venue.",
+      "invalid_address": "Enter the street, number and neighborhood.",
+      "invalid_municipality": "Pick a municipality in the metropolitan area.",
+      "invalid_dimensions": "Check the length, width and height.",
+      "vehicle_types_required": "Pick at least one type of car that fits.",
+      "invalid_title": "The title needs 5 to 60 characters.",
+      "invalid_description": "The description can have up to 500 characters.",
+      "photos_required": "Add at least 3 photos.",
+      "too_many_photos": "You can add up to 8 photos.",
+      "invalid_price": "The price per hour must be between $20 and $500.",
+      "terms_required": "To publish you must accept the host rules.",
+      "duplicate_space": "You already listed a garage at this address.",
+      "not_editable": "A garage under review or rejected can't be paused or resumed.",
+      "own_space": "You can't book your own garage."
+    }
+  },
+  "host": {
+    "next": "Continue",
+    "steps": {
+      "location": "Location",
+      "size": "Dimensions",
+      "photos": "Photos",
+      "price": "Price"
+    },
+    "home": {
+      "title": "Host",
+      "introTitle": "Rent out your garage on event days",
+      "introBody": "List your garage or spot and earn by the hour when there's an event nearby. Before you list, we verify your identity, just like we do for drivers.",
+      "start": "Start listing",
+      "publish": "List a garage",
+      "tabs": {
+        "label": "Section",
+        "spaces": "My garages",
+        "bookings": "Bookings received"
+      },
+      "emptySpacesTitle": "You haven't listed a garage yet",
+      "emptySpacesBody": "List your first one: it takes a few minutes.",
+      "emptyBookingsTitle": "No bookings yet",
+      "emptyBookingsBody": "When a driver books one of your garages, it will show up here.",
+      "loadError": "We couldn't load your data."
+    },
+    "space": {
+      "status": {
+        "pending_review": "Under review",
+        "active": "Live",
+        "paused": "Paused",
+        "rejected": "Rejected"
+      },
+      "nearVenue": "{{distance}} from {{venue}}",
+      "pendingNote": "We're reviewing your photos and details. You'll see it here once it's live.",
+      "pausedNote": "Paused: drivers can't see it. Bookings already confirmed still stand.",
+      "rejectedNote": "We couldn't publish it. {{note}}",
+      "pause": "Pause",
+      "resume": "Resume",
+      "changePrice": "Change price",
+      "priceTitle": "Change the price per hour",
+      "priceLabel": "Price per hour (pesos)",
+      "priceSave": "Save price",
+      "cancel": "Cancel",
+      "republish": "List again"
+    },
+    "booking": {
+      "verified": "Identity verified",
+      "price": "Booking price"
+    },
+    "location": {
+      "title": "Where is your garage?",
+      "intro": "Pick the nearest venue and mark the entrance. The exact address is only shown to whoever books.",
+      "venue": "Nearby venue",
+      "venuePlaceholder": "Pick a venue",
+      "street": "Street and number",
+      "neighborhood": "Neighborhood",
+      "municipality": "Municipality",
+      "municipalityPlaceholder": "Pick a municipality",
+      "references": "Landmarks (optional)",
+      "referencesHint": "Helps the driver find the entrance.",
+      "pinTitle": "Mark the entrance on the map",
+      "pinHelp": "Tap the map or use the arrows. The pin must be within {{radius}} of the venue.",
+      "nudge": "Move the pin 50 meters",
+      "north": "Move north",
+      "south": "Move south",
+      "east": "Move east",
+      "west": "Move west",
+      "noVenue": "Pick the nearby venue first to see the map.",
+      "noPin": "You haven't marked the entrance yet.",
+      "distance": "{{distance}} from {{venue}}",
+      "tooFar": "{{distance}} from {{venue}}: outside the {{radius}} radius",
+      "privacy": "Only whoever books and confirms sees the exact address."
+    },
+    "size": {
+      "title": "Space dimensions",
+      "intro": "Measure where the car parks. We use it to suggest which cars fit.",
+      "length": "Length (cm)",
+      "width": "Width (cm)",
+      "height": "Entrance height (cm)",
+      "range": "Between {{min}} and {{max}}",
+      "types": "Which cars fit?",
+      "typesHint": "We suggest them from the measurements. You can change them.",
+      "features": "What does it offer?",
+      "noSuggestion": "No standard car fits those measurements. Check the numbers."
+    },
+    "photos": {
+      "title": "Photos and description",
+      "intro": "Show the entrance and where the car parks. We review them before publishing.",
+      "add": "Add photos",
+      "count": "{{count}} of {{max}} photos (minimum {{min}})",
+      "cover": "Cover",
+      "remove": "Remove photo {{name}}",
+      "uploading": "Uploading photos…",
+      "badType": "{{name}}: use JPG, PNG or WebP photos.",
+      "tooBig": "{{name}}: it's larger than 10 MB.",
+      "tooMany": "Only {{max}} photos fit.",
+      "uploadFailed": "{{name}}: it couldn't be uploaded. Try again.",
+      "titleLabel": "Listing title",
+      "titleHint": "Between {{min}} and {{max}} characters.",
+      "descriptionLabel": "Description (optional)",
+      "descriptionHint": "How to get in, hours, and what the driver should know."
+    },
+    "price": {
+      "title": "Price",
+      "intro": "Choose what you charge per hour. You can change it any time.",
+      "label": "Price per hour (pesos)",
+      "hint": "Between {{min}} and {{max}}.",
+      "example": "For 4 hours: {{total}}",
+      "feeNote": "Drivers also pay a ParkApp service fee.",
+      "summary": "Summary",
+      "sizeLine": "{{length}} × {{width}} cm, entrance height {{height}} cm",
+      "photosLine_one": "{{count}} photo",
+      "photosLine_other": "{{count}} photos",
+      "terms": "I accept the host rules: keep the spot free during reserved hours and only receive people with a booking.",
+      "publish": "List garage",
+      "publishing": "Listing…",
+      "fix": "Fix it"
+    },
+    "done": {
+      "title": "Your garage is under review",
+      "body": "We review your photos and details before it goes live. It usually takes a short while, and you'll see the change in My garages.",
+      "see": "See my garages",
+      "another": "List another"
+    },
+    "nextUp": "Next: {{step}}",
+    "lastStep": "Last step"
+  }
+}

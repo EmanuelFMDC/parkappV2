@@ -15,6 +15,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Whatever was cached belonged to the previous person.
         queryClient.removeQueries({ queryKey: ['bookings'] })
         queryClient.removeQueries({ queryKey: ['me'] })
+        queryClient.removeQueries({ queryKey: ['host'] })
       }),
     [auth, queryClient],
   )

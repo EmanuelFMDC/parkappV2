@@ -105,6 +105,28 @@ Decisión del dueño del proyecto: el conductor debe registrarse de forma riguro
 - **Contrato:** `/api/me` crece (datos, autos, estado de identidad) y se añaden `/api/me/profile`, `/api/me/vehicles` y `/api/me/identity`; `BookingCreate` usa `vehicleId` en lugar de la placa. El proveedor responde de forma asíncrona (webhook en producción): el cliente consulta `/api/me` hasta que sea `verified` o `rejected`.
 - **Legal (pendiente):** INE y selfie son datos personales sensibles. Hace falta aviso de privacidad y consentimiento revisados por un abogado, y que las imágenes se queden con el proveedor y ParkApp guarde solo el resultado.
 
+## D-017 · Fase 4: pantallas del anfitrión (2026-10-01)
+
+Las tres preguntas de alcance quedaron sin respuesta, así que se tomaron estos supuestos (fáciles de cambiar):
+
+1. **La identidad del anfitrión usa el mismo registro** que la del conductor, sin pedir auto: teléfono, datos personales e identidad. Sin identidad verificada no se puede publicar.
+2. **Alcance:** alta en cuatro pasos, "Mis cocheras" (pausar, reactivar, cambiar precio) y "Reservas recibidas".
+3. **Ubicación:** dirección escrita más pin en el mapa ilustrado, con botones de dirección para teclado y lector de pantalla. Sin geocodificación hasta Google Maps.
+
+Decisiones tomadas:
+
+- **Revisión antes de publicar.** Una cochera nueva nace `pending_review`; el back-office (Django Admin, simulado) la aprueba o la rechaza con un motivo. Solo las `active` aparecen en las búsquedas. Sigue la spec ("revisar fotos", "aprobar anfitriones").
+- **Un anfitrión no puede reservar su propia cochera** (422 `own_space`).
+- **Qué ve el anfitrión de un conductor:** nombre de pila, insignia, auto y precio; nunca teléfono, correo ni INE. Una prueba lo verifica sobre la respuesta real.
+- **Autos sugeridos por medidas** con umbrales orientativos y editables; la regla vive en `lib/hostRules.ts` y debe validarse con un anfitrión real.
+- **Precio:** entero en centavos, $20 a $500 por hora. La comisión del anfitrión no se define aquí: el panel muestra el precio de la reserva antes del cargo por servicio, sin inventar un pago neto.
+- **Una cochera sin reseñas dice "Nueva"** en vez de 0.0.
+- **Pausar no cancela reservas ya confirmadas.**
+- **El borrador del alta vive en `sessionStorage`** y no sale del navegador hasta publicar.
+- **Contrato:** `/api/host/spaces`, `/api/host/spaces/{id}` y `/api/host/bookings`; la verificación de identidad deja de exigir un auto.
+- **Pendiente legal:** las "reglas para anfitriones" y el aviso de privacidad son textos provisionales que debe revisar un abogado.
+- **Diferido:** editar otros datos de una cochera publicada, eliminarla, pagos al anfitrión (Stripe Connect), cancelaciones del anfitrión, reseñas a conductores y mensajería.
+
 ## Pendientes de decidir
 
 - Verificar condiciones vigentes de Stripe Connect para México antes de implementar pagos.

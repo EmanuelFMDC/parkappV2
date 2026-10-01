@@ -10,6 +10,16 @@ interface RatingProps {
 export function Rating({ value, count }: RatingProps) {
   const { t, i18n } = useTranslation()
   const number = new Intl.NumberFormat(i18n.language, { minimumFractionDigits: 1 })
+
+  // A listing nobody has reviewed yet says so, instead of showing a misleading 0.0.
+  if (count === 0) {
+    return (
+      <span className="inline-flex items-center gap-1 whitespace-nowrap text-caption font-semibold text-primary">
+        {t('ui.newListing')}
+      </span>
+    )
+  }
+
   return (
     <span className="inline-flex items-center gap-1 whitespace-nowrap text-caption font-semibold text-ink">
       <Star aria-hidden className="size-4 fill-action text-action" />

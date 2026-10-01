@@ -1,4 +1,4 @@
-import { CalendarCheck, Compass, UserRound } from 'lucide-react'
+import { CalendarCheck, Compass, UserRound, Warehouse } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
@@ -7,6 +7,7 @@ import { BottomNav } from '../ui'
 const tabs = [
   { key: '/', icon: <Compass />, label: 'nav.explore' },
   { key: '/bookings', icon: <CalendarCheck />, label: 'nav.bookings' },
+  { key: '/host', icon: <Warehouse />, label: 'nav.host' },
   { key: '/profile', icon: <UserRound />, label: 'nav.profile' },
 ] as const
 

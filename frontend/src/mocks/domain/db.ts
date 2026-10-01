@@ -1,6 +1,10 @@
 import type {
   Booking,
   BookingCreate,
+  HostBooking,
+  HostSpace,
+  HostSpaceCreate,
+  HostSpaceUpdate,
   Me,
   ProfileInput,
   Quote,
@@ -16,7 +20,8 @@ import { createAccounts } from './accounts'
 import { ApiError, notFound } from './errors'
 import { distanceM } from './geo'
 import { quoteWindow } from './pricing'
-import { buildEvents, buildReviews, buildSpaces, venues } from './seed'
+import { buildEvents, buildReviews, venues } from './seed'
+import { createSpaceStore } from './spaces'
 
 const PRE_BOOKING_MS = 10 * 60_000
 const FREE_CANCEL_MS = 10 * 60_000
@@ -46,6 +51,8 @@ interface DbOptions {
   storage?: Pick<Storage, 'getItem' | 'setItem'> | null
   /** How long the simulated identity provider takes to answer. */
   identityDelayMs?: number
+  /** How long simulated back-office takes to review a new space. */
+  reviewDelayMs?: number
 }
 
 const BLOCKING: Booking['status'][] = ['pending_payment', 'confirmed']
@@ -67,14 +74,16 @@ function randomCode(): string {
  * no overlapping bookings on a space, integer-cent pricing, UTC dates, and the exact address
  * only after confirmation.
  */
-export function createDb({ now = Date.now, storage = null, identityDelayMs }: DbOptions = {}) {
-  const spaces = buildSpaces()
+export function createDb({
+  now = Date.now,
+  storage = null,
+  identityDelayMs,
+  reviewDelayMs,
+}: DbOptions = {}) {
+  const store = createSpaceStore({ now, storage, reviewDelayMs })
   const events = buildEvents(now())
   const reviews = new Map<string, Review[]>(
-    spaces.map((s) => [s.id, buildReviews(s.id, s.reviewCount, now())]),
-  )
-  const addresses = new Map(
-    spaces.map((s, i) => [s.id, `Calle de ejemplo ${100 + i}, ${venueOf(s).area}`]),
+    store.active().map((s) => [s.id, buildReviews(s.id, s.reviewCount, now())]),
   )
   const accounts = createAccounts({ now, storage, identityDelayMs })
   const bookings: StoredBooking[] = load()
@@ -97,16 +106,19 @@ export function createDb({ now = Date.now, storage = null, identityDelayMs }: Db
   }
 
   function venueOf(space: Space): Venue {
-    return venues.find((v) => space.id.startsWith(`${v.id}-`))!
+    return venues.find((v) => v.id === store.venueIdOf(space.id))!
   }
   function requireVenue(id: string): Venue {
     const venue = venues.find((v) => v.id === id)
     if (!venue) throw notFound('Venue')
     return venue
   }
-  function requireSpace(id: string): Space {
-    const space = spaces.find((s) => s.id === id)
-    if (!space) throw notFound('Space')
+  /** Any space, whatever its status: a booking keeps working after its space is paused. */
+  const requireSpace = (id: string): Space => store.require(id)
+  /** Only spaces drivers may see and book. */
+  function requireActiveSpace(id: string): Space {
+    const space = store.require(id)
+    if (!store.isActive(id)) throw notFound('Space')
     return space
   }
 
@@ -160,7 +172,7 @@ export function createDb({ now = Date.now, storage = null, identityDelayMs }: Db
         id: space.id,
         title: space.title,
         neighborhood: space.neighborhood,
-        address: revealed ? (addresses.get(space.id) ?? null) : null,
+        address: revealed ? store.addressOf(space.id) : null,
         photoUrl: space.photoUrls[0] ?? null,
         spotLabel: revealed ? b.spotLabel : null,
       },
@@ -202,15 +214,16 @@ export function createDb({ now = Date.now, storage = null, identityDelayMs }: Db
       const venue = requireVenue(venueId)
       quoteWindow(1, startsAt, endsAt) // validates the window
       expireStale()
-      return spaces
-        .filter((s) => s.id.startsWith(`${venue.id}-`))
+      return store
+        .active()
+        .filter((s) => store.venueIdOf(s.id) === venue.id)
         .map((s) => summary(s, venue, startsAt, endsAt))
         .filter((s) => s.distanceM <= venue.radiusM)
         .sort((a, b) => a.distanceM - b.distanceM)
     },
 
     getSpace(id: string): Space {
-      const space = requireSpace(id)
+      const space = requireActiveSpace(id)
       const venue = venueOf(space)
       return { ...space, distanceM: distanceM(space.location, venue.location), available: true }
     },
@@ -219,7 +232,7 @@ export function createDb({ now = Date.now, storage = null, identityDelayMs }: Db
       return reviews.get(spaceId) ?? []
     },
     quote(spaceId: string, startsAt: string, endsAt: string): Quote {
-      return quoteWindow(requireSpace(spaceId).priceCentsPerHour, startsAt, endsAt)
+      return quoteWindow(requireActiveSpace(spaceId).priceCentsPerHour, startsAt, endsAt)
     },
 
     createBooking(userId: string | null, input: BookingCreate): Booking {
@@ -228,7 +241,10 @@ export function createDb({ now = Date.now, storage = null, identityDelayMs }: Db
       if (blocked) {
         throw new ApiError(403, blocked, 'Complete your account before booking')
       }
-      const space = requireSpace(input.spaceId)
+      const space = requireActiveSpace(input.spaceId)
+      if (store.hostIdOf(space.id) === uid) {
+        throw new ApiError(422, 'own_space', 'You cannot book your own space')
+      }
       const vehicle = accounts.vehicle(uid, input.vehicleId)
       if (!space.vehicleTypes.includes(vehicle.type)) {
         throw new ApiError(422, 'vehicle_not_supported', 'Your vehicle does not fit this space')
@@ -318,7 +334,43 @@ export function createDb({ now = Date.now, storage = null, identityDelayMs }: Db
       accounts.removeVehicle(userId, vehicleId),
     startIdentity: (userId: string | null): Me => accounts.startIdentity(userId),
 
-    /** Test and demo controls for the simulated identity provider and pre-verified accounts. */
+    listHostSpaces: (userId: string | null): HostSpace[] => store.listFor(requireUser(userId)),
+    createHostSpace(userId: string | null, input: HostSpaceCreate): HostSpace {
+      const uid = requireUser(userId)
+      // A host needs personal data and a verified identity, but no car.
+      const blocked = accounts.blockedBy(uid, { needsVehicle: false })
+      if (blocked) throw new ApiError(403, blocked, 'Complete your account before publishing')
+      return store.create(uid, input, accounts.hostLabel(uid))
+    },
+    updateHostSpace: (userId: string | null, id: string, patch: HostSpaceUpdate): HostSpace =>
+      store.update(requireUser(userId), id, patch),
+
+    /** What drivers booked on this host's spaces. Never the driver's phone, email or ID. */
+    listHostBookings(userId: string | null): HostBooking[] {
+      const uid = requireUser(userId)
+      expireStale()
+      const mine = new Set(store.idsFor(uid))
+      return bookings
+        .filter((b) => mine.has(b.spaceId) && !['pending_payment', 'expired'].includes(b.status))
+        .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt))
+        .map((b) => {
+          const card = accounts.driverCard(b.userId)
+          return {
+            id: b.id,
+            status: b.status,
+            space: { id: b.spaceId, title: requireSpace(b.spaceId).title },
+            startsAt: b.startsAt,
+            endsAt: b.endsAt,
+            driver: { ...card, firstName: card.firstName || 'Conductor', vehicle: b.vehicle },
+            subtotalCents: b.subtotalCents,
+            createdAt: b.createdAt,
+          }
+        })
+    },
+
+    /** Test and demo controls for simulated back-office, the identity provider and verified accounts. */
+    setReviewOutcome: (outcome: 'active' | 'rejected') => store.setReviewOutcome(outcome),
+    approveAllSpacesNow: () => store.approveAllNow(),
     setIdentityOutcome: (outcome: 'verified' | 'rejected') => accounts.setIdentityOutcome(outcome),
     seedVerifiedAccount: (userId: string, vehicle?: Partial<VehicleInput>): Me =>
       accounts.seedVerified(userId, vehicle),
@@ -331,7 +383,7 @@ export function createDb({ now = Date.now, storage = null, identityDelayMs }: Db
         id: `bk_foreign_${counter}`,
         userId: 'someone-else',
         spaceId,
-        venueId: venueOf(space).id,
+        venueId: store.venueIdOf(space.id),
         status: 'confirmed',
         startsAt,
         endsAt,

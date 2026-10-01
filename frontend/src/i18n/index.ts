@@ -5,6 +5,8 @@ import driverEn from './driver.en.json'
 import driverEsMX from './driver.es-MX.json'
 import en from './en.json'
 import esMX from './es-MX.json'
+import hostEn from './host.en.json'
+import hostEsMX from './host.es-MX.json'
 
 export const languages = ['es-MX', 'en'] as const
 export type Language = (typeof languages)[number]
@@ -34,8 +36,8 @@ export function toSupportedLanguage(detected: string): Language {
 }
 
 export const dictionaries = {
-  'es-MX': mergeTranslations(esMX, driverEsMX),
-  en: mergeTranslations(en, driverEn),
+  'es-MX': mergeTranslations(esMX, driverEsMX, hostEsMX),
+  en: mergeTranslations(en, driverEn, hostEn),
 }
 
 void i18n

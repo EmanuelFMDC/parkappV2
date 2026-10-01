@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { offsetPoint } from '../mocks/domain/geo'
-import { toMapPercent } from './mapProjection'
+import { distanceM, offsetPoint } from './geo'
+import { fromMapPercent, toMapPercent } from './mapProjection'
 
 const venue = { lat: 20.6817, lng: -103.4626 }
 const at = (meters: number, bearing: number) =>
@@ -31,5 +31,29 @@ describe('toMapPercent', () => {
   it('stays inside the map even for far points', () => {
     expect(at(20_000, 90).x).toBeLessThanOrEqual(94)
     expect(at(20_000, 270).x).toBeGreaterThanOrEqual(6)
+  })
+})
+
+describe('fromMapPercent', () => {
+  it('is the inverse of toMapPercent', () => {
+    for (const [meters, bearing] of [
+      [320, 20],
+      [900, 135],
+      [1700, 250],
+      [2400, 310],
+    ] as const) {
+      const original = offsetPoint(venue, meters, bearing)
+      const back = fromMapPercent(venue, toMapPercent(venue, original, 3000), 3000)
+      expect(Math.abs(distanceM(original, back))).toBeLessThan(25)
+    }
+  })
+
+  it('maps the center to the venue', () => {
+    expect(fromMapPercent(venue, { x: 50, y: 50 }, 3000)).toEqual(venue)
+  })
+
+  it('puts a tap above the center north of the venue', () => {
+    const point = fromMapPercent(venue, { x: 50, y: 30 }, 3000)
+    expect(point.lat).toBeGreaterThan(venue.lat)
   })
 })

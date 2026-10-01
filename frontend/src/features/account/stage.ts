@@ -7,6 +7,9 @@ import type { Me } from '../../api/types'
  */
 export type AccountStage = 'signed_out' | 'profile' | 'vehicle' | 'identity' | 'ready'
 
+/** Hosts publish a space, drivers book one. Only drivers need a registered car. */
+export type Role = 'driver' | 'host'
+
 export const ACCOUNT_STAGES: Exclude<AccountStage, 'ready'>[] = [
   'signed_out',
   'profile',
@@ -14,12 +17,12 @@ export const ACCOUNT_STAGES: Exclude<AccountStage, 'ready'>[] = [
   'identity',
 ]
 
-export function accountStage(me: Me | null | undefined): AccountStage {
+export function accountStage(me: Me | null | undefined, role: Role = 'driver'): AccountStage {
   if (!me) return 'signed_out'
   if (!me.firstName || !me.lastName || !me.birthDate || !me.email || !me.privacyAcceptedAt) {
     return 'profile'
   }
-  if (me.vehicles.length === 0) return 'vehicle'
+  if (role === 'driver' && me.vehicles.length === 0) return 'vehicle'
   if (me.identityStatus !== 'verified') return 'identity'
   return 'ready'
 }

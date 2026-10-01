@@ -122,11 +122,12 @@ export function createAccounts({ now, storage, identityDelayMs = 3000 }: Options
     vehicles: a.vehicles,
   })
 
-  function block(a: Account): AccountBlock | null {
+  /** What stops an account from acting. Hosts have no car, so they skip the vehicle check. */
+  function block(a: Account, needsVehicle = true): AccountBlock | null {
     if (!a.firstName || !a.lastName || !a.birthDate || !a.email || !a.privacyAcceptedAt) {
       return 'profile_incomplete'
     }
-    if (a.vehicles.length === 0) return 'vehicle_required'
+    if (needsVehicle && a.vehicles.length === 0) return 'vehicle_required'
     if (a.identity.status !== 'verified') return 'identity_required'
     return null
   }
@@ -136,7 +137,26 @@ export function createAccounts({ now, storage, identityDelayMs = 3000 }: Options
     get: (userId: string | null): Me => toMe(ensure(userId)),
 
     /** `null` when the account may book; otherwise what is missing. */
-    blockedBy: (userId: string | null): AccountBlock | null => block(ensure(userId)),
+    blockedBy: (
+      userId: string | null,
+      opts: { needsVehicle?: boolean } = {},
+    ): AccountBlock | null => block(ensure(userId), opts.needsVehicle ?? true),
+
+    /** How a host appears to drivers: first name and last initial, never more. */
+    hostLabel(userId: string): { displayName: string; memberSince: string } {
+      const a = ensure(userId)
+      const initial = a.lastName ? ` ${a.lastName.charAt(0)}.` : ''
+      return {
+        displayName: `${a.firstName ?? ''}${initial}`.trim(),
+        memberSince: new Date(now()).toISOString().slice(0, 10),
+      }
+    },
+
+    /** What a host may know about a driver: first name and whether the identity is verified. */
+    driverCard(userId: string): { firstName: string; identityVerified: boolean } {
+      const a = ensure(userId)
+      return { firstName: a.firstName ?? '', identityVerified: a.identity.status === 'verified' }
+    },
 
     vehicle(userId: string | null, vehicleId: string): Vehicle {
       const v = ensure(userId).vehicles.find((x) => x.id === vehicleId)
@@ -213,9 +233,9 @@ export function createAccounts({ now, storage, identityDelayMs = 3000 }: Options
 
     startIdentity(userId: string | null): Me {
       const a = ensure(userId)
-      const missing = block(a)
-      if (missing === 'profile_incomplete' || missing === 'vehicle_required') {
-        throw new ApiError(403, missing, 'Complete your profile and add a vehicle first')
+      // Identity only needs the personal data: hosts verify without registering a car.
+      if (block(a, false) === 'profile_incomplete') {
+        throw new ApiError(403, 'profile_incomplete', 'Complete your details first')
       }
       if (a.identity.status !== 'verified') {
         a.identity = { status: 'pending', startedAt: now() }

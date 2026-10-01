@@ -137,10 +137,23 @@ describe('identity verification', () => {
     accounts.addVehicle(USER, car())
   }
 
-  it('cannot start before the profile and a vehicle exist', () => {
+  it('cannot start before the personal data exists, but needs no car (hosts have none)', () => {
     expectApiError(() => accounts.startIdentity(USER), 403, 'profile_incomplete')
     accounts.updateProfile(USER, profile())
-    expectApiError(() => accounts.startIdentity(USER), 403, 'vehicle_required')
+    expect(accounts.startIdentity(USER).identityStatus).toBe('pending')
+  })
+
+  it('a host is ready with data and identity alone, a driver also needs a car', () => {
+    accounts.updateProfile(USER, profile())
+    accounts.startIdentity(USER)
+    clock += 3500
+    expect(accounts.blockedBy(USER, { needsVehicle: false })).toBeNull()
+    expect(accounts.blockedBy(USER)).toBe('vehicle_required')
+  })
+
+  it('shows a host as first name and last initial only', () => {
+    accounts.updateProfile(USER, profile())
+    expect(accounts.hostLabel(USER).displayName).toBe('Ana L.')
   })
 
   it('is pending while the provider decides, then verified', () => {

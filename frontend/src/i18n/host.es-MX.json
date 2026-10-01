@@ -1,0 +1,158 @@
+{
+  "nav": {
+    "host": "Anfitrión"
+  },
+  "ui": {
+    "newListing": "Nueva"
+  },
+  "account": {
+    "hostWhy": "Para publicar una cochera necesitamos saber quién eres: así los conductores confían en ti. Lo pedimos una sola vez."
+  },
+  "errors": {
+    "code": {
+      "venue_required": "Elige el recinto cercano.",
+      "location_required": "Marca la entrada de tu cochera en el mapa.",
+      "outside_radius": "La cochera debe estar a menos de 3 km del recinto.",
+      "invalid_address": "Escribe la calle, el número y la colonia.",
+      "invalid_municipality": "Elige un municipio de la zona metropolitana.",
+      "invalid_dimensions": "Revisa el largo, el ancho y la altura.",
+      "vehicle_types_required": "Elige al menos un tipo de auto que quepa.",
+      "invalid_title": "El título debe tener entre 5 y 60 caracteres.",
+      "invalid_description": "La descripción puede tener hasta 500 caracteres.",
+      "photos_required": "Agrega al menos 3 fotos.",
+      "too_many_photos": "Puedes agregar hasta 8 fotos.",
+      "invalid_price": "El precio por hora debe estar entre $20 y $500.",
+      "terms_required": "Para publicar debes aceptar las reglas para anfitriones.",
+      "duplicate_space": "Ya publicaste una cochera en esta dirección.",
+      "not_editable": "Una cochera en revisión o rechazada no se puede pausar ni reactivar.",
+      "own_space": "No puedes reservar tu propia cochera."
+    }
+  },
+  "host": {
+    "next": "Continuar",
+    "steps": {
+      "location": "Ubicación",
+      "size": "Dimensiones",
+      "photos": "Fotos",
+      "price": "Precio"
+    },
+    "home": {
+      "title": "Anfitrión",
+      "introTitle": "Renta tu cochera los días de evento",
+      "introBody": "Publica tu cochera o cajón y gana por hora cuando hay un evento cerca. Antes de publicar verificamos tu identidad, igual que la de los conductores.",
+      "start": "Empezar a publicar",
+      "publish": "Publicar una cochera",
+      "tabs": {
+        "label": "Sección",
+        "spaces": "Mis cocheras",
+        "bookings": "Reservas recibidas"
+      },
+      "emptySpacesTitle": "Aún no publicas ninguna cochera",
+      "emptySpacesBody": "Publica la primera: toma unos minutos.",
+      "emptyBookingsTitle": "Aún no recibes reservas",
+      "emptyBookingsBody": "Cuando un conductor reserve una de tus cocheras, aparecerá aquí.",
+      "loadError": "No pudimos cargar tus datos."
+    },
+    "space": {
+      "status": {
+        "pending_review": "En revisión",
+        "active": "Publicada",
+        "paused": "Pausada",
+        "rejected": "Rechazada"
+      },
+      "nearVenue": "A {{distance}} de {{venue}}",
+      "pendingNote": "Estamos revisando tus fotos y datos. Te mostramos aquí cuando esté publicada.",
+      "pausedNote": "Pausada: los conductores no la ven. Tus reservas ya confirmadas siguen en pie.",
+      "rejectedNote": "No pudimos publicarla. {{note}}",
+      "pause": "Pausar",
+      "resume": "Reactivar",
+      "changePrice": "Cambiar precio",
+      "priceTitle": "Cambiar el precio por hora",
+      "priceLabel": "Precio por hora (pesos)",
+      "priceSave": "Guardar precio",
+      "cancel": "Cancelar",
+      "republish": "Publicar de nuevo"
+    },
+    "booking": {
+      "verified": "Identidad verificada",
+      "price": "Precio de la reserva"
+    },
+    "location": {
+      "title": "¿Dónde está tu cochera?",
+      "intro": "Elige el recinto más cercano y marca la entrada. La dirección exacta solo se muestra a quien reserva.",
+      "venue": "Recinto cercano",
+      "venuePlaceholder": "Elige un recinto",
+      "street": "Calle y número",
+      "neighborhood": "Colonia",
+      "municipality": "Municipio",
+      "municipalityPlaceholder": "Elige un municipio",
+      "references": "Referencias (opcional)",
+      "referencesHint": "Ayuda al conductor a encontrar la entrada.",
+      "pinTitle": "Marca la entrada en el mapa",
+      "pinHelp": "Toca el mapa o usa las flechas. El pin debe quedar a menos de {{radius}} del recinto.",
+      "nudge": "Mover el pin 50 metros",
+      "north": "Mover al norte",
+      "south": "Mover al sur",
+      "east": "Mover al este",
+      "west": "Mover al oeste",
+      "noVenue": "Elige primero el recinto cercano para ver el mapa.",
+      "noPin": "Aún no marcas la entrada.",
+      "distance": "A {{distance}} de {{venue}}",
+      "tooFar": "A {{distance}} de {{venue}}: fuera del radio de {{radius}}",
+      "privacy": "La dirección exacta solo la ve quien reserva y confirma."
+    },
+    "size": {
+      "title": "Medidas del espacio",
+      "intro": "Mide el lugar donde se estaciona el auto. Con eso sugerimos qué autos caben.",
+      "length": "Largo (cm)",
+      "width": "Ancho (cm)",
+      "height": "Altura de la entrada (cm)",
+      "range": "Entre {{min}} y {{max}}",
+      "types": "¿Qué autos caben?",
+      "typesHint": "Los sugerimos según las medidas. Puedes cambiarlos.",
+      "features": "¿Qué ofrece?",
+      "noSuggestion": "Con esas medidas no cabe un auto estándar. Revisa los números."
+    },
+    "photos": {
+      "title": "Fotos y descripción",
+      "intro": "Muestra la entrada y el lugar donde se estaciona. Las revisamos antes de publicar.",
+      "add": "Agregar fotos",
+      "count": "{{count}} de {{max}} fotos (mínimo {{min}})",
+      "cover": "Portada",
+      "remove": "Quitar foto {{name}}",
+      "uploading": "Subiendo fotos…",
+      "badType": "{{name}}: usa fotos JPG, PNG o WebP.",
+      "tooBig": "{{name}}: pesa más de 10 MB.",
+      "tooMany": "Solo caben {{max}} fotos.",
+      "uploadFailed": "{{name}}: no se pudo subir. Intenta de nuevo.",
+      "titleLabel": "Título del anuncio",
+      "titleHint": "Entre {{min}} y {{max}} caracteres.",
+      "descriptionLabel": "Descripción (opcional)",
+      "descriptionHint": "Cómo se entra, horarios y qué debe saber el conductor."
+    },
+    "price": {
+      "title": "Precio",
+      "intro": "Elige cuánto cobras por hora. Puedes cambiarlo cuando quieras.",
+      "label": "Precio por hora (pesos)",
+      "hint": "Entre {{min}} y {{max}}.",
+      "example": "Por 4 horas: {{total}}",
+      "feeNote": "Los conductores pagan además un cargo por servicio de ParkApp.",
+      "summary": "Resumen",
+      "sizeLine": "{{length}} × {{width}} cm, altura de entrada {{height}} cm",
+      "photosLine_one": "{{count}} foto",
+      "photosLine_other": "{{count}} fotos",
+      "terms": "Acepto las reglas para anfitriones: mantener el lugar libre en los horarios reservados y recibir solo a quien tenga reserva.",
+      "publish": "Publicar cochera",
+      "publishing": "Publicando…",
+      "fix": "Corregir"
+    },
+    "done": {
+      "title": "Tu cochera está en revisión",
+      "body": "Revisamos tus fotos y datos antes de publicarla. Normalmente toma poco tiempo, y verás el cambio en Mis cocheras.",
+      "see": "Ver mis cocheras",
+      "another": "Publicar otra"
+    },
+    "nextUp": "Siguiente: {{step}}",
+    "lastStep": "Último paso"
+  }
+}

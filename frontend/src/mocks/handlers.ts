@@ -1,5 +1,12 @@
 import { delay, http, HttpResponse, type HttpHandler } from 'msw'
-import type { BookingCreate, Me, ProfileInput, VehicleInput } from '../api/types'
+import type {
+  BookingCreate,
+  HostSpaceCreate,
+  HostSpaceUpdate,
+  Me,
+  ProfileInput,
+  VehicleInput,
+} from '../api/types'
 import { createDb, type MockDb } from './domain/db'
 import { ApiError } from './domain/errors'
 import { seedDemoBookings } from './domain/demo'
@@ -136,6 +143,26 @@ export function createHandlers(db: MockDb, latencyMs = 0): HttpHandler[] {
     http.post(
       url('/api/me/identity'),
       route((c) => db.startIdentity(userIdFrom(c.request))),
+    ),
+
+    http.get(
+      url('/api/host/spaces'),
+      route((c) => ({ items: db.listHostSpaces(userIdFrom(c.request)) })),
+    ),
+    http.post(url('/api/host/spaces'), async ({ request, params }) => {
+      const body = (await request.clone().json()) as HostSpaceCreate
+      return route((c) => db.createHostSpace(userIdFrom(c.request), body), 201)({ request, params })
+    }),
+    http.patch(url('/api/host/spaces/:spaceId'), async ({ request, params }) => {
+      const body = (await request.clone().json()) as HostSpaceUpdate
+      return route((c) => db.updateHostSpace(userIdFrom(c.request), param(c, 'spaceId'), body))({
+        request,
+        params,
+      })
+    }),
+    http.get(
+      url('/api/host/bookings'),
+      route((c) => ({ items: db.listHostBookings(userIdFrom(c.request)) })),
     ),
   ]
 }
