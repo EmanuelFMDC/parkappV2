@@ -46,6 +46,15 @@ Un solo paquete JavaScript en el monorepo, así que las ventajas de pnpm no comp
 - **Guardas en código:** `formatCents` y los mocks de pago lanzan error con decimales; ESLint prohíbe `parseFloat`.
 - **Pendiente en CI:** el job del frontend ejecuta formato, lint, pruebas unitarias y build. Playwright aún no corre en CI (no verificado en un runner).
 
+## D-013 · Fase 2: design system (2026-09-30)
+- **El ámbar es la acción, el azul es la marca.** Cambia respecto al prototipo, donde el botón principal era azul. Sigue la spec: "azul profundo de marca con acento cálido para acciones". Hay un botón de acción por pantalla.
+- **Objeto memorable: el boleto de evento** (`TicketStub`), con talón perforado. Cada mitad recorta sus propias esquinas para que las muescas coincidan con la línea de corte.
+- **Layout por contenedor, no por ventana.** `MapListLayout` y `BottomSheet` usan container queries y un `ResizeObserver` sobre su contenedor (acople a 768 px). Así el mismo componente se demuestra en marcos de teléfono y escritorio dentro de una sola página, y funcionará igual dentro de una pantalla real.
+- **Contraste como prueba, no como intención.** `styleguide/tokens.ts` refleja `index.css` y una prueba falla si difieren o si alguna de las 17 combinaciones baja de AA. axe corre en Playwright en ambos idiomas.
+- **Corrección de tokens del prototipo:** el aro de foco pasó de ámbar (1,7:1) a azul (9,4:1) y se creó `control` (3,5:1) para bordes de campos.
+- **Mapa y fotos son ilustraciones** hasta conectar Google Maps y Cloud Storage detrás de sus interfaces.
+- **Capturas** en `docs/design-system/screenshots/`. Se omiten las vistas de página completa porque pesan hasta 2,2 MB y superan el límite de 500 KB del hook de pre-commit.
+
 ## Pendientes de decidir
 - Verificar condiciones vigentes de Stripe Connect para México antes de implementar pagos.
 - Verificar disponibilidad de la región `northamerica-south1` en Cloud Run y Cloud SQL.

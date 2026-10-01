@@ -1,3 +1,174 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/figtree';
+@import '@fontsource-variable/bricolage-grotesque';
 
-/* Brand tokens, fonts and component styles arrive in Phase 2 (design system). */
+/*
+ * ParkApp design tokens (single source of truth).
+ * Blue = brand and navigation. Amber = the action (reserve, pay). Everything else is neutral.
+ * Components use semantic utilities (bg-action, text-ink-muted, ring-control), never raw hex.
+ * Every foreground/background pair is checked by src/lib/contrast.test.ts.
+ */
+@theme {
+  --font-display: 'Bricolage Grotesque Variable', 'Figtree Variable', system-ui, sans-serif;
+  --font-sans: 'Figtree Variable', system-ui, sans-serif;
+
+  /* Brand: señal (deep blue) */
+  --color-signal-50: #eef3fc;
+  --color-signal-100: #d9e5f8;
+  --color-signal-200: #b3c9f0;
+  --color-signal-300: #7fa1e0;
+  --color-signal-500: #2a5cb8;
+  --color-signal-600: #174a9f;
+  --color-signal-700: #0f3d91;
+  --color-signal-800: #0b2e70;
+  --color-signal-900: #081d4a;
+
+  /* Action: ticket (warm amber). A fill, never text or an outline on light backgrounds. */
+  --color-ticket-50: #fff6e0;
+  --color-ticket-200: #ffe199;
+  --color-ticket-400: #ffb21a;
+  --color-ticket-500: #f29d00;
+  --color-ticket-700: #8a5600;
+
+  /* Neutrals */
+  --color-ink: #081230;
+  --color-ink-muted: #4a5573;
+  --color-ink-subtle: #66708f;
+  --color-line: #dfe3ec;
+  --color-control: #7d88a6; /* borders of interactive controls: >= 3:1 (WCAG 1.4.11) */
+  --color-canvas: #f6f7fa;
+  --color-surface: #ffffff;
+
+  /* Semantic */
+  --color-success-50: #e5f5ec;
+  --color-success-600: #0f6e40;
+  --color-danger-50: #fdeceb;
+  --color-danger-600: #c9302c;
+  --color-warning-50: #fff6e0;
+  --color-warning-700: #8a5600;
+
+  /* Roles */
+  --color-primary: var(--color-signal-700);
+  --color-primary-hover: var(--color-signal-800);
+  --color-primary-soft: var(--color-signal-50);
+  --color-action: var(--color-ticket-400);
+  --color-action-hover: var(--color-ticket-500);
+
+  /* Type scale: size / line-height */
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.15rem;
+  --text-body: 1rem;
+  --text-body--line-height: 1.5rem;
+  --text-lead: 1.125rem;
+  --text-lead--line-height: 1.7rem;
+  --text-title: 1.25rem;
+  --text-title--line-height: 1.6rem;
+  --text-headline: 1.75rem;
+  --text-headline--line-height: 2rem;
+  --text-display: 2.5rem;
+  --text-display--line-height: 2.6rem;
+
+  /* Shape: controls 12, surfaces 20, sheets 28, pills full */
+  --radius-control: 0.75rem;
+  --radius-surface: 1.25rem;
+  --radius-sheet: 1.75rem;
+
+  /* Touch targets: nothing interactive is smaller than 44px */
+  --spacing-touch: 2.75rem;
+  --spacing-touch-lg: 3.25rem;
+
+  /* Elevation */
+  --shadow-raised: 0 1px 2px rgb(8 18 48 / 0.06), 0 4px 16px rgb(8 18 48 / 0.08);
+  --shadow-sheet: 0 -8px 32px rgb(8 18 48 / 0.16);
+  --shadow-pin: 0 2px 8px rgb(8 18 48 / 0.28);
+
+  /* Motion */
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-sheet-in: sheet-in 320ms var(--ease-out-quint);
+  --animate-pulse-ring: pulse-ring 2.4s ease-out infinite;
+  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+
+  @keyframes sheet-in {
+    from {
+      transform: translateY(24px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(0.6);
+      opacity: 0.6;
+    }
+    100% {
+      transform: scale(2.2);
+      opacity: 0;
+    }
+  }
+  @keyframes shimmer {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
+  }
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    background: var(--color-canvas);
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    min-height: 100dvh;
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-signal-700);
+    outline-offset: 2px;
+    border-radius: var(--radius-control);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Ticket perforation: each half cuts its own corners, so notches sit exactly on the tear line. */
+  .ticket-top,
+  .ticket-bottom {
+    --r: 0.7rem;
+  }
+  .ticket-top {
+    mask:
+      radial-gradient(circle var(--r) at 0 100%, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle var(--r) at 100% 100%, #0000 98%, #000) right / 51% 100% no-repeat;
+  }
+  .ticket-bottom {
+    mask:
+      radial-gradient(circle var(--r) at 0 0, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle var(--r) at 100% 0, #0000 98%, #000) right / 51% 100% no-repeat;
+  }
+}

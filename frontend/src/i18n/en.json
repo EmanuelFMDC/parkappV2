@@ -17,5 +17,210 @@
     "label": "Language",
     "es-MX": "Español",
     "en": "English"
+  },
+  "ui": {
+    "close": "Close",
+    "back": "Back",
+    "mainNav": "Main navigation",
+    "perHour": "per hour",
+    "rating_one": "{{value}} out of 5, {{count}} review",
+    "rating_other": "{{value}} out of 5, {{count}} reviews"
+  },
+  "sheet": {
+    "expand": "Expand results panel",
+    "collapse": "Collapse results panel"
+  },
+  "steps": {
+    "progress": "Step {{current}} of {{total}}",
+    "label": "Progress",
+    "done": "(completed)"
+  },
+  "ticket": {
+    "entry": "Entry",
+    "until": "Until",
+    "plate": "Plate",
+    "spot": "Spot",
+    "code": "Access code"
+  },
+  "map": {
+    "label": "Map of nearby garages",
+    "venue": "Event venue",
+    "pin": "{{title}}, {{price}} per hour"
+  },
+  "samples": {
+    "venue": "Estadio Akron",
+    "distance": "{{distance}} from {{venue}}",
+    "address": "123 Example St, Zapopan",
+    "spot": "Garage 2",
+    "spaces": {
+      "gate": "Garage with electric gate",
+      "covered": "Covered spot for a compact car",
+      "suv": "Roomy space for an SUV",
+      "corner": "Corner spot with easy entry"
+    },
+    "tags": {
+      "covered": "Covered",
+      "gate": "Electric gate",
+      "camera": "Security camera"
+    }
+  },
+  "styleguide": {
+    "title": "ParkApp design system",
+    "intro": "Tokens, components and patterns. Every text color meets WCAG AA and every touch target is at least 44 px.",
+    "tocLabel": "Sections",
+    "toc": {
+      "colors": "Color",
+      "contrast": "Contrast",
+      "type": "Typography",
+      "controls": "Controls",
+      "cards": "Cards and ticket",
+      "navigation": "Navigation",
+      "patterns": "Map and list"
+    },
+    "colors": {
+      "title": "Color",
+      "intro": "Deep blue for brand and navigation. Amber only for the main action. Everything else is neutral.",
+      "groups": {
+        "brand": "Brand blue",
+        "action": "Action",
+        "neutral": "Neutrals",
+        "semantic": "Status"
+      },
+      "usage": {
+        "brand": "signal-700 is the brand blue: navigation, links, the ticket panel. Light tones are soft backgrounds.",
+        "action": "ticket-400 is the action color (reserve, pay, publish). It is a fill: never text or an outline on a light background.",
+        "neutral": "ink for text, ink-muted for support text, control for field and button borders, line for dividers only.",
+        "semantic": "Success, error and warning. Always paired with text."
+      }
+    },
+    "contrast": {
+      "title": "Verified contrast",
+      "intro": "These are the combinations the components use. An automated test fails if any of them stops passing.",
+      "pair": "Combination",
+      "sample": "Sample",
+      "ratio": "Ratio",
+      "min": "Minimum",
+      "result": "Result",
+      "pass": "Passes",
+      "pairs": {
+        "body": "Text on page background",
+        "bodyOnSurface": "Text on card",
+        "muted": "Support text on card",
+        "mutedOnCanvas": "Support text on page",
+        "subtle": "Placeholder and subtle text",
+        "actionLabel": "Action button text",
+        "actionHover": "Action button on hover",
+        "brandButton": "Blue button text",
+        "link": "Blue link on card",
+        "onBrandCaption": "Secondary text on blue",
+        "success": "Success status",
+        "danger": "Error status",
+        "dangerOnSurface": "Error message on field",
+        "warning": "Warning status",
+        "focusRing": "Focus ring (graphic)",
+        "controlBorder": "Field border on card (graphic)",
+        "controlBorderOnCanvas": "Field border on page (graphic)"
+      }
+    },
+    "type": {
+      "title": "Typography",
+      "intro": "Bricolage Grotesque for headlines and prices; Figtree for interface and text. Figures use tabular numbers.",
+      "scale": "Scale",
+      "families": "Bricolage Grotesque (variable) and Figtree (variable), self-hosted.",
+      "samples": {
+        "display": "Park without circling",
+        "headline": "Garages near your event",
+        "title": "Garage with electric gate",
+        "lead": "Book in four steps and drive straight to your spot.",
+        "body": "Your spot is held for up to 15 minutes after your arrival time.",
+        "caption": "Free cancellation until 10 minutes before"
+      }
+    },
+    "shape": {
+      "title": "Shape",
+      "control": "Controls, 12 px",
+      "surface": "Cards, 20 px",
+      "sheet": "Sheet, 28 px"
+    },
+    "spacing": {
+      "title": "Spacing (4 px base)"
+    },
+    "buttons": {
+      "title": "Controls",
+      "intro": "One main action per screen: the thing the person came to do.",
+      "variants": "Buttons",
+      "action": "Reserve garage",
+      "brand": "Continue",
+      "secondary": "See reviews",
+      "ghost": "Later",
+      "danger": "Cancel booking",
+      "loading": "Reserving…",
+      "disabled": "Pick a time",
+      "small": "Share"
+    },
+    "forms": {
+      "title": "Fields and selection",
+      "search": "Search a venue or address",
+      "plate": "Car license plate",
+      "plateHint": "Three letters and three numbers",
+      "plateError": "Enter the full plate, for example ABC-123.",
+      "arrival": "Arrival time",
+      "now": "Now",
+      "in30": "In 30 min",
+      "in60": "In 1 h",
+      "alerts": "Remind me 15 minutes before it ends",
+      "filters": "Filters"
+    },
+    "feedback": {
+      "title": "Status and loading",
+      "available": "Available",
+      "few": "Almost full",
+      "full": "Full",
+      "verified": "Verified host",
+      "neutral": "Compact car",
+      "loading": "Loading garage",
+      "emptyHeading": "Empty state",
+      "emptyTitle": "No garages nearby",
+      "emptyBody": "Try a wider radius or change your arrival time.",
+      "emptyAction": "Widen search"
+    },
+    "cards": {
+      "title": "Cards and ticket",
+      "intro": "The photo comes first; price and reviews are always visible. A confirmed booking is an event ticket.",
+      "spaces": "Garage card",
+      "ticket": "Booking ticket",
+      "ticketIntro": "Shown on confirmation and in My bookings. The bottom half is the stub you show at the entrance."
+    },
+    "nav": {
+      "title": "Navigation",
+      "intro": "Booking takes four steps at most. Listing a garage is also four, in order.",
+      "bars": "Top and bottom bars",
+      "steps": "Step indicator",
+      "topbar": "Your booking",
+      "explore": "Explore",
+      "bookings": "My bookings",
+      "profile": "Profile",
+      "driverSteps": {
+        "venue": "Venue",
+        "space": "Garage",
+        "time": "Time",
+        "pay": "Payment"
+      },
+      "hostSteps": {
+        "location": "Location",
+        "size": "Dimensions",
+        "photos": "Photos",
+        "price": "Price"
+      }
+    },
+    "patterns": {
+      "title": "Map and list",
+      "intro": "On a phone the map fills the screen and the list lives in a panel with three heights. On desktop the list sits beside the map. Hovering a card highlights its price on the map.",
+      "mobile": "Phone",
+      "desktop": "Desktop",
+      "sheetLabel": "Nearby garages",
+      "summary_one": "{{count}} garage near {{venue}}",
+      "summary_other": "{{count}} garages near {{venue}}"
+    }
   }
 }

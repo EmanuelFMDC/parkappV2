@@ -17,5 +17,210 @@
     "label": "Idioma",
     "es-MX": "Español",
     "en": "English"
+  },
+  "ui": {
+    "close": "Cerrar",
+    "back": "Volver",
+    "mainNav": "Navegación principal",
+    "perHour": "por hora",
+    "rating_one": "{{value}} de 5, {{count}} reseña",
+    "rating_other": "{{value}} de 5, {{count}} reseñas"
+  },
+  "sheet": {
+    "expand": "Ampliar panel de resultados",
+    "collapse": "Reducir panel de resultados"
+  },
+  "steps": {
+    "progress": "Paso {{current}} de {{total}}",
+    "label": "Progreso",
+    "done": "(completado)"
+  },
+  "ticket": {
+    "entry": "Entrada",
+    "until": "Hasta",
+    "plate": "Placa",
+    "spot": "Lugar",
+    "code": "Código de acceso"
+  },
+  "map": {
+    "label": "Mapa de cocheras cercanas",
+    "venue": "Recinto del evento",
+    "pin": "{{title}}, {{price}} por hora"
+  },
+  "samples": {
+    "venue": "Estadio Akron",
+    "distance": "A {{distance}} de {{venue}}",
+    "address": "Calle de ejemplo 123, Zapopan",
+    "spot": "Cochera 2",
+    "spaces": {
+      "gate": "Cochera con portón eléctrico",
+      "covered": "Cajón techado para auto compacto",
+      "suv": "Espacio amplio para camioneta",
+      "corner": "Cajón en esquina con entrada fácil"
+    },
+    "tags": {
+      "covered": "Techado",
+      "gate": "Portón eléctrico",
+      "camera": "Cámara de seguridad"
+    }
+  },
+  "styleguide": {
+    "title": "Sistema de diseño de ParkApp",
+    "intro": "Tokens, componentes y patrones. Cada color de texto cumple WCAG AA y cada elemento táctil mide al menos 44 px.",
+    "tocLabel": "Secciones",
+    "toc": {
+      "colors": "Color",
+      "contrast": "Contraste",
+      "type": "Tipografía",
+      "controls": "Controles",
+      "cards": "Tarjetas y boleto",
+      "navigation": "Navegación",
+      "patterns": "Mapa y lista"
+    },
+    "colors": {
+      "title": "Color",
+      "intro": "Azul profundo para la marca y la navegación. Ámbar solo para la acción principal. El resto es neutro.",
+      "groups": {
+        "brand": "Azul de marca",
+        "action": "Acción",
+        "neutral": "Neutros",
+        "semantic": "Estados"
+      },
+      "usage": {
+        "brand": "signal-700 es el azul de marca: navegación, enlaces, panel del boleto. Los tonos claros sirven de fondo suave.",
+        "action": "ticket-400 es el color de la acción (reservar, pagar, publicar). Es un relleno: nunca texto ni contorno sobre fondo claro.",
+        "neutral": "ink para texto, ink-muted para apoyo, control para bordes de campos y botones, line solo para divisores.",
+        "semantic": "Éxito, error y aviso. Siempre acompañados de texto."
+      }
+    },
+    "contrast": {
+      "title": "Contraste verificado",
+      "intro": "Estas combinaciones son las que usan los componentes. Una prueba automática falla si alguna deja de cumplir.",
+      "pair": "Combinación",
+      "sample": "Muestra",
+      "ratio": "Proporción",
+      "min": "Mínimo",
+      "result": "Resultado",
+      "pass": "Cumple",
+      "pairs": {
+        "body": "Texto sobre fondo de página",
+        "bodyOnSurface": "Texto sobre tarjeta",
+        "muted": "Texto de apoyo sobre tarjeta",
+        "mutedOnCanvas": "Texto de apoyo sobre página",
+        "subtle": "Marcador de posición y texto tenue",
+        "actionLabel": "Texto del botón de acción",
+        "actionHover": "Botón de acción al pasar el cursor",
+        "brandButton": "Texto del botón azul",
+        "link": "Enlace azul sobre tarjeta",
+        "onBrandCaption": "Texto secundario sobre azul",
+        "success": "Estado correcto",
+        "danger": "Estado de error",
+        "dangerOnSurface": "Mensaje de error sobre campo",
+        "warning": "Estado de aviso",
+        "focusRing": "Aro de foco (elemento gráfico)",
+        "controlBorder": "Borde de campo sobre tarjeta (elemento gráfico)",
+        "controlBorderOnCanvas": "Borde de campo sobre página (elemento gráfico)"
+      }
+    },
+    "type": {
+      "title": "Tipografía",
+      "intro": "Bricolage Grotesque para titulares y precios; Figtree para interfaz y texto. Las cifras usan números tabulares.",
+      "scale": "Escala",
+      "families": "Bricolage Grotesque (variable) y Figtree (variable), servidas desde el propio sitio.",
+      "samples": {
+        "display": "Estaciona sin dar vueltas",
+        "headline": "Cocheras cerca de tu evento",
+        "title": "Cochera con portón eléctrico",
+        "lead": "Reserva en cuatro pasos y llega directo a tu lugar.",
+        "body": "Tu lugar queda apartado hasta 15 minutos después de la hora de llegada.",
+        "caption": "Cancelación gratis hasta 10 minutos antes"
+      }
+    },
+    "shape": {
+      "title": "Forma",
+      "control": "Controles, 12 px",
+      "surface": "Tarjetas, 20 px",
+      "sheet": "Panel, 28 px"
+    },
+    "spacing": {
+      "title": "Espaciado (base de 4 px)"
+    },
+    "buttons": {
+      "title": "Controles",
+      "intro": "Una sola acción principal por pantalla, la que la persona vino a hacer.",
+      "variants": "Botones",
+      "action": "Reservar cochera",
+      "brand": "Continuar",
+      "secondary": "Ver reseñas",
+      "ghost": "Más tarde",
+      "danger": "Cancelar reserva",
+      "loading": "Reservando…",
+      "disabled": "Elige una hora",
+      "small": "Compartir"
+    },
+    "forms": {
+      "title": "Campos y selección",
+      "search": "Busca un recinto o una dirección",
+      "plate": "Placa del auto",
+      "plateHint": "Tres letras y tres números",
+      "plateError": "Escribe la placa completa, por ejemplo ABC-123.",
+      "arrival": "Hora de llegada",
+      "now": "Ahora",
+      "in30": "En 30 min",
+      "in60": "En 1 h",
+      "alerts": "Avisarme 15 minutos antes de que termine",
+      "filters": "Filtros"
+    },
+    "feedback": {
+      "title": "Estados y carga",
+      "available": "Disponible",
+      "few": "Quedan pocos",
+      "full": "Lleno",
+      "verified": "Anfitrión verificado",
+      "neutral": "Auto compacto",
+      "loading": "Cargando cochera",
+      "emptyHeading": "Estado vacío",
+      "emptyTitle": "No hay cocheras cerca",
+      "emptyBody": "Prueba con un radio mayor o cambia la hora de llegada.",
+      "emptyAction": "Ampliar búsqueda"
+    },
+    "cards": {
+      "title": "Tarjetas y boleto",
+      "intro": "La foto va primero, el precio y las reseñas siempre se ven. La reserva confirmada es un boleto de evento.",
+      "spaces": "Tarjeta de cochera",
+      "ticket": "Boleto de reserva",
+      "ticketIntro": "Aparece al confirmar y en Mis reservas. La mitad inferior es el talón que se muestra en la entrada."
+    },
+    "nav": {
+      "title": "Navegación",
+      "intro": "Reservar toma como máximo cuatro pasos. Publicar una cochera también son cuatro, en orden.",
+      "bars": "Barra superior e inferior",
+      "steps": "Indicador de pasos",
+      "topbar": "Tu reserva",
+      "explore": "Explorar",
+      "bookings": "Mis reservas",
+      "profile": "Perfil",
+      "driverSteps": {
+        "venue": "Recinto",
+        "space": "Cochera",
+        "time": "Horario",
+        "pay": "Pago"
+      },
+      "hostSteps": {
+        "location": "Ubicación",
+        "size": "Dimensiones",
+        "photos": "Fotos",
+        "price": "Precio"
+      }
+    },
+    "patterns": {
+      "title": "Mapa y lista",
+      "intro": "En el teléfono, el mapa ocupa la pantalla y la lista vive en un panel que se desliza a tres alturas. En escritorio, la lista queda junto al mapa. Al pasar el cursor sobre una tarjeta se resalta su precio en el mapa.",
+      "mobile": "Teléfono",
+      "desktop": "Escritorio",
+      "sheetLabel": "Cocheras cercanas",
+      "summary_one": "{{count}} cochera cerca de {{venue}}",
+      "summary_other": "{{count}} cocheras cerca de {{venue}}"
+    }
   }
 }
