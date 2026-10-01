@@ -271,7 +271,7 @@ test.describe('host lists a garage in four steps', () => {
 
     // 3. The host sees the booking
     await signInAsSeeded(page, HOST_ID, HOST_PHONE)
-    await page.goto('/host?tab=bookings')
+    await page.goto('/host/bookings')
     await expect(page.getByRole('heading', { name: TITLE })).toBeVisible()
     await expect(page.getByText('Prueba', { exact: true })).toBeVisible()
     await expect(page.getByText('Identidad verificada')).toBeVisible()

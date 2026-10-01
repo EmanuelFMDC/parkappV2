@@ -2,6 +2,23 @@
 
 Publicar una cochera es un flujo de **cuatro pasos en orden**: Ubicación, Dimensiones, Fotos y Precio. Antes hace falta una cuenta con datos personales e **identidad verificada** (no pide auto). Una cochera nueva **no sale al público hasta que el back-office la aprueba**. Para verlo: `npm run dev` en `frontend/`, abrir **/host**. La API es simulada en el navegador (D-014).
 
+## Dos modos, una sola cuenta
+
+La app tiene **modo conductor** (buscar y reservar) y **modo anfitrión** (publicar y gestionar). Es la misma cuenta, el mismo inicio de sesión y la misma identidad verificada; cada modo tiene su propia barra inferior.
+
+|                | Modo conductor                                                  | Modo anfitrión                                                                                  |
+| -------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Barra inferior | Explorar · Mis reservas · Perfil                                | Mis cocheras · Reservas · Perfil                                                                |
+| Aviso          | ninguno                                                         | franja oscura "Modo anfitrión" con "Cambiar a modo conductor", en todas las pantallas con barra |
+| Direcciones    | `/`, `/bookings`, `/profile`                                    | `/host`, `/host/bookings`, `/host/profile`                                                      |
+| Perfil         | datos, idioma, **autos**, tarjeta para cambiar a modo anfitrión | los mismos datos e idioma, **sin autos**                                                        |
+
+- **El modo lo decide la dirección** (todo lo que empieza con `/host`), no un estado oculto. Por eso los enlaces, recargar y el botón de atrás siempre coinciden con lo que se ve.
+- **Cómo se entra al modo anfitrión:** desde el Perfil ("Cambiar a modo anfitrión") o desde la invitación discreta al final de Explorar ("¿Tienes una cochera?"). Se puede mirar sin tener cuenta: la cuenta se pide cuando hace falta, al empezar a publicar.
+- **Cómo se vuelve:** un toque en el aviso de arriba.
+- **Los enlaces viejos** (`/host?tab=bookings`) redirigen a `/host/bookings`.
+- Las pantallas de publicar (`/host/new/...`) no muestran barra ni aviso para no distraer.
+
 ## El flujo
 
 | Pantalla            | Ruta                   | Qué hace el anfitrión                                                                                   |
@@ -52,8 +69,8 @@ Se añadió a `backend/openapi.draft.yaml`: `GET` y `POST /api/host/spaces`, `PA
 
 ## Verificación automática
 
-- **293 pruebas unitarias y de pantalla (Vitest)**, de ellas las nuevas del anfitrión: reglas del dominio (revisión, rechazo, validaciones de cada campo y sus bordes, duplicados, pausar, precio, propiedad, qué ve el anfitrión, persistencia), validaciones por paso y que no se pueda saltar uno, medidas y autos sugeridos, selector de pin, carga de fotos (tipo, tamaño, máximo, quitar), publicar, panel y registro de anfitrión sin auto.
-- **65 pruebas de punta a punta (Playwright, móvil y escritorio), con axe WCAG 2.1 AA en cada pantalla:** alta completa desde cero hasta que un conductor la encuentra, mensajes de cada paso incompleto, pin fuera del radio, pasos que no se saltan, borrador que sobrevive a recargar, rechazo con motivo, pausar y reactivar con cambio de precio visto desde el lado del conductor, el anfitrión viendo una reserva sin datos privados, no reservar la propia cochera e inglés.
+- **318 pruebas unitarias y de pantalla (Vitest)**, de ellas las nuevas del anfitrión: reglas del dominio (revisión, rechazo, validaciones de cada campo y sus bordes, duplicados, pausar, precio, propiedad, qué ve el anfitrión, persistencia), validaciones por paso y que no se pueda saltar uno, medidas y autos sugeridos, selector de pin, carga de fotos (tipo, tamaño, máximo, quitar), publicar, panel y registro de anfitrión sin auto.
+- **77 pruebas de punta a punta (Playwright, móvil y escritorio), con axe WCAG 2.1 AA en cada pantalla:** alta completa desde cero hasta que un conductor la encuentra, mensajes de cada paso incompleto, pin fuera del radio, pasos que no se saltan, borrador que sobrevive a recargar, rechazo con motivo, pausar y reactivar con cambio de precio visto desde el lado del conductor, el anfitrión viendo una reserva sin datos privados, no reservar la propia cochera e inglés.
 
 ## Defectos que encontró la verificación (ya corregidos)
 
@@ -70,3 +87,10 @@ Se añadió a `backend/openapi.draft.yaml`: `GET` y `POST /api/host/spaces`, `PA
 - **Falta:** editar los demás datos de una cochera ya publicada, eliminarla, cobros al anfitrión (Stripe Connect), cancelaciones iniciadas por el anfitrión, reseñas del anfitrión a conductores y mensajes entre ambos.
 - **Reserva instantánea.** El anfitrión no aprueba cada reserva.
 - Sigue sin probarse con lector de pantalla real ni en un teléfono físico.
+
+## Cambio de modo (D-018)
+
+- **Pruebas unitarias:** cada modo muestra su barra y no la del otro, la pestaña actual está marcada, el aviso aparece solo en modo anfitrión y lleva de vuelta en un toque, el Perfil ofrece el cambio correcto y oculta los autos en modo anfitrión, la invitación es un enlace a `/host`, y los enlaces viejos redirigen.
+- **De punta a punta (móvil y escritorio, con axe):** pasar de conductor a anfitrión y de vuelta, moverse entre las pestañas de cada modo, que el botón de atrás y adelante sigan al modo, la invitación en Explorar, mirar el modo anfitrión sin cuenta, la redirección de enlaces viejos y la traducción del aviso.
+- **Capturas nuevas:** `0-explore-invitation`, `10-profile-driver-mode` y `11-profile-host-mode` en `docs/host/screenshots/`.
+- **Defecto que encontró la revisión:** en el Perfil de modo anfitrión aparecían dos botones idénticos "Cambiar a modo conductor" (el aviso y una tarjeta). Se dejó solo el aviso. Además, "Completar mi cuenta" y "Cerrar sesión" salían pegados.

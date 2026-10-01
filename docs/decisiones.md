@@ -127,6 +127,18 @@ Decisiones tomadas:
 - **Pendiente legal:** las "reglas para anfitriones" y el aviso de privacidad son textos provisionales que debe revisar un abogado.
 - **Diferido:** editar otros datos de una cochera publicada, eliminarla, pagos al anfitrión (Stripe Connect), cancelaciones del anfitrión, reseñas a conductores y mensajería.
 
+## D-018 · Modo conductor y modo anfitrión en una sola app (2026-10-01)
+
+Decisión del dueño del proyecto tras revisar el frontend: separar el flujo del anfitrión del del conductor, sin separar la app ni la cuenta.
+
+- **Una cuenta, dos modos** (como Airbnb). Se descartaron dos apps o dos cuentas: la spec pide un solo código (Capacitor) y una identidad verificada por persona, y muchos anfitriones también van a eventos.
+- **Cada modo tiene su barra:** conductor = Explorar, Mis reservas, Perfil; anfitrión = Mis cocheras, Reservas, Perfil. "Reservas recibidas" pasa de ser un selector escondido dentro de una pestaña a una pestaña propia.
+- **El modo lo decide la dirección** (`/host...`), sin estado oculto ni redirecciones al abrir la app. Ventaja: enlaces, recarga y botón de atrás siempre coinciden con la pantalla. Costo: la app no recuerda el último modo usado; se puede añadir si hace falta.
+- **Señal visual:** en modo anfitrión una franja oscura "Modo anfitrión" con el botón para volver, en todas las pantallas con barra. No se repite el mismo botón en el Perfil.
+- **Puntos de entrada:** tarjeta "Modo anfitrión" en el Perfil e invitación discreta en Explorar. Se puede mirar el modo anfitrión sin cuenta; se pide al empezar a publicar.
+- **El Perfil existe en ambos modos** (`/profile` y `/host/profile`); en modo anfitrión no muestra autos.
+- **Sin cambios de contrato ni de API.** Los enlaces viejos `/host?tab=bookings` redirigen a `/host/bookings`.
+
 ## Pendientes de decidir
 
 - Verificar condiciones vigentes de Stripe Connect para México antes de implementar pagos.

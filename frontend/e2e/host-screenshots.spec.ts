@@ -15,6 +15,14 @@ test('host flow screenshots', async ({ page }, testInfo) => {
     await page.screenshot({ path: `${OUT}/${p}-${name}.png` })
   }
 
+  // In driver mode, a quiet invitation to host
+  await page.goto('/')
+  // Wait for the venues to load, or there is nothing to scroll yet.
+  await expect(page.getByText('Arena VFG')).toBeVisible()
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  await expect(page.getByRole('link', { name: /¿Tienes una cochera\?/ })).toBeVisible()
+  await shot('0-explore-invitation')
+
   // A newcomer sees the invitation
   await page.goto('/host')
   await expect(page.getByText('Renta tu cochera los días de evento')).toBeVisible()
@@ -93,7 +101,15 @@ test('host flow screenshots', async ({ page }, testInfo) => {
   await expect(page.getByText('Publicada')).toBeVisible()
   await shot('8-home-live')
 
-  await page.goto('/host?tab=bookings')
+  await page.goto('/host/bookings')
   await expect(page.getByText('Identidad verificada')).toBeVisible()
   await shot('9-bookings-received')
+
+  // The same profile in each mode
+  await page.goto('/profile')
+  await expect(page.getByRole('heading', { name: 'Modo anfitrión' })).toBeVisible()
+  await shot('10-profile-driver-mode')
+  await page.goto('/host/profile')
+  await expect(page.getByText('Modo anfitrión', { exact: true })).toBeVisible()
+  await shot('11-profile-host-mode')
 })

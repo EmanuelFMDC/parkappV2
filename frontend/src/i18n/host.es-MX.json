@@ -1,6 +1,7 @@
 {
   "nav": {
-    "host": "Anfitrión"
+    "hostSpaces": "Mis cocheras",
+    "hostBookings": "Reservas"
   },
   "ui": {
     "newListing": "Nueva"
@@ -43,7 +44,6 @@
       "start": "Empezar a publicar",
       "publish": "Publicar una cochera",
       "tabs": {
-        "label": "Sección",
         "spaces": "Mis cocheras",
         "bookings": "Reservas recibidas"
       },
@@ -154,5 +154,14 @@
     },
     "nextUp": "Siguiente: {{step}}",
     "lastStep": "Último paso"
+  },
+  "mode": {
+    "hostBanner": "Modo anfitrión",
+    "switchToDriver": "Cambiar a modo conductor",
+    "switchToHost": "Cambiar a modo anfitrión",
+    "pitchTitle": "¿Tienes una cochera?",
+    "pitchBody": "Gana por hora cuando hay un evento cerca.",
+    "profileHostTitle": "Modo anfitrión",
+    "profileHostBody": "Publica tus cocheras y mira las reservas que recibes. Es la misma cuenta."
   }
 }

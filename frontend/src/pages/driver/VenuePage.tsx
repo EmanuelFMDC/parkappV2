@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Page } from '../../components/layout/Page'
 import { StickyBar } from '../../components/layout/StickyBar'
 import { Button, Logo, RadioCard, Skeleton, StepIndicator } from '../../components/ui'
+import { HostPitch } from '../../features/host/HostPitch'
 import { tripSearch } from '../../features/trip/useTrip'
 import { useVenueEvents, useVenues } from '../../features/venues/hooks'
 import { formatDateTime } from '../../lib/time'
@@ -126,6 +127,8 @@ export default function VenuePage() {
           )}
           {event && <p className="text-caption text-ink-muted">{t('driver.venue.arrive')}</p>}
         </section>
+
+        <HostPitch />
       </Page>
 
       <StickyBar aboveNav>

@@ -1,6 +1,7 @@
 {
   "nav": {
-    "host": "Host"
+    "hostSpaces": "My garages",
+    "hostBookings": "Bookings"
   },
   "ui": {
     "newListing": "New"
@@ -43,7 +44,6 @@
       "start": "Start listing",
       "publish": "List a garage",
       "tabs": {
-        "label": "Section",
         "spaces": "My garages",
         "bookings": "Bookings received"
       },
@@ -154,5 +154,14 @@
     },
     "nextUp": "Next: {{step}}",
     "lastStep": "Last step"
+  },
+  "mode": {
+    "hostBanner": "Host mode",
+    "switchToDriver": "Switch to driver mode",
+    "switchToHost": "Switch to host mode",
+    "pitchTitle": "Do you have a garage?",
+    "pitchBody": "Earn by the hour when there is an event nearby.",
+    "profileHostTitle": "Host mode",
+    "profileHostBody": "List your garages and see the bookings you receive. It is the same account."
   }
 }

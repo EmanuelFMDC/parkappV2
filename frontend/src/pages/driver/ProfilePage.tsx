@@ -1,4 +1,4 @@
-import { BadgeCheck, CarFront, Trash2 } from 'lucide-react'
+import { BadgeCheck, CarFront, Trash2, Warehouse } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -10,14 +10,20 @@ import { describeVehicle } from '../../features/account/vehicleFit'
 import { useAuth } from '../../features/auth/context'
 import { useUpdateLanguage } from '../../features/auth/hooks'
 import { languages, toSupportedLanguage, type Language } from '../../i18n'
+import { HOME_OF, PROFILE_OF, useMode } from '../../lib/mode'
 
 const names: Record<Language, string> = { 'es-MX': 'Español (México)', en: 'English' }
 
+/**
+ * The profile is the same in both modes (one account), reached from each mode's bar. It is also
+ * where someone switches mode. Cars only matter when looking for a spot, so host mode hides them.
+ */
 export default function ProfilePage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const mode = useMode()
   const { user, signOut } = useAuth()
-  const { stage, me } = useAccount()
+  const { stage, me } = useAccount(mode)
   const updateLanguage = useUpdateLanguage()
   const removeVehicle = useRemoveVehicle()
   const [adding, setAdding] = useState(false)
@@ -27,11 +33,32 @@ export default function ProfilePage() {
     void i18n.changeLanguage(language)
     if (user) updateLanguage.mutate(language)
   }
+  const createAccount = () =>
+    navigate(
+      `/account/new?next=${encodeURIComponent(PROFILE_OF[mode])}${mode === 'host' ? '&as=host' : ''}`,
+    )
 
   return (
     <>
       <TopBar title={t('profile.title')} />
       <Page className="space-y-8">
+        {/* In host mode the banner already offers the way back on every screen, so no second button. */}
+        {mode === 'driver' && (
+          <section
+            aria-labelledby="mode-title"
+            className="space-y-3 rounded-surface bg-surface p-5 ring-1 ring-line"
+          >
+            <h2 id="mode-title" className="flex items-center gap-2 text-title font-semibold">
+              <Warehouse aria-hidden className="size-6 text-primary" />
+              {t('mode.profileHostTitle')}
+            </h2>
+            <p className="text-ink-muted">{t('mode.profileHostBody')}</p>
+            <Button variant="brand" onClick={() => navigate(HOME_OF.host)}>
+              {t('mode.switchToHost')}
+            </Button>
+          </section>
+        )}
+
         <Segmented
           label={t('profile.language')}
           value={current}
@@ -47,9 +74,7 @@ export default function ProfilePage() {
           {!user ? (
             <>
               <p className="text-ink-muted">{t('profile.signedOut')}</p>
-              <Button onClick={() => navigate('/account/new?next=%2Fprofile')}>
-                {t('account.create')}
-              </Button>
+              <Button onClick={createAccount}>{t('account.create')}</Button>
             </>
           ) : (
             <>
@@ -70,19 +95,19 @@ export default function ProfilePage() {
               {me?.email && <p className="text-ink-muted">{me.email}</p>}
               {me?.phone && <p className="text-ink-muted">{me.phone}</p>}
 
-              {stage !== 'ready' && (
-                <Button onClick={() => navigate('/account/new?next=%2Fprofile')}>
-                  {t('profile.complete')}
+              <div className="flex flex-wrap gap-3">
+                {stage !== 'ready' && (
+                  <Button onClick={createAccount}>{t('profile.complete')}</Button>
+                )}
+                <Button variant="secondary" onClick={() => void signOut()}>
+                  {t('auth.signOut')}
                 </Button>
-              )}
-              <Button variant="secondary" onClick={() => void signOut()}>
-                {t('auth.signOut')}
-              </Button>
+              </div>
             </>
           )}
         </section>
 
-        {user && me && (
+        {mode === 'driver' && user && me && (
           <section aria-labelledby="vehicles-title" className="space-y-3">
             <h2 id="vehicles-title" className="text-title font-semibold">
               {t('profile.vehicles')}

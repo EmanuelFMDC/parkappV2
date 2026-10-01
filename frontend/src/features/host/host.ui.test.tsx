@@ -10,7 +10,7 @@ import { distanceM, offsetPoint } from '../../lib/geo'
 import { API_URL } from '../../mocks/handlers'
 import { resetTestDb, testDb } from '../../mocks/server'
 import { venues } from '../../mocks/domain/seed'
-import HostHomePage from '../../pages/host/HostHomePage'
+import HostSpacesPage from '../../pages/host/HostSpacesPage'
 import PriceStep from '../../pages/host/PriceStep'
 import SizeStep from '../../pages/host/SizeStep'
 import OnboardingPage from '../../pages/account/OnboardingPage'
@@ -354,7 +354,7 @@ describe('host home', () => {
       <Providers apiBaseUrl={API_URL} services={services}>
         <MemoryRouter initialEntries={['/host']}>
           <Routes>
-            <Route path="host" element={<HostHomePage />} />
+            <Route path="host" element={<HostSpacesPage />} />
             <Route path="*" element={<Where />} />
           </Routes>
         </MemoryRouter>

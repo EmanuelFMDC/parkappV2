@@ -10,7 +10,8 @@ const SpaceDetailPage = lazy(() => import('./pages/driver/SpaceDetailPage'))
 const TimePage = lazy(() => import('./pages/driver/TimePage'))
 const PayPage = lazy(() => import('./pages/driver/PayPage'))
 const OnboardingPage = lazy(() => import('./pages/account/OnboardingPage'))
-const HostHomePage = lazy(() => import('./pages/host/HostHomePage'))
+const HostSpacesPage = lazy(() => import('./pages/host/HostSpacesPage'))
+const HostBookingsPage = lazy(() => import('./pages/host/HostBookingsPage'))
 const LocationStep = lazy(() => import('./pages/host/LocationStep'))
 const SizeStep = lazy(() => import('./pages/host/SizeStep'))
 const PhotosStep = lazy(() => import('./pages/host/PhotosStep'))
@@ -42,7 +43,9 @@ export default function App() {
                 <Route path="book/:spaceId/pay" element={<PayPage />} />
               </Route>
               <Route path="bookings" element={<BookingsPage />} />
-              <Route path="host" element={<HostHomePage />} />
+              <Route path="host" element={<HostSpacesPage />} />
+              <Route path="host/bookings" element={<HostBookingsPage />} />
+              <Route path="host/profile" element={<ProfilePage />} />
               {/* Publishing needs personal data and a verified identity, but no car. */}
               <Route element={<RequireAccount role="host" />}>
                 <Route path="host/new/location" element={<LocationStep />} />
