@@ -1,7 +1,8 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
+import type { VehicleInput } from '../../api/types'
 import { Providers } from '../../app/Providers'
 import i18n from '../../i18n'
 import { API_URL } from '../../mocks/handlers'
@@ -9,6 +10,8 @@ import { testDb } from '../../mocks/server'
 import { createMockServices, type Services } from '../../services'
 import PayPage from './PayPage'
 import VenuePage from './VenuePage'
+
+const GOOGLE_USER = 'mock-google-user'
 
 function Where() {
   const { pathname, search } = useLocation()
@@ -32,14 +35,24 @@ function renderAt(url: string, services?: Services) {
 }
 
 const DAY = 86_400_000
-const payUrl = () => {
-  const from = new Date(Date.now() + 2 * DAY).toISOString()
-  const to = new Date(Date.now() + 2 * DAY + 4 * 3_600_000).toISOString()
-  return `/book/akron-2/pay?venue=akron&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
+const window2d = () => ({
+  from: new Date(Date.now() + 2 * DAY).toISOString(),
+  to: new Date(Date.now() + 2 * DAY + 4 * 3_600_000).toISOString(),
+})
+const payUrl = (spaceId = 'akron-2') => {
+  const { from, to } = window2d()
+  return `/book/${spaceId}/pay?venue=akron&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
+}
+
+/** A driver who has completed registration: profile, one sedan, identity verified. */
+async function signedInDriver(vehicle?: Partial<VehicleInput>) {
+  const services = createMockServices()
+  await services.auth.signInWithGoogle()
+  testDb().seedVerifiedAccount(GOOGLE_USER, vehicle)
+  return services
 }
 
 beforeEach(async () => {
-  sessionStorage.clear()
   await i18n.changeLanguage('es-MX')
 })
 
@@ -69,47 +82,34 @@ describe('VenuePage (step 1)', () => {
 })
 
 describe('PayPage (step 4)', () => {
-  it('sends the driver back to step 3 when there is no license plate', async () => {
-    renderAt(payUrl())
-    expect(await screen.findByTestId('where')).toHaveTextContent('/book/akron-2/time')
+  it('shows the registered car and asks for no plate and no sign-in', async () => {
+    renderAt(payUrl(), await signedInDriver())
+    expect(await screen.findByText('Nissan Versa · Gris · JAL-482-A')).toBeInTheDocument()
+    expect(screen.queryByLabelText(/placa/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Teléfono')).not.toBeInTheDocument()
   })
 
-  it('asks a signed-out driver to sign in and keeps the pay button disabled', async () => {
-    sessionStorage.setItem('parkapp.draft.plate', 'JAL482A')
-    renderAt(payUrl())
-    expect(
-      await screen.findByRole('heading', { name: 'Inicia sesión para reservar' }),
-    ).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Pagar y reservar/ })).toBeDisabled()
-  })
+  it('books and confirms when the payment succeeds, using the registered car', async () => {
+    renderAt(payUrl(), await signedInDriver())
 
-  it('books and confirms when the payment succeeds', async () => {
-    sessionStorage.setItem('parkapp.draft.plate', 'JAL482A')
-    const services = createMockServices()
-    await services.auth.signInWithGoogle()
-    renderAt(payUrl(), services)
-
-    const pay = await screen.findByRole('button', { name: /Pagar y reservar · \$/ })
-    await within(document.body).findByText('Tarjeta de ejemplo terminada en 4242')
-    await userEvent.click(pay)
+    await userEvent.click(await screen.findByRole('button', { name: /Pagar y reservar · \$/ }))
 
     expect(await screen.findByTestId('where')).toHaveTextContent('/bookings/')
-    const [booking] = testDb().listBookings('mock-google-user')
+    const [booking] = testDb().listBookings(GOOGLE_USER)
     expect(booking?.status).toBe('confirmed')
+    expect(booking?.vehicle.plate).toBe('JAL482A')
     expect(booking?.accessCode).toMatch(/^[A-Z0-9]{6}$/)
   })
 
   it('does not confirm the booking when the payment fails, and says so', async () => {
-    sessionStorage.setItem('parkapp.draft.plate', 'JAL482A')
-    const services = createMockServices()
+    const services = await signedInDriver()
     services.payments.confirm = async () => ({ status: 'failed', reason: 'card_declined' })
-    await services.auth.signInWithGoogle()
     renderAt(payUrl(), services)
 
     await userEvent.click(await screen.findByRole('button', { name: /Pagar y reservar · \$/ }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('El pago no se pudo completar')
-    const [held] = testDb().listBookings('mock-google-user')
+    const [held] = testDb().listBookings(GOOGLE_USER)
     // The space is held, not sold: it was never confirmed and has no access code or address.
     expect(held?.status).toBe('pending_payment')
     expect(held?.accessCode).toBeNull()
@@ -117,13 +117,10 @@ describe('PayPage (step 4)', () => {
   })
 
   it('tells the driver when someone else took the garage', async () => {
-    sessionStorage.setItem('parkapp.draft.plate', 'JAL482A')
-    const services = createMockServices()
-    await services.auth.signInWithGoogle()
-    const url = payUrl()
-    const params = new URL(`http://x${url}`).searchParams
-    testDb().seedForeignBooking('akron-2', params.get('from')!, params.get('to')!)
-    renderAt(url, services)
+    const services = await signedInDriver()
+    const { from, to } = window2d()
+    testDb().seedForeignBooking('akron-2', from, to)
+    renderAt(payUrl(), services)
 
     await userEvent.click(await screen.findByRole('button', { name: /Pagar y reservar · \$/ }))
 
@@ -131,6 +128,12 @@ describe('PayPage (step 4)', () => {
       'Alguien acaba de reservar esta cochera',
     )
     expect(screen.getByRole('link', { name: 'Elegir otra cochera' })).toBeInTheDocument()
-    expect(testDb().listBookings('mock-google-user')).toEqual([])
+    expect(testDb().listBookings(GOOGLE_USER)).toEqual([])
+  })
+
+  it('sends the driver back to step 3 when none of their cars fits the garage', async () => {
+    // akron-2 takes compact and sedan only; this driver has just a pickup.
+    renderAt(payUrl(), await signedInDriver({ type: 'pickup', plate: 'PIC111' }))
+    expect(await screen.findByTestId('where')).toHaveTextContent('/book/akron-2/time')
   })
 })

@@ -1,5 +1,5 @@
 import { delay, http, HttpResponse, type HttpHandler } from 'msw'
-import type { BookingCreate, Me } from '../api/types'
+import type { BookingCreate, Me, ProfileInput, VehicleInput } from '../api/types'
 import { createDb, type MockDb } from './domain/db'
 import { ApiError } from './domain/errors'
 import { seedDemoBookings } from './domain/demo'
@@ -120,6 +120,23 @@ export function createHandlers(db: MockDb, latencyMs = 0): HttpHandler[] {
       const body = (await request.clone().json()) as Partial<Pick<Me, 'language'>>
       return route((c) => db.updateMe(userIdFrom(c.request), body))({ request, params })
     }),
+
+    http.put(url('/api/me/profile'), async ({ request, params }) => {
+      const body = (await request.clone().json()) as ProfileInput
+      return route((c) => db.updateProfile(userIdFrom(c.request), body))({ request, params })
+    }),
+    http.post(url('/api/me/vehicles'), async ({ request, params }) => {
+      const body = (await request.clone().json()) as VehicleInput
+      return route((c) => db.addVehicle(userIdFrom(c.request), body), 201)({ request, params })
+    }),
+    http.delete(
+      url('/api/me/vehicles/:vehicleId'),
+      route((c) => db.removeVehicle(userIdFrom(c.request), param(c, 'vehicleId'))),
+    ),
+    http.post(
+      url('/api/me/identity'),
+      route((c) => db.startIdentity(userIdFrom(c.request))),
+    ),
   ]
 }
 

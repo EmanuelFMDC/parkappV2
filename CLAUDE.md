@@ -23,7 +23,7 @@ Plataforma P2P para rentar cocheras y cajones privados por horas cerca de recint
 | Contrato API | OpenAPI → cliente TS con `openapi-typescript` | Tipos compartidos sin escribirlos a mano |
 | Auth | Firebase Auth (teléfono + Google) → JWT verificado en Django | |
 | Pagos | Stripe Connect | Comisión + pago al anfitrión. Verificar condiciones vigentes para México antes de implementar |
-| Identidad | Truora (INE) | Solo anfitriones al inicio |
+| Identidad | Truora (INE) | Anfitriones y conductores (cambio D-016: el conductor se verifica antes del paso 3) |
 | Archivos | Cloud Storage + URLs firmadas | Fotos de cajones |
 | Push | Firebase Cloud Messaging | Vía Capacitor |
 | Infra | Docker + Cloud Run + Artifact Registry | Región `northamerica-south1` si está disponible. `min-instances=1` en producción |

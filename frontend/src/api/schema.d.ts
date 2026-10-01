@@ -136,7 +136,10 @@ export interface paths {
         /** The signed-in driver's bookings, newest first */
         get: operations["listMyBookings"];
         put?: never;
-        /** Hold a space while the driver pays (pre-booking expires at expiresAt) */
+        /**
+         * Hold a space while the driver pays (pre-booking expires at expiresAt)
+         * @description Requires a complete account: personal data, at least one vehicle and a verified identity. Otherwise 403 with code profile_incomplete, vehicle_required or identity_required. 422 vehicle_not_supported when the vehicle type does not fit the space.
+         */
         post: operations["createBooking"];
         delete?: never;
         options?: never;
@@ -211,6 +214,77 @@ export interface paths {
         head?: never;
         /** Update language preference */
         patch: operations["updateMe"];
+        trace?: never;
+    };
+    "/api/me/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Save the driver's personal data and accept the privacy notice */
+        put: operations["updateProfile"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/vehicles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register a vehicle */
+        post: operations["addVehicle"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/vehicles/{vehicleId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a vehicle */
+        delete: operations["removeVehicle"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/identity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start identity verification (INE and selfie through the identity provider)
+         * @description Sets identityStatus to pending. The provider reports the result asynchronously (webhook); clients poll GET /api/me until it is verified or rejected.
+         */
+        post: operations["startIdentityVerification"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
 }
@@ -303,7 +377,8 @@ export interface components {
             startsAt: string;
             /** Format: date-time */
             endsAt: string;
-            plate: string;
+            /** @description One of the driver's registered vehicles */
+            vehicleId: string;
         };
         /** @enum {string} */
         BookingStatus: "pending_payment" | "confirmed" | "cancelled" | "expired" | "completed";
@@ -325,7 +400,7 @@ export interface components {
             startsAt: string;
             /** Format: date-time */
             endsAt: string;
-            plate: string;
+            vehicle: components["schemas"]["Vehicle"];
             subtotalCents: number;
             serviceFeeCents: number;
             totalCents: number;
@@ -339,17 +414,66 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        /** @enum {string} */
+        VehicleType: "compact" | "sedan" | "suv" | "pickup";
+        Vehicle: {
+            id: string;
+            plate: string;
+            make: string;
+            model: string;
+            color: string;
+            type: components["schemas"]["VehicleType"];
+        };
+        VehicleInput: {
+            plate: string;
+            make: string;
+            model: string;
+            color: string;
+            type: components["schemas"]["VehicleType"];
+        };
+        ProfileInput: {
+            firstName: string;
+            lastName: string;
+            /**
+             * Format: date
+             * @description Must be at least 18 years ago
+             */
+            birthDate: string;
+            /** Format: email */
+            email: string;
+            /** @description Must be true. Records consent to the privacy notice */
+            acceptPrivacy: boolean;
+        };
+        /** @enum {string} */
+        IdentityStatus: "not_started" | "pending" | "verified" | "rejected";
         Me: {
             id: string;
-            displayName: string | null;
             phone: string | null;
+            email: string | null;
+            firstName: string | null;
+            lastName: string | null;
+            /** Format: date */
+            birthDate: string | null;
             /** @enum {string} */
             language: "es-MX" | "en";
+            /** Format: date-time */
+            privacyAcceptedAt: string | null;
+            identityStatus: components["schemas"]["IdentityStatus"];
+            vehicles: components["schemas"]["Vehicle"][];
         };
     };
     responses: {
         /** @description Not found */
         NotFound: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description The account is not ready for this action */
+        Forbidden: {
             headers: {
                 [name: string]: unknown;
             };
@@ -600,6 +724,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             /** @description The space is already booked for part of that window */
             409: {
@@ -756,6 +881,104 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+        };
+    };
+    updateProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileInput"];
+            };
+        };
+        responses: {
+            /** @description Updated account */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            422: components["responses"]["Invalid"];
+        };
+    };
+    addVehicle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VehicleInput"];
+            };
+        };
+        responses: {
+            /** @description Updated account */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            422: components["responses"]["Invalid"];
+        };
+    };
+    removeVehicle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                vehicleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Updated account */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    startIdentityVerification: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Updated account */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
 }

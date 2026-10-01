@@ -52,7 +52,19 @@
       "unauthorized": "Inicia sesión para continuar.",
       "not_found": "No encontramos lo que buscas.",
       "payment_failed": "El pago no se pudo completar. Intenta de nuevo.",
-      "unknown": "Algo salió mal. Intenta de nuevo."
+      "unknown": "Algo salió mal. Intenta de nuevo.",
+      "invalid_name": "Escribe tu nombre y apellidos tal como aparecen en tu INE.",
+      "invalid_birth_date": "Revisa tu fecha de nacimiento.",
+      "underage": "Debes tener 18 años o más para reservar.",
+      "invalid_email": "Escribe un correo válido.",
+      "consent_required": "Para continuar debes aceptar el aviso de privacidad.",
+      "invalid_vehicle": "Escribe marca, modelo y color de tu auto.",
+      "duplicate_vehicle": "Esta placa ya está registrada.",
+      "too_many_vehicles": "Puedes registrar hasta 5 autos.",
+      "vehicle_not_supported": "Tu auto no cabe en esta cochera.",
+      "vehicle_required": "Registra tu auto para continuar.",
+      "profile_incomplete": "Completa tus datos para continuar.",
+      "identity_required": "Verifica tu identidad para reservar."
     }
   },
   "auth": {
@@ -69,8 +81,7 @@
     "google": "Continuar con Google",
     "invalidPhone": "Escribe un teléfono de 10 dígitos.",
     "invalidCode": "El código no es correcto. Prueba de nuevo.",
-    "signOut": "Cerrar sesión",
-    "signInToSee": "Inicia sesión para ver tus reservas"
+    "signOut": "Cerrar sesión"
   },
   "driver": {
     "venue": {
@@ -115,21 +126,22 @@
       "unavailable": "Esta cochera ya no está disponible en tu horario. Elige otra o cambia el horario.",
       "notFoundTitle": "No encontramos esta cochera",
       "notFoundBody": "Vuelve a la lista y elige otra.",
-      "backToList": "Ver cocheras"
+      "backToList": "Ver cocheras",
+      "createAccount": "Crear cuenta para continuar",
+      "vehicleNoFit": "Ninguno de tus autos cabe en esta cochera. Elige otra."
     },
     "time": {
       "title": "Tu horario",
       "arrival": "Llegada",
       "departure": "Salida",
-      "plate": "Placa del auto",
-      "plateHint": "El anfitrión la usa para reconocer tu auto.",
-      "plateError": "Escribe la placa completa, por ejemplo JAL-482-A.",
       "duration": "Duración: {{value}}",
       "subtotal": "Cochera",
       "fee": "Cargo por servicio",
       "total": "Total",
       "continue": "Continuar al pago",
-      "unavailable": "Esta cochera ya no está disponible en este horario."
+      "unavailable": "Esta cochera ya no está disponible en este horario.",
+      "vehicle": "Tu auto",
+      "vehicleNoFit": "No cabe en esta cochera"
     },
     "pay": {
       "title": "Pago",
@@ -174,18 +186,80 @@
       "notFoundTitle": "No encontramos esta reserva",
       "notFoundBody": "Puede que sea de otra cuenta.",
       "back": "Mis reservas"
-    }
+    },
+    "needAccountTitle": "Crea tu cuenta para ver tus reservas",
+    "needAccountBody": "Reservar requiere una cuenta verificada, para que los anfitriones sepan quién llega."
   },
   "profile": {
     "title": "Perfil",
     "account": "Cuenta",
     "signedOut": "No has iniciado sesión.",
     "signedInAs": "Sesión iniciada: {{who}}",
-    "language": "Idioma"
+    "language": "Idioma",
+    "identity": {
+      "not_started": "Sin verificar",
+      "pending": "En revisión",
+      "verified": "Identidad verificada",
+      "rejected": "No verificada"
+    },
+    "complete": "Completar mi cuenta",
+    "vehicles": "Mis autos",
+    "noVehicles": "Aún no tienes autos registrados.",
+    "removeVehicle": "Quitar {{plate}}",
+    "addVehicle": "Agregar auto",
+    "cancelAdd": "Cancelar"
   },
   "notFound": {
     "title": "Página no encontrada",
     "body": "La página que buscas no existe.",
     "home": "Ir al inicio"
+  },
+  "account": {
+    "title": "Crea tu cuenta",
+    "steps": {
+      "phone": "Teléfono",
+      "profile": "Tus datos",
+      "vehicle": "Tu auto",
+      "identity": "Identidad"
+    },
+    "why": "Para reservar un espacio privado, el anfitrión necesita saber quién llega. Lo pedimos una sola vez, antes de elegir tu horario.",
+    "phoneTitle": "Verifica tu teléfono",
+    "create": "Crear cuenta o iniciar sesión",
+    "profile": {
+      "title": "Tus datos",
+      "intro": "Escribe tu nombre completo como aparece en tu INE.",
+      "firstName": "Nombre(s)",
+      "lastName": "Apellidos",
+      "legalHint": "Debe coincidir con tu identificación oficial.",
+      "birthDate": "Fecha de nacimiento",
+      "birthHint": "Debes tener 18 años o más.",
+      "email": "Correo electrónico",
+      "privacyNote": "El anfitrión verá tu nombre de pila, tu auto y si tu identidad está verificada. Nunca verá tu teléfono, tu correo ni tu INE.",
+      "consent": "Acepto el aviso de privacidad y el uso de mis datos para verificar mi identidad.",
+      "save": "Guardar y continuar"
+    },
+    "vehicle": {
+      "title": "Tu auto",
+      "intro": "Lo usamos para comprobar que cabe en la cochera y para que el anfitrión lo reconozca.",
+      "plate": "Placa",
+      "plateHint": "Ejemplo: JAL-482-A",
+      "make": "Marca",
+      "model": "Modelo",
+      "color": "Color",
+      "type": "Tipo de auto",
+      "save": "Guardar auto y continuar"
+    },
+    "identity": {
+      "title": "Verifica tu identidad",
+      "intro": "Con tu INE y una selfie confirmamos que eres tú. Se hace una sola vez y lo realiza un proveedor especializado en verificación.",
+      "docIne": "INE vigente, frente y reverso",
+      "docSelfie": "Una selfie para compararla con tu INE",
+      "start": "Verificar mi identidad",
+      "pending": "Estamos revisando tu identidad. Puede tardar unos segundos.",
+      "verified": "Identidad verificada",
+      "rejected": "No pudimos verificar tu identidad. Revisa que tu INE esté vigente y se lea bien, y vuelve a intentarlo.",
+      "retry": "Intentar de nuevo",
+      "simulation": "Simulación: en esta versión de prueba no se pide ninguna imagen y la verificación se aprueba sola en unos segundos."
+    }
   }
 }

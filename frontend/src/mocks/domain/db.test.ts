@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { ApiError } from './errors'
 import { createDb, type MockDb } from './db'
+import { ApiError } from './errors'
 import { quoteWindow } from './pricing'
 
 const T0 = Date.parse('2026-10-10T12:00:00.000Z')
@@ -10,18 +10,24 @@ const hours = (n: number) => n * 3_600_000
 let clock = T0
 let db: MockDb
 const USER = 'mock-user-3312345678'
+const OTHER = 'mock-user-3300000000'
+let vehicleId: string
 
 beforeEach(() => {
   clock = T0
   db = createDb({ now: () => clock })
+  vehicleId = db.seedVerifiedAccount(USER).vehicles[0]!.id
+  db.seedVerifiedAccount(OTHER, { plate: 'ZZZ999' })
 })
+
+const vehicleOf = (userId: string) => db.getMe(userId).vehicles[0]!.id
 
 const book = (spaceId: string, fromH: number, toH: number, userId: string | null = USER) =>
   db.createBooking(userId, {
     spaceId,
     startsAt: iso(T0 + hours(fromH)),
     endsAt: iso(T0 + hours(toH)),
-    plate: 'JAL482A',
+    vehicleId: userId === OTHER ? vehicleOf(OTHER) : vehicleId,
   })
 
 function expectApiError(fn: () => unknown, status: number, code: string) {
@@ -65,34 +71,34 @@ describe('pricing', () => {
 describe('double booking', () => {
   it('rejects an overlapping booking on the same space with 409', () => {
     book('akron-1', 2, 6)
-    expectApiError(() => book('akron-1', 5, 8, 'mock-user-other'), 409, 'space_unavailable')
+    expectApiError(() => book('akron-1', 5, 8, OTHER), 409, 'space_unavailable')
   })
 
   it('rejects a booking fully inside an existing one', () => {
     book('akron-1', 2, 8)
-    expectApiError(() => book('akron-1', 3, 4, 'mock-user-other'), 409, 'space_unavailable')
+    expectApiError(() => book('akron-1', 3, 4, OTHER), 409, 'space_unavailable')
   })
 
   it('allows back-to-back bookings (end equals next start)', () => {
     book('akron-1', 2, 4)
-    expect(() => book('akron-1', 4, 6, 'mock-user-other')).not.toThrow()
+    expect(() => book('akron-1', 4, 6, OTHER)).not.toThrow()
   })
 
   it('allows the same hours on a different space', () => {
     book('akron-1', 2, 6)
-    expect(() => book('akron-2', 2, 6, 'mock-user-other')).not.toThrow()
+    expect(() => book('akron-2', 2, 6, OTHER)).not.toThrow()
   })
 
   it('frees the space again when a pre-booking expires unpaid', () => {
     book('akron-1', 2, 6)
     clock += 11 * 60_000
-    expect(() => book('akron-1', 2, 6, 'mock-user-other')).not.toThrow()
+    expect(() => book('akron-1', 2, 6, OTHER)).not.toThrow()
   })
 
   it('frees the space when the booking is cancelled', () => {
     const b = book('akron-1', 6, 9)
     db.cancelBooking(USER, b.id)
-    expect(() => book('akron-1', 6, 9, 'mock-user-other')).not.toThrow()
+    expect(() => book('akron-1', 6, 9, OTHER)).not.toThrow()
   })
 })
 
@@ -138,6 +144,11 @@ describe('booking lifecycle', () => {
     expect(confirmed.expiresAt).toBeNull()
   })
 
+  it('keeps a snapshot of the vehicle on the booking', () => {
+    const b = book('akron-1', 2, 4)
+    expect(b.vehicle).toMatchObject({ plate: 'JAL482A', make: 'Nissan' })
+  })
+
   it('does not confirm an expired hold', () => {
     const pending = book('akron-1', 2, 4)
     clock += 11 * 60_000
@@ -146,8 +157,8 @@ describe('booking lifecycle', () => {
 
   it("never shows one driver another driver's booking", () => {
     const mine = book('akron-1', 2, 4)
-    expectApiError(() => db.getBooking('mock-user-other', mine.id), 404, 'not_found')
-    expect(db.listBookings('mock-user-other')).toEqual([])
+    expectApiError(() => db.getBooking(OTHER, mine.id), 404, 'not_found')
+    expect(db.listBookings(OTHER)).toEqual([])
   })
 
   it('cancels for free until 10 minutes before the start, not after', () => {
@@ -158,42 +169,107 @@ describe('booking lifecycle', () => {
       spaceId: 'akron-2',
       startsAt: iso(T0 + 5 * 60_000),
       endsAt: iso(T0 + hours(2)),
-      plate: 'JAL482A',
+      vehicleId,
     })
     expectApiError(() => db.cancelBooking(USER, soon.id), 409, 'too_late')
   })
 
-  it('validates plate and start time', () => {
+  it('refuses to start in the past', () => {
+    expectApiError(() => book('akron-1', -5, -3), 422, 'in_the_past')
+  })
+
+  it("cannot book with another driver's vehicle", () => {
     expectApiError(
       () =>
         db.createBooking(USER, {
           spaceId: 'akron-1',
           startsAt: iso(T0 + hours(2)),
           endsAt: iso(T0 + hours(4)),
-          plate: 'AB',
+          vehicleId: vehicleOf(OTHER),
         }),
-      422,
-      'invalid_plate',
+      404,
+      'not_found',
     )
-    expectApiError(() => book('akron-1', -5, -3), 422, 'in_the_past')
+  })
+})
+
+describe('who may book', () => {
+  const input = (vId: string) => ({
+    spaceId: 'akron-1',
+    startsAt: iso(T0 + hours(2)),
+    endsAt: iso(T0 + hours(4)),
+    vehicleId: vId,
+  })
+
+  it('blocks a brand new account until it has a profile', () => {
+    expectApiError(() => db.createBooking('mock-user-new', input('x')), 403, 'profile_incomplete')
+  })
+
+  it('blocks an account with a profile but no vehicle', () => {
+    db.updateProfile('mock-user-new', {
+      firstName: 'Ana',
+      lastName: 'López',
+      birthDate: '1995-03-02',
+      email: 'ana@example.com',
+      acceptPrivacy: true,
+    })
+    expectApiError(() => db.createBooking('mock-user-new', input('x')), 403, 'vehicle_required')
+  })
+
+  it('blocks an account whose identity is not verified', () => {
+    db.updateProfile('mock-user-new', {
+      firstName: 'Ana',
+      lastName: 'López',
+      birthDate: '1995-03-02',
+      email: 'ana@example.com',
+      acceptPrivacy: true,
+    })
+    const me = db.addVehicle('mock-user-new', {
+      plate: 'ABC-123-D',
+      make: 'Kia',
+      model: 'Rio',
+      color: 'Rojo',
+      type: 'sedan',
+    })
+    expectApiError(
+      () => db.createBooking('mock-user-new', input(me.vehicles[0]!.id)),
+      403,
+      'identity_required',
+    )
+  })
+
+  it('rejects a vehicle type that does not fit the space', () => {
+    const pickup = db.addVehicle(USER, {
+      plate: 'PIC-111',
+      make: 'Ford',
+      model: 'Ranger',
+      color: 'Azul',
+      type: 'pickup',
+    })
+    const pickupId = pickup.vehicles.find((v) => v.plate === 'PIC111')!.id
+    // akron-1 fits compact, sedan and suv only.
+    expectApiError(() => db.createBooking(USER, input(pickupId)), 422, 'vehicle_not_supported')
   })
 })
 
 describe('persistence', () => {
-  it('restores bookings from storage after a reload', () => {
+  it('restores bookings and accounts from storage after a reload', () => {
     const store = new Map<string, string>()
     const storage = {
       getItem: (k: string) => store.get(k) ?? null,
       setItem: (k: string, v: string) => void store.set(k, v),
     }
     const first = createDb({ now: () => clock, storage })
+    const vId = first.seedVerifiedAccount(USER).vehicles[0]!.id
     const b = first.createBooking(USER, {
       spaceId: 'akron-1',
       startsAt: iso(T0 + hours(2)),
       endsAt: iso(T0 + hours(4)),
-      plate: 'JAL482A',
+      vehicleId: vId,
     })
     const second = createDb({ now: () => clock, storage })
     expect(second.getBooking(USER, b.id).id).toBe(b.id)
+    expect(second.getMe(USER).identityStatus).toBe('verified')
+    expect(second.getMe(USER).vehicles).toHaveLength(1)
   })
 })

@@ -13,6 +13,8 @@ import {
   Skeleton,
   SpaceImage,
 } from '../../components/ui'
+import { useAccount } from '../../features/account/hooks'
+import { fits } from '../../features/account/vehicleFit'
 import { useQuote, useReviews, useSpace, useSpaces } from '../../features/spaces/hooks'
 import { useTrip } from '../../features/trip/useTrip'
 import { formatCents } from '../../lib/money'
@@ -29,6 +31,7 @@ export default function SpaceDetailPage() {
   const reviews = useReviews(spaceId)
   const quote = useQuote(spaceId, window)
   const live = useSpaces(venueId, window)
+  const account = useAccount()
 
   if (!venueId || !window) return <Navigate to="/" replace />
 
@@ -36,6 +39,14 @@ export default function SpaceDetailPage() {
   const lang = i18n.language
   const data = space.data
   const taken = live.data?.find((s) => s.id === spaceId)?.available === false
+  const ready = account.stage === 'ready'
+  // Only worth warning once we know the driver's cars: none of them fits this garage.
+  const noneFits =
+    ready && Boolean(data) && !account.me!.vehicles.some((v) => fits(v, data!.vehicleTypes))
+  const timeUrl = `/book/${spaceId}/time${search}`
+  // Step 3 needs an account: anyone without one is sent to create it, then returns to step 3.
+  const goNext = () =>
+    navigate(ready ? timeUrl : `/account/new?next=${encodeURIComponent(timeUrl)}`)
 
   if (space.isError) {
     return (
@@ -82,6 +93,15 @@ export default function SpaceDetailPage() {
                 className="rounded-control bg-danger-50 p-4 font-medium text-danger-600"
               >
                 {t('driver.detail.unavailable')}
+              </p>
+            )}
+
+            {noneFits && (
+              <p
+                role="alert"
+                className="rounded-control bg-danger-50 p-4 font-medium text-danger-600"
+              >
+                {t('driver.detail.vehicleNoFit')}
               </p>
             )}
 
@@ -178,11 +198,10 @@ export default function SpaceDetailPage() {
             {quote.data ? formatCents(quote.data.totalCents, lang) : '—'}
           </p>
         </div>
-        <Button
-          disabled={!data || taken}
-          onClick={() => navigate(`/book/${spaceId}/time${search}`)}
-        >
-          {t('driver.detail.continue')}
+        <Button disabled={!data || taken || noneFits || account.loading} onClick={goNext}>
+          {ready || account.loading
+            ? t('driver.detail.continue')
+            : t('driver.detail.createAccount')}
         </Button>
       </StickyBar>
     </>

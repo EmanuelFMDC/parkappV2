@@ -12,7 +12,7 @@ import {
   TopBar,
 } from '../../components/ui'
 import { useAuth } from '../../features/auth/context'
-import { SignInPanel } from '../../features/auth/SignInPanel'
+import { formatPlate } from '../../features/account/vehicleFit'
 import { useBooking, useCancelBooking } from '../../features/bookings/hooks'
 import { StatusBadge } from '../../features/bookings/StatusBadge'
 import { WindowSummary } from '../../features/bookings/WindowSummary'
@@ -40,7 +40,20 @@ export default function BookingPage() {
       <>
         <TopBar title={t('bookings.title')} onBack={backToList} />
         <Page>
-          <SignInPanel title={t('auth.signInToSee')} />
+          <EmptyState
+            icon={<CalendarX className="size-6" />}
+            title={t('bookings.needAccountTitle')}
+            body={t('bookings.needAccountBody')}
+            action={
+              <Button
+                onClick={() =>
+                  navigate(`/account/new?next=${encodeURIComponent(`/bookings/${bookingId}`)}`)
+                }
+              >
+                {t('account.create')}
+              </Button>
+            }
+          />
         </Page>
       </>
     )
@@ -104,7 +117,7 @@ export default function BookingPage() {
                 })}
                 startLabel={time(b.startsAt)}
                 endLabel={time(b.endsAt)}
-                plate={b.plate}
+                plate={formatPlate(b.vehicle.plate)}
                 spotLabel={b.space.spotLabel ?? '—'}
                 code={b.accessCode ?? '—'}
               />

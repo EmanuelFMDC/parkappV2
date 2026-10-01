@@ -52,7 +52,19 @@
       "unauthorized": "Sign in to continue.",
       "not_found": "We couldn't find what you're looking for.",
       "payment_failed": "The payment didn't go through. Try again.",
-      "unknown": "Something went wrong. Try again."
+      "unknown": "Something went wrong. Try again.",
+      "invalid_name": "Enter your first and last name as they appear on your INE.",
+      "invalid_birth_date": "Check your date of birth.",
+      "underage": "You must be 18 or older to book.",
+      "invalid_email": "Enter a valid email.",
+      "consent_required": "To continue you must accept the privacy notice.",
+      "invalid_vehicle": "Enter your car's make, model and color.",
+      "duplicate_vehicle": "This plate is already registered.",
+      "too_many_vehicles": "You can register up to 5 cars.",
+      "vehicle_not_supported": "Your car doesn't fit this garage.",
+      "vehicle_required": "Register your car to continue.",
+      "profile_incomplete": "Complete your details to continue.",
+      "identity_required": "Verify your identity to book."
     }
   },
   "auth": {
@@ -69,8 +81,7 @@
     "google": "Continue with Google",
     "invalidPhone": "Enter a 10-digit phone number.",
     "invalidCode": "That code isn't right. Try again.",
-    "signOut": "Sign out",
-    "signInToSee": "Sign in to see your bookings"
+    "signOut": "Sign out"
   },
   "driver": {
     "venue": {
@@ -115,21 +126,22 @@
       "unavailable": "This garage is no longer available for your time. Pick another or change the time.",
       "notFoundTitle": "We can't find this garage",
       "notFoundBody": "Go back to the list and pick another.",
-      "backToList": "See garages"
+      "backToList": "See garages",
+      "createAccount": "Create account to continue",
+      "vehicleNoFit": "None of your cars fits this garage. Pick another."
     },
     "time": {
       "title": "Your time",
       "arrival": "Arrival",
       "departure": "Departure",
-      "plate": "Car license plate",
-      "plateHint": "The host uses it to recognize your car.",
-      "plateError": "Enter the full plate, for example JAL-482-A.",
       "duration": "Duration: {{value}}",
       "subtotal": "Garage",
       "fee": "Service fee",
       "total": "Total",
       "continue": "Continue to payment",
-      "unavailable": "This garage is no longer available at this time."
+      "unavailable": "This garage is no longer available at this time.",
+      "vehicle": "Your car",
+      "vehicleNoFit": "Doesn't fit this garage"
     },
     "pay": {
       "title": "Payment",
@@ -174,18 +186,80 @@
       "notFoundTitle": "We can't find this booking",
       "notFoundBody": "It may belong to another account.",
       "back": "My bookings"
-    }
+    },
+    "needAccountTitle": "Create your account to see your bookings",
+    "needAccountBody": "Booking needs a verified account, so hosts know who is arriving."
   },
   "profile": {
     "title": "Profile",
     "account": "Account",
     "signedOut": "You're not signed in.",
     "signedInAs": "Signed in: {{who}}",
-    "language": "Language"
+    "language": "Language",
+    "identity": {
+      "not_started": "Not verified",
+      "pending": "Under review",
+      "verified": "Identity verified",
+      "rejected": "Not verified"
+    },
+    "complete": "Complete my account",
+    "vehicles": "My cars",
+    "noVehicles": "You haven't registered a car yet.",
+    "removeVehicle": "Remove {{plate}}",
+    "addVehicle": "Add a car",
+    "cancelAdd": "Cancel"
   },
   "notFound": {
     "title": "Page not found",
     "body": "The page you're looking for doesn't exist.",
     "home": "Go to the start"
+  },
+  "account": {
+    "title": "Create your account",
+    "steps": {
+      "phone": "Phone",
+      "profile": "Your details",
+      "vehicle": "Your car",
+      "identity": "Identity"
+    },
+    "why": "To book a private space, the host needs to know who is arriving. We ask once, before you pick your time.",
+    "phoneTitle": "Verify your phone",
+    "create": "Create account or sign in",
+    "profile": {
+      "title": "Your details",
+      "intro": "Enter your full name as it appears on your INE.",
+      "firstName": "First name(s)",
+      "lastName": "Last name(s)",
+      "legalHint": "It must match your official ID.",
+      "birthDate": "Date of birth",
+      "birthHint": "You must be 18 or older.",
+      "email": "Email",
+      "privacyNote": "The host will see your first name, your car and whether your identity is verified. They will never see your phone, email or INE.",
+      "consent": "I accept the privacy notice and the use of my data to verify my identity.",
+      "save": "Save and continue"
+    },
+    "vehicle": {
+      "title": "Your car",
+      "intro": "We use it to check that it fits the garage and so the host can recognize it.",
+      "plate": "License plate",
+      "plateHint": "Example: JAL-482-A",
+      "make": "Make",
+      "model": "Model",
+      "color": "Color",
+      "type": "Car type",
+      "save": "Save car and continue"
+    },
+    "identity": {
+      "title": "Verify your identity",
+      "intro": "With your INE and a selfie we confirm it is you. You do it once, and a specialized verification provider handles it.",
+      "docIne": "Valid INE, front and back",
+      "docSelfie": "A selfie to compare with your INE",
+      "start": "Verify my identity",
+      "pending": "We're reviewing your identity. It can take a few seconds.",
+      "verified": "Identity verified",
+      "rejected": "We couldn't verify your identity. Check that your INE is valid and readable, and try again.",
+      "retry": "Try again",
+      "simulation": "Simulation: in this test version no image is requested and verification approves itself in a few seconds."
+    }
   }
 }

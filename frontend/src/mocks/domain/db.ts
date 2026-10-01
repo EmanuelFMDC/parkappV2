@@ -2,14 +2,18 @@ import type {
   Booking,
   BookingCreate,
   Me,
+  ProfileInput,
   Quote,
   Review,
   Space,
   SpaceSummary,
+  Vehicle,
+  VehicleInput,
   Venue,
   VenueEvent,
 } from '../../api/types'
-import { ApiError, notFound, unauthorized } from './errors'
+import { createAccounts } from './accounts'
+import { ApiError, notFound } from './errors'
 import { distanceM } from './geo'
 import { quoteWindow } from './pricing'
 import { buildEvents, buildReviews, buildSpaces, venues } from './seed'
@@ -26,7 +30,7 @@ interface StoredBooking {
   status: Booking['status']
   startsAt: string
   endsAt: string
-  plate: string
+  vehicle: Vehicle
   subtotalCents: number
   serviceFeeCents: number
   totalCents: number
@@ -40,6 +44,8 @@ interface DbOptions {
   now?: () => number
   /** Where bookings survive page reloads. `null` keeps everything in memory (tests). */
   storage?: Pick<Storage, 'getItem' | 'setItem'> | null
+  /** How long the simulated identity provider takes to answer. */
+  identityDelayMs?: number
 }
 
 const BLOCKING: Booking['status'][] = ['pending_payment', 'confirmed']
@@ -61,7 +67,7 @@ function randomCode(): string {
  * no overlapping bookings on a space, integer-cent pricing, UTC dates, and the exact address
  * only after confirmation.
  */
-export function createDb({ now = Date.now, storage = null }: DbOptions = {}) {
+export function createDb({ now = Date.now, storage = null, identityDelayMs }: DbOptions = {}) {
   const spaces = buildSpaces()
   const events = buildEvents(now())
   const reviews = new Map<string, Review[]>(
@@ -70,7 +76,7 @@ export function createDb({ now = Date.now, storage = null }: DbOptions = {}) {
   const addresses = new Map(
     spaces.map((s, i) => [s.id, `Calle de ejemplo ${100 + i}, ${venueOf(s).area}`]),
   )
-  const users = new Map<string, Me>()
+  const accounts = createAccounts({ now, storage, identityDelayMs })
   const bookings: StoredBooking[] = load()
   let counter = bookings.length
 
@@ -161,7 +167,7 @@ export function createDb({ now = Date.now, storage = null }: DbOptions = {}) {
       venueName: requireVenue(b.venueId).name,
       startsAt: b.startsAt,
       endsAt: b.endsAt,
-      plate: b.plate,
+      vehicle: b.vehicle,
       subtotalCents: b.subtotalCents,
       serviceFeeCents: b.serviceFeeCents,
       totalCents: b.totalCents,
@@ -178,14 +184,7 @@ export function createDb({ now = Date.now, storage = null }: DbOptions = {}) {
     return b
   }
 
-  function requireUser(userId: string | null): string {
-    if (!userId) throw unauthorized()
-    if (!users.has(userId)) {
-      const phone = userId.replace('mock-user-', '')
-      users.set(userId, { id: userId, displayName: null, phone: phone || null, language: 'es-MX' })
-    }
-    return userId
-  }
+  const requireUser = (userId: string | null): string => accounts.ensure(userId).id
 
   return {
     now,
@@ -225,13 +224,18 @@ export function createDb({ now = Date.now, storage = null }: DbOptions = {}) {
 
     createBooking(userId: string | null, input: BookingCreate): Booking {
       const uid = requireUser(userId)
+      const blocked = accounts.blockedBy(uid)
+      if (blocked) {
+        throw new ApiError(403, blocked, 'Complete your account before booking')
+      }
       const space = requireSpace(input.spaceId)
+      const vehicle = accounts.vehicle(uid, input.vehicleId)
+      if (!space.vehicleTypes.includes(vehicle.type)) {
+        throw new ApiError(422, 'vehicle_not_supported', 'Your vehicle does not fit this space')
+      }
       const q = quoteWindow(space.priceCentsPerHour, input.startsAt, input.endsAt)
       if (Date.parse(input.startsAt) < now() - 5 * 60_000) {
         throw new ApiError(422, 'in_the_past', 'The booking cannot start in the past')
-      }
-      if (input.plate.trim().length < 5) {
-        throw new ApiError(422, 'invalid_plate', 'Enter the full license plate')
       }
       expireStale()
       if (!isFree(space.id, input.startsAt, input.endsAt)) {
@@ -250,7 +254,7 @@ export function createDb({ now = Date.now, storage = null }: DbOptions = {}) {
         status: 'pending_payment',
         startsAt: input.startsAt,
         endsAt: input.endsAt,
-        plate: input.plate.trim().toUpperCase(),
+        vehicle,
         subtotalCents: q.subtotalCents,
         serviceFeeCents: q.serviceFeeCents,
         totalCents: q.totalCents,
@@ -303,12 +307,21 @@ export function createDb({ now = Date.now, storage = null }: DbOptions = {}) {
       return toBooking(b)
     },
 
-    getMe: (userId: string | null): Me => users.get(requireUser(userId))!,
-    updateMe(userId: string | null, patch: Partial<Pick<Me, 'language'>>): Me {
-      const me = users.get(requireUser(userId))!
-      if (patch.language) me.language = patch.language
-      return me
-    },
+    getMe: (userId: string | null): Me => accounts.get(userId),
+    updateMe: (userId: string | null, patch: Partial<Pick<Me, 'language'>>): Me =>
+      patch.language ? accounts.updateLanguage(userId, patch.language) : accounts.get(userId),
+    updateProfile: (userId: string | null, input: ProfileInput): Me =>
+      accounts.updateProfile(userId, input),
+    addVehicle: (userId: string | null, input: VehicleInput): Me =>
+      accounts.addVehicle(userId, input),
+    removeVehicle: (userId: string | null, vehicleId: string): Me =>
+      accounts.removeVehicle(userId, vehicleId),
+    startIdentity: (userId: string | null): Me => accounts.startIdentity(userId),
+
+    /** Test and demo controls for the simulated identity provider and pre-verified accounts. */
+    setIdentityOutcome: (outcome: 'verified' | 'rejected') => accounts.setIdentityOutcome(outcome),
+    seedVerifiedAccount: (userId: string, vehicle?: Partial<VehicleInput>): Me =>
+      accounts.seedVerified(userId, vehicle),
 
     /** Test and demo helper: another driver books a space, as in real life. */
     seedForeignBooking(spaceId: string, startsAt: string, endsAt: string) {
@@ -322,7 +335,14 @@ export function createDb({ now = Date.now, storage = null }: DbOptions = {}) {
         status: 'confirmed',
         startsAt,
         endsAt,
-        plate: 'XXX000',
+        vehicle: {
+          id: 'veh_foreign',
+          plate: 'XXX000',
+          make: 'Otro',
+          model: 'Auto',
+          color: 'Negro',
+          type: 'sedan',
+        },
         subtotalCents: 0,
         serviceFeeCents: 0,
         totalCents: 0,

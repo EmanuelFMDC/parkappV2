@@ -152,6 +152,10 @@ paths:
     post:
       operationId: createBooking
       summary: Hold a space while the driver pays (pre-booking expires at expiresAt)
+      description: >
+        Requires a complete account: personal data, at least one vehicle and a verified identity.
+        Otherwise 403 with code profile_incomplete, vehicle_required or identity_required.
+        422 vehicle_not_supported when the vehicle type does not fit the space.
       security: [{ bearer: [] }]
       requestBody:
         required: true
@@ -165,6 +169,7 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Booking' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
         '409':
           description: The space is already booked for part of that window
@@ -272,6 +277,77 @@ paths:
               schema: { $ref: '#/components/schemas/Me' }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
+  /api/me/profile:
+    put:
+      operationId: updateProfile
+      summary: Save the driver's personal data and accept the privacy notice
+      security: [{ bearer: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProfileInput' }
+      responses:
+        '200':
+          description: Updated account
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Me' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/Invalid' }
+
+  /api/me/vehicles:
+    post:
+      operationId: addVehicle
+      summary: Register a vehicle
+      security: [{ bearer: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VehicleInput' }
+      responses:
+        '201':
+          description: Updated account
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Me' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/Invalid' }
+
+  /api/me/vehicles/{vehicleId}:
+    delete:
+      operationId: removeVehicle
+      summary: Remove a vehicle
+      security: [{ bearer: [] }]
+      parameters:
+        - { name: vehicleId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Updated account
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Me' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/me/identity:
+    post:
+      operationId: startIdentityVerification
+      summary: Start identity verification (INE and selfie through the identity provider)
+      description: >
+        Sets identityStatus to pending. The provider reports the result asynchronously
+        (webhook); clients poll GET /api/me until it is verified or rejected.
+      security: [{ bearer: [] }]
+      responses:
+        '200':
+          description: Updated account
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Me' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
 components:
   securitySchemes:
     bearer:
@@ -281,6 +357,11 @@ components:
   responses:
     NotFound:
       description: Not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Forbidden:
+      description: The account is not ready for this action
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Problem' }
@@ -402,19 +483,19 @@ components:
         totalCents: { type: integer }
     BookingCreate:
       type: object
-      required: [spaceId, startsAt, endsAt, plate]
+      required: [spaceId, startsAt, endsAt, vehicleId]
       properties:
         spaceId: { type: string }
         startsAt: { type: string, format: date-time }
         endsAt: { type: string, format: date-time }
-        plate: { type: string }
+        vehicleId: { type: string, description: One of the driver's registered vehicles }
     BookingStatus:
       type: string
       enum: [pending_payment, confirmed, cancelled, expired, completed]
     Booking:
       type: object
       required:
-        [id, status, space, venueName, startsAt, endsAt, plate, subtotalCents, serviceFeeCents, totalCents, expiresAt, accessCode, createdAt]
+        [id, status, space, venueName, startsAt, endsAt, vehicle, subtotalCents, serviceFeeCents, totalCents, expiresAt, accessCode, createdAt]
       properties:
         id: { type: string }
         status: { $ref: '#/components/schemas/BookingStatus' }
@@ -435,7 +516,7 @@ components:
         venueName: { type: string }
         startsAt: { type: string, format: date-time }
         endsAt: { type: string, format: date-time }
-        plate: { type: string }
+        vehicle: { $ref: '#/components/schemas/Vehicle' }
         subtotalCents: { type: integer }
         serviceFeeCents: { type: integer }
         totalCents: { type: integer }
@@ -447,11 +528,56 @@ components:
           type: [string, 'null']
           description: Shown once the booking is confirmed
         createdAt: { type: string, format: date-time }
-    Me:
+    VehicleType:
+      type: string
+      enum: [compact, sedan, suv, pickup]
+    Vehicle:
       type: object
-      required: [id, displayName, phone, language]
+      required: [id, plate, make, model, color, type]
       properties:
         id: { type: string }
-        displayName: { type: [string, 'null'] }
+        plate: { type: string }
+        make: { type: string }
+        model: { type: string }
+        color: { type: string }
+        type: { $ref: '#/components/schemas/VehicleType' }
+    VehicleInput:
+      type: object
+      required: [plate, make, model, color, type]
+      properties:
+        plate: { type: string }
+        make: { type: string }
+        model: { type: string }
+        color: { type: string }
+        type: { $ref: '#/components/schemas/VehicleType' }
+    ProfileInput:
+      type: object
+      required: [firstName, lastName, birthDate, email, acceptPrivacy]
+      properties:
+        firstName: { type: string }
+        lastName: { type: string }
+        birthDate: { type: string, format: date, description: Must be at least 18 years ago }
+        email: { type: string, format: email }
+        acceptPrivacy:
+          type: boolean
+          description: Must be true. Records consent to the privacy notice
+    IdentityStatus:
+      type: string
+      enum: [not_started, pending, verified, rejected]
+    Me:
+      type: object
+      required:
+        [id, phone, email, firstName, lastName, birthDate, language, privacyAcceptedAt, identityStatus, vehicles]
+      properties:
+        id: { type: string }
         phone: { type: [string, 'null'] }
+        email: { type: [string, 'null'] }
+        firstName: { type: [string, 'null'] }
+        lastName: { type: [string, 'null'] }
+        birthDate: { type: [string, 'null'], format: date }
         language: { type: string, enum: [es-MX, en] }
+        privacyAcceptedAt: { type: [string, 'null'], format: date-time }
+        identityStatus: { $ref: '#/components/schemas/IdentityStatus' }
+        vehicles:
+          type: array
+          items: { $ref: '#/components/schemas/Vehicle' }

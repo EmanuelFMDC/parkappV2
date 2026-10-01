@@ -1,26 +1,29 @@
+import { CarFront } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Page } from '../../components/layout/Page'
 import { StickyBar } from '../../components/layout/StickyBar'
 import { WizardHeader } from '../../components/layout/WizardHeader'
-import { Button, DateTimeField, Input } from '../../components/ui'
-import { usePlateDraft } from '../../features/bookings/plateDraft'
+import { Badge, Button, DateTimeField, RadioCard } from '../../components/ui'
+import { useAccount } from '../../features/account/hooks'
+import { describeVehicle, fits, pickVehicle } from '../../features/account/vehicleFit'
 import { WindowSummary } from '../../features/bookings/WindowSummary'
-import { useQuote, useSpaces } from '../../features/spaces/hooks'
+import { useQuote, useSpace, useSpaces } from '../../features/spaces/hooks'
 import { tripSearch, useTrip } from '../../features/trip/useTrip'
 import { errorMessage } from '../../lib/errors'
 import { formatCents } from '../../lib/money'
 
-/** Step 3 of 4: arrival, departure and license plate, with the exact price as it changes. */
+/** Step 3 of 4: arrival, departure and which of the driver's registered cars, with the exact price. */
 export default function TimePage() {
   const { spaceId } = useParams()
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { search } = useLocation()
   const trip = useTrip()
-  const [plate, setPlate] = usePlateDraft()
-  const [plateError, setPlateError] = useState<string>()
+  const { me } = useAccount()
+  const space = useSpace(spaceId)
+  const [chosenId, setChosenId] = useState<string>()
   const [edited, setEdited] = useState<{ startsAt?: string; endsAt?: string }>({})
 
   const base = trip.window
@@ -37,6 +40,10 @@ export default function TimePage() {
   if (!trip.venueId || !base || !window) return <Navigate to="/" replace />
 
   const lang = i18n.language
+  const vehicles = me?.vehicles ?? []
+  const allowed = space.data?.vehicleTypes
+  const vehicle = allowed ? pickVehicle(vehicles, allowed, chosenId ?? trip.vehicleId) : undefined
+  const noneFits = Boolean(allowed) && !vehicle
   const taken = live.data?.find((s) => s.id === spaceId)?.available === false
   const windowError = !validWindow
     ? t('errors.code.invalid_window')
@@ -45,13 +52,9 @@ export default function TimePage() {
       : undefined
 
   const next = () => {
-    if (plate.trim().length < 5) {
-      setPlateError(t('driver.time.plateError'))
-      return
-    }
-    setPlateError(undefined)
+    if (!vehicle || !validWindow) return
     navigate(
-      `/book/${spaceId}/pay${tripSearch({ venueId: trip.venueId, ...(validWindow as { startsAt: string; endsAt: string }) })}`,
+      `/book/${spaceId}/pay${tripSearch({ venueId: trip.venueId, vehicleId: vehicle.id, ...validWindow })}`,
     )
   }
 
@@ -85,17 +88,47 @@ export default function TimePage() {
           </p>
         )}
 
-        <Input
-          label={t('driver.time.plate')}
-          hint={t('driver.time.plateHint')}
-          value={plate}
-          onChange={(e) => setPlate(e.target.value.toUpperCase())}
-          autoCapitalize="characters"
-          autoComplete="off"
-          maxLength={10}
-          placeholder="JAL-482-A"
-          error={plateError}
-        />
+        <section aria-labelledby="vehicle-title" className="space-y-3">
+          <h2 id="vehicle-title" className="text-title font-semibold">
+            {t('driver.time.vehicle')}
+          </h2>
+          {vehicles.length > 1 ? (
+            <div role="radiogroup" aria-labelledby="vehicle-title" className="space-y-3">
+              {vehicles.map((v) => {
+                const ok = !allowed || fits(v, allowed)
+                return (
+                  <RadioCard
+                    key={v.id}
+                    name="vehicle"
+                    value={v.id}
+                    checked={vehicle?.id === v.id}
+                    onChange={ok ? setChosenId : () => undefined}
+                  >
+                    <span className="block font-semibold">{describeVehicle(v)}</span>
+                    {!ok && (
+                      <span className="mt-1 block">
+                        <Badge tone="danger">{t('driver.time.vehicleNoFit')}</Badge>
+                      </span>
+                    )}
+                  </RadioCard>
+                )
+              })}
+            </div>
+          ) : vehicles[0] ? (
+            <div className="flex items-center gap-3 rounded-surface bg-surface p-4 ring-1 ring-line">
+              <CarFront aria-hidden className="size-6 shrink-0 text-primary" />
+              <p className="font-semibold">{describeVehicle(vehicles[0])}</p>
+            </div>
+          ) : null}
+          {noneFits && (
+            <p
+              role="alert"
+              className="rounded-control bg-danger-50 p-4 font-medium text-danger-600"
+            >
+              {t('driver.detail.vehicleNoFit')}
+            </p>
+          )}
+        </section>
 
         {validWindow && (
           <section
@@ -132,7 +165,7 @@ export default function TimePage() {
             {quote.data ? formatCents(quote.data.totalCents, lang) : '—'}
           </p>
         </div>
-        <Button disabled={!quote.data || taken} onClick={next}>
+        <Button disabled={!quote.data || taken || !vehicle} onClick={next}>
           {t('driver.time.continue')}
         </Button>
       </StickyBar>

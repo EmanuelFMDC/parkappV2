@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Page } from '../../components/layout/Page'
 import { Button, EmptyState, Skeleton, SpaceImage, TopBar } from '../../components/ui'
 import { useAuth } from '../../features/auth/context'
-import { SignInPanel } from '../../features/auth/SignInPanel'
 import { useBookings } from '../../features/bookings/hooks'
 import { StatusBadge } from '../../features/bookings/StatusBadge'
 import { formatCents } from '../../lib/money'
@@ -23,7 +22,16 @@ export default function BookingsPage() {
       <TopBar title={t('bookings.title')} />
       <Page className="space-y-4">
         {!user ? (
-          <SignInPanel title={t('auth.signInToSee')} />
+          <EmptyState
+            icon={<CalendarX className="size-6" />}
+            title={t('bookings.needAccountTitle')}
+            body={t('bookings.needAccountBody')}
+            action={
+              <Button onClick={() => navigate('/account/new?next=%2Fbookings')}>
+                {t('account.create')}
+              </Button>
+            }
+          />
         ) : bookings.isPending ? (
           <div role="status" aria-label={t('common.loading')} className="space-y-3">
             <Skeleton className="h-28 w-full" />

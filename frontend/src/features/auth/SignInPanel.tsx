@@ -6,8 +6,14 @@ import { useAuth } from './context'
 
 const digitsOnly = (value: string) => value.replace(/\D/g, '')
 
-/** Phone + code sign-in, or Google. Calls `onSignedIn` once there is a session. */
-export function SignInPanel({ title }: { title?: string }) {
+interface SignInPanelProps {
+  title?: string
+  /** Render only the form: the page around it already has its own heading and card. */
+  bare?: boolean
+}
+
+/** Phone + code sign-in, or Google. Once there is a session the account state takes over. */
+export function SignInPanel({ title, bare }: SignInPanelProps) {
   const { t } = useTranslation()
   const auth = useAuth()
   const [phone, setPhone] = useState('')
@@ -43,15 +49,8 @@ export function SignInPanel({ title }: { title?: string }) {
     void run(() => auth.confirmCode(verificationId, code.trim()))
   }
 
-  return (
-    <section
-      aria-labelledby="signin-title"
-      className="space-y-4 rounded-surface bg-surface p-5 ring-1 ring-line"
-    >
-      <h2 id="signin-title" className="text-title font-semibold">
-        {title ?? t('auth.title')}
-      </h2>
-
+  const body = (
+    <>
       {!verificationId ? (
         <form onSubmit={sendCode} noValidate className="space-y-4">
           <Input
@@ -107,6 +106,20 @@ export function SignInPanel({ title }: { title?: string }) {
       <Button variant="secondary" block onClick={() => void run(() => auth.signInWithGoogle())}>
         {t('auth.google')}
       </Button>
+    </>
+  )
+
+  if (bare) return <div className="space-y-4">{body}</div>
+
+  return (
+    <section
+      aria-labelledby="signin-title"
+      className="space-y-4 rounded-surface bg-surface p-5 ring-1 ring-line"
+    >
+      <h2 id="signin-title" className="text-title font-semibold">
+        {title ?? t('auth.title')}
+      </h2>
+      {body}
     </section>
   )
 }
