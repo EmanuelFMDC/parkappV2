@@ -1,6 +1,7 @@
-import { CalendarCheck, Compass, UserRound } from 'lucide-react'
+import { CalendarCheck, Compass, Inbox, UserRound, Warehouse } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ModeBanner } from '../../components/layout/ModeBanner'
 import { BottomNav, StepIndicator, TopBar } from '../../components/ui'
 import { Section, Subsection } from '../Section'
 
@@ -8,6 +9,8 @@ export function NavigationSection() {
   const { t } = useTranslation()
   const [tab, setTab] = useState('explore')
   const [step, setStep] = useState(2)
+  const [hostTab, setHostTab] = useState('spaces')
+  const [switched, setSwitched] = useState(false)
 
   const driverSteps = ['venue', 'space', 'time', 'pay'].map((k) =>
     t(`styleguide.nav.driverSteps.${k}`),
@@ -34,6 +37,27 @@ export function NavigationSection() {
               ]}
             />
           </div>
+        </Subsection>
+
+        <Subsection title={t('styleguide.nav.modes')}>
+          <p className="text-caption text-ink-muted">{t('styleguide.nav.modesIntro')}</p>
+          <div className="overflow-hidden rounded-surface bg-canvas ring-1 ring-line">
+            <ModeBanner onSwitch={() => setSwitched(true)} />
+            <div className="h-10" />
+            <BottomNav
+              position="static"
+              current={hostTab}
+              onSelect={setHostTab}
+              items={[
+                { key: 'spaces', label: t('nav.hostSpaces'), icon: <Warehouse /> },
+                { key: 'bookings', label: t('nav.hostBookings'), icon: <Inbox /> },
+                { key: 'profile', label: t('styleguide.nav.profile'), icon: <UserRound /> },
+              ]}
+            />
+          </div>
+          <p role="status" className="min-h-6 text-caption font-medium text-ink-muted">
+            {switched ? t('styleguide.nav.switched') : ''}
+          </p>
         </Subsection>
 
         <Subsection title={t('styleguide.nav.steps')}>

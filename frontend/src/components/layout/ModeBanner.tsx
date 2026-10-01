@@ -5,9 +5,9 @@ import { HOME_OF } from '../../lib/mode'
 
 /**
  * Always visible in host mode, so nobody confuses it with the driver side. It is also the one-tap
- * way back to the driver side.
+ * way back to the driver side. `onSwitch` replaces the navigation (the design-system page uses it).
  */
-export function ModeBanner() {
+export function ModeBanner({ onSwitch }: { onSwitch?: () => void }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   return (
@@ -19,7 +19,7 @@ export function ModeBanner() {
         </p>
         <button
           type="button"
-          onClick={() => navigate(HOME_OF.driver)}
+          onClick={onSwitch ?? (() => navigate(HOME_OF.driver))}
           className="inline-flex h-touch items-center rounded-control px-2 text-caption font-semibold underline underline-offset-4 hover:bg-white/10"
         >
           {t('mode.switchToDriver')}

@@ -1,27 +1,14 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import type { HostSpace, SpaceStatus } from '../../api/types'
-import {
-  Badge,
-  Button,
-  ConfirmDialog,
-  Input,
-  SpaceImage,
-  type BadgeTone,
-} from '../../components/ui'
+import type { HostSpace } from '../../api/types'
+import { Button, ConfirmDialog, Input, SpaceImage } from '../../components/ui'
 import { errorMessage } from '../../lib/errors'
 import { formatDistance } from '../../lib/distance'
 import { PRICE_MAX_CENTS, PRICE_MIN_CENTS } from '../../lib/hostRules'
 import { formatCents, parsePesosToCents } from '../../lib/money'
 import { useUpdateHostSpace } from './hooks'
-
-const TONE: Record<SpaceStatus, BadgeTone> = {
-  pending_review: 'warning',
-  active: 'success',
-  paused: 'neutral',
-  rejected: 'danger',
-}
+import { SpaceStatusBadge } from './SpaceStatusBadge'
 
 /** One of the host's spaces, with what they can do to it in its current state. */
 export function HostSpaceCard({ space }: { space: HostSpace }) {
@@ -60,7 +47,7 @@ export function HostSpaceCard({ space }: { space: HostSpace }) {
       <div className="flex min-w-0 flex-1 flex-col gap-3 p-4">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <h3 className="text-body font-semibold leading-snug">{space.title}</h3>
-          <Badge tone={TONE[space.status]}>{t(`host.space.status.${space.status}`)}</Badge>
+          <SpaceStatusBadge status={space.status} />
         </div>
         <p className="text-caption text-ink-muted">
           {space.street}, {space.municipality}

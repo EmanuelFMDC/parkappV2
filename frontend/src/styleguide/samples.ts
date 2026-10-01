@@ -1,3 +1,4 @@
+import type { Venue } from '../api/types'
 import type { PhotoTone } from '../components/ui'
 
 export interface SampleSpace {
@@ -62,3 +63,14 @@ export const sampleSpaces: SampleSpace[] = [
 ]
 
 export const VENUE_POSITION = { x: 52, y: 52 }
+
+/** A venue for the host map demos. The name is translated where it is used. */
+export function sampleVenue(name: string): Venue {
+  return {
+    id: 'sample',
+    name,
+    area: 'Zapopan',
+    location: { lat: 20.6817, lng: -103.4627 },
+    radiusM: 3000,
+  }
+}

@@ -4,11 +4,25 @@ import { Logo } from '../components/ui'
 import { CardsSection } from './sections/CardsSection'
 import { ColorsSection } from './sections/ColorsSection'
 import { ControlsSection } from './sections/ControlsSection'
+import { FormsSection } from './sections/FormsSection'
+import { HostSection } from './sections/HostSection'
 import { NavigationSection } from './sections/NavigationSection'
 import { PatternsSection } from './sections/PatternsSection'
+import { StatesSection } from './sections/StatesSection'
 import { TypographySection } from './sections/TypographySection'
 
-const toc = ['colors', 'contrast', 'type', 'controls', 'cards', 'navigation', 'patterns'] as const
+const toc = [
+  'colors',
+  'contrast',
+  'type',
+  'controls',
+  'forms',
+  'cards',
+  'states',
+  'navigation',
+  'patterns',
+  'host',
+] as const
 
 export function StyleguidePage() {
   const { t } = useTranslation()
@@ -42,9 +56,12 @@ export function StyleguidePage() {
         <ColorsSection />
         <TypographySection />
         <ControlsSection />
+        <FormsSection />
         <CardsSection />
+        <StatesSection />
         <NavigationSection />
         <PatternsSection />
+        <HostSection />
       </main>
     </div>
   )

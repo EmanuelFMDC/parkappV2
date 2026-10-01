@@ -3,7 +3,18 @@ import { expect, test } from '@playwright/test'
 // Regenerate with: SCREENSHOTS=1 npx playwright test screenshots
 // Output goes to docs/design-system/screenshots/<project>-<name>.png
 const OUT = '../docs/design-system/screenshots'
-const sections = ['colors', 'contrast', 'type', 'controls', 'cards', 'navigation', 'patterns']
+const sections = [
+  'colors',
+  'contrast',
+  'type',
+  'controls',
+  'forms',
+  'cards',
+  'states',
+  'navigation',
+  'patterns',
+  'host',
+]
 
 test.skip(!process.env.SCREENSHOTS, 'only when SCREENSHOTS=1')
 

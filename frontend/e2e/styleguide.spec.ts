@@ -30,11 +30,13 @@ test.describe('design system page', () => {
 
   test('every button, link and field has a target of at least 44px', async ({ page }) => {
     const small = await page
-      .locator('button:visible, a:visible, input:visible, [role="switch"]:visible')
+      .locator('button:visible, a:visible, input:visible, select:visible, [role="switch"]:visible')
       .evaluateAll((els) =>
         els
           .map((el) => {
-            const r = el.getBoundingClientRect()
+            // A checkbox is tapped through its whole label row.
+            const box = el.matches('input[type="checkbox"]') ? (el.closest('label') ?? el) : el
+            const r = box.getBoundingClientRect()
             // Card titles are stretched with ::after to cover the whole card: the card is the target.
             const stretched = getComputedStyle(el, '::after').position === 'absolute'
             return {

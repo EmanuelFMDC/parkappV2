@@ -75,7 +75,10 @@
       "controls": "Controles",
       "cards": "Tarjetas y boleto",
       "navigation": "Navegación",
-      "patterns": "Mapa y lista"
+      "patterns": "Mapa y lista",
+      "forms": "Formularios",
+      "states": "Estados y datos",
+      "host": "Anfitrión"
     },
     "colors": {
       "title": "Color",
@@ -211,7 +214,10 @@
         "size": "Dimensiones",
         "photos": "Fotos",
         "price": "Precio"
-      }
+      },
+      "modes": "Modo anfitrión",
+      "modesIntro": "La franja oscura y su barra propia distinguen el modo.",
+      "switched": "Cambiaría a modo conductor."
     },
     "patterns": {
       "title": "Mapa y lista",
@@ -221,6 +227,80 @@
       "sheetLabel": "Cocheras cercanas",
       "summary_one": "{{count}} cochera cerca de {{venue}}",
       "summary_other": "{{count}} cocheras cerca de {{venue}}"
+    },
+    "fields": {
+      "title": "Formularios y diálogos",
+      "intro": "Campos nativos con etiqueta visible, ayuda y error. Todo el renglón es el objetivo táctil.",
+      "checkbox": "Casilla",
+      "checkboxLabel": "Acepto las reglas para anfitriones",
+      "checkboxError": "Debes aceptar las reglas para continuar.",
+      "select": "Lista desplegable",
+      "selectLabel": "Tipo de auto",
+      "selectHint": "Elige el más grande que cabría.",
+      "selectError": "Elige un tipo de auto.",
+      "selectPlaceholder": "Selecciona una opción",
+      "vehicles": {
+        "car": "Auto compacto",
+        "suv": "Camioneta",
+        "van": "Van"
+      },
+      "vehicleHints": {
+        "car": "Hasta 4.5 m de largo",
+        "suv": "Hasta 5.2 m de largo",
+        "van": "Hasta 6 m de largo"
+      },
+      "textarea": "Texto largo",
+      "textareaLabel": "Descripción",
+      "textareaHint": "Cuenta cómo llegar y qué debe saber el conductor.",
+      "textareaError": "Escribe al menos 20 caracteres.",
+      "radio": "Tarjeta de opción",
+      "radioIntro": "Una sola opción; se mueve con las flechas.",
+      "radioLegend": "Tipo de auto",
+      "datetime": "Fecha y hora",
+      "datetimeIntro": "Se edita en hora de Ciudad de México y se entrega como instante UTC.",
+      "datetimeLabel": "Llegada",
+      "datetimeUtc": "Valor UTC:",
+      "iconButtons": "Botones de ícono",
+      "iconIntro": "Siempre llevan nombre accesible, aunque solo muestren un ícono.",
+      "share": "Compartir",
+      "close": "Cerrar",
+      "dialog": "Diálogo de confirmación",
+      "dialogIntro": "Cancelar es la primera acción. Escape cierra y el foco regresa al botón.",
+      "openPlain": "Abrir confirmación",
+      "openDanger": "Abrir confirmación de riesgo",
+      "plainTitle": "¿Publicar tu cochera?",
+      "plainBody": "La revisaremos antes de mostrarla a los conductores.",
+      "plainConfirm": "Publicar",
+      "cancel": "Cancelar",
+      "dangerTitle": "¿Cancelar la reserva?",
+      "dangerBody": "Esta acción no se puede deshacer.",
+      "dangerConfirm": "Cancelar reserva",
+      "keep": "Conservar",
+      "confirmed": "Acción confirmada.",
+      "cancelled": "Acción cancelada."
+    },
+    "states": {
+      "title": "Estados y datos",
+      "intro": "Cómo se ven las tarjetas, calificaciones y estados en cada situación.",
+      "cardStates": "Estados de la tarjeta",
+      "unavailable": "No disponible",
+      "newListing": "Sin reseñas",
+      "unavailableLabel": "No disponible",
+      "rating": "Calificación",
+      "ratingIntro": "Sin reseñas dice Nueva, no 0.0.",
+      "price": "Precio",
+      "image": "Imagen de cochera",
+      "imageIntro": "Tres ilustraciones y una de respaldo cuando no hay foto.",
+      "bookingStatus": "Estados de una reserva",
+      "spaceStatus": "Estados de una cochera"
+    },
+    "host": {
+      "title": "Herramientas del anfitrión",
+      "intro": "Componentes del alta de una cochera.",
+      "pin": "Marcar la entrada",
+      "pinIntro": "Toca el mapa o mueve el pin de 50 en 50 m.",
+      "photos": "Fotos",
+      "photosIntro": "Revisa tipo y tamaño; la primera es la portada."
     }
   }
 }

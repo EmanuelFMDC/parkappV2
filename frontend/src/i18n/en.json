@@ -75,7 +75,10 @@
       "controls": "Controls",
       "cards": "Cards and ticket",
       "navigation": "Navigation",
-      "patterns": "Map and list"
+      "patterns": "Map and list",
+      "forms": "Forms",
+      "states": "States and data",
+      "host": "Host"
     },
     "colors": {
       "title": "Color",
@@ -211,7 +214,10 @@
         "size": "Dimensions",
         "photos": "Photos",
         "price": "Price"
-      }
+      },
+      "modes": "Host mode",
+      "modesIntro": "The dark strip and its own bar tell the modes apart.",
+      "switched": "Would switch to driver mode."
     },
     "patterns": {
       "title": "Map and list",
@@ -221,6 +227,80 @@
       "sheetLabel": "Nearby garages",
       "summary_one": "{{count}} garage near {{venue}}",
       "summary_other": "{{count}} garages near {{venue}}"
+    },
+    "fields": {
+      "title": "Forms and dialogs",
+      "intro": "Native fields with a visible label, hint and error. The whole row is the touch target.",
+      "checkbox": "Checkbox",
+      "checkboxLabel": "I accept the host rules",
+      "checkboxError": "You must accept the rules to continue.",
+      "select": "Select",
+      "selectLabel": "Car type",
+      "selectHint": "Pick the largest that would fit.",
+      "selectError": "Pick a car type.",
+      "selectPlaceholder": "Select an option",
+      "vehicles": {
+        "car": "Compact car",
+        "suv": "SUV",
+        "van": "Van"
+      },
+      "vehicleHints": {
+        "car": "Up to 4.5 m long",
+        "suv": "Up to 5.2 m long",
+        "van": "Up to 6 m long"
+      },
+      "textarea": "Long text",
+      "textareaLabel": "Description",
+      "textareaHint": "Explain how to get there and what the driver should know.",
+      "textareaError": "Write at least 20 characters.",
+      "radio": "Option card",
+      "radioIntro": "A single choice; move with the arrow keys.",
+      "radioLegend": "Car type",
+      "datetime": "Date and time",
+      "datetimeIntro": "Edited in Mexico City time and reported as a UTC instant.",
+      "datetimeLabel": "Arrival",
+      "datetimeUtc": "UTC value:",
+      "iconButtons": "Icon buttons",
+      "iconIntro": "Always have an accessible name, even when they only show an icon.",
+      "share": "Share",
+      "close": "Close",
+      "dialog": "Confirmation dialog",
+      "dialogIntro": "Cancel is the first action. Escape closes it and focus returns to the button.",
+      "openPlain": "Open confirmation",
+      "openDanger": "Open risky confirmation",
+      "plainTitle": "Publish your garage?",
+      "plainBody": "We will review it before drivers can see it.",
+      "plainConfirm": "Publish",
+      "cancel": "Cancel",
+      "dangerTitle": "Cancel the booking?",
+      "dangerBody": "This cannot be undone.",
+      "dangerConfirm": "Cancel booking",
+      "keep": "Keep it",
+      "confirmed": "Action confirmed.",
+      "cancelled": "Action cancelled."
+    },
+    "states": {
+      "title": "States and data",
+      "intro": "How cards, ratings and statuses look in each situation.",
+      "cardStates": "Card states",
+      "unavailable": "Unavailable",
+      "newListing": "No reviews",
+      "unavailableLabel": "Unavailable",
+      "rating": "Rating",
+      "ratingIntro": "With no reviews it says New, not 0.0.",
+      "price": "Price",
+      "image": "Space image",
+      "imageIntro": "Three illustrations and a fallback when there is no photo.",
+      "bookingStatus": "Booking statuses",
+      "spaceStatus": "Space statuses"
+    },
+    "host": {
+      "title": "Host tools",
+      "intro": "Components used to list a garage.",
+      "pin": "Mark the entrance",
+      "pinIntro": "Tap the map or nudge the pin 50 m at a time.",
+      "photos": "Photos",
+      "photosIntro": "Checks type and size; the first one is the cover."
     }
   }
 }

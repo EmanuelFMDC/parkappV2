@@ -78,7 +78,14 @@ Regla: lo que la persona debe _encontrar_ (borde de un campo, el riel de un inte
 
 ## Componentes añadidos después de aprobar el sistema
 
-Se crearon al construir las pantallas del conductor y del anfitrión y **todavía no tienen sección en la página `/design-system`**: `Checkbox`, `Select`, `Textarea`, `RadioCard`, `ConfirmDialog` (sobre el `<dialog>` nativo), `DateTimeField`, `SpaceImage` y `Rating` con el estado "Nueva". Cumplen los mismos tokens y los cubre axe en las pantallas donde se usan; falta documentarlos y mostrarlos en la muestra.
+Se crearon al construir las pantallas del conductor y del anfitrión y ahora están en la página `/design-system`, con axe en español e inglés y la medición de 44 px:
+
+- **Formularios y diálogos** (`forms`): `Checkbox` (con error; todo el renglón es el objetivo), `Select` (ayuda y error), `Textarea` (contador, ayuda, error), `RadioCard`, `DateTimeField` (muestra el valor UTC que entrega), `IconButton` (plano y elevado) y `ConfirmDialog` (normal y de riesgo, sobre el `<dialog>` nativo).
+- **Estados y datos** (`states`): tarjeta no disponible y tarjeta sin reseñas, `Rating` con "Nueva", `PriceTag` en dos tamaños, `SpaceImage` (tres ilustraciones y respaldo), `StatusBadge` de reservas y `SpaceStatusBadge` de cocheras.
+- **Navegación:** `ModeBanner` (con `onSwitch` opcional para no navegar en la muestra) junto a la barra del modo anfitrión.
+- **Anfitrión** (`host`): `PinPicker` y `PhotoUploader` funcionando con el servicio simulado.
+
+Hallazgo de la revisión: el selector de idioma medía 21 px de alto; ahora mide 44 px.
 
 ## Límites conocidos
 
