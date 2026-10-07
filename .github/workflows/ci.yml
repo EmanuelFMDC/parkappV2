@@ -1,12 +1,12 @@
 name: CI
 
 # Skeleton: runs lint and tests only. No deploy yet (Phase 6).
-# Flow: work on develop -> PR -> merge to main.
+# Flow: work on develop_frontend or develop_backend -> PR -> merge to main.
 on:
   push:
-    branches: [develop, main]
+    branches: [develop_frontend, develop_backend, main]
   pull_request:
-    branches: [develop, main]
+    branches: [develop_frontend, develop_backend, main]
 
 permissions:
   contents: read
