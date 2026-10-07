@@ -8,23 +8,12 @@ El contexto completo del proyecto, el stack y las reglas no negociables están e
 
 | Carpeta | Contenido |
 |---|---|
-| `backend/` | Django 5 + Django Ninja + GeoDjango (Fase 5) |
+| `backend/` |  |
 | `frontend/` | React 19 + TypeScript + Vite, PWA |
-| `infra/` | Docker Compose local, Dockerfiles y despliegue en Cloud Run |
-| `docs/` | Decisiones y documentación. `docs/prototipo-v1/` archiva el prototipo anterior |
-
-## Base de datos local
-
-```bash
-cp .env.example .env          # edita POSTGRES_PASSWORD
-docker compose --env-file .env -f infra/docker-compose.yml up -d db       # desarrollo
-docker compose --env-file .env -f infra/docker-compose.yml up -d db_test  # pruebas (en memoria)
-```
+| `infra/` | Despliegue (Cloud Run) cuando llegue la Fase 6 |
+| `docs/` | Decisiones, contrato API borrador (`docs/api/`) y documentación. `docs/prototipo-v1/` archiva el prototipo anterior |
 
 ## Ramas
 
-Se trabaja en `develop`; el merge a `main` dispara build y deploy (a partir de la Fase 6).
+Se trabaja en `develop`; el merge a `main` dispara build y deploy.
 
-## Prototipo anterior
-
-El primer prototipo del frontend (estacionamientos genéricos) está en el tag `prototype-v1`.

@@ -1,6 +1,6 @@
 # Pantallas del anfitrión (Fase 4)
 
-Publicar una cochera es un flujo de **cuatro pasos en orden**: Ubicación, Dimensiones, Fotos y Precio. Antes hace falta una cuenta con datos personales e **identidad verificada** (no pide auto). Una cochera nueva **no sale al público hasta que el back-office la aprueba**. Para verlo: `npm run dev` en `frontend/`, abrir **/host**. La API es simulada en el navegador (D-014).
+Publicar una cochera es un flujo de **cuatro pasos en orden**: Ubicación, Dimensiones, Fotos y Precio. Antes hace falta una cuenta con datos personales e **identidad verificada** (no pide auto). Una cochera nueva **no sale al público hasta que el back-office la aprueba**. Para verlo: `npm run dev` en `frontend/`, abrir **/host**. La API es simulada en el navegador.
 
 ## Dos modos, una sola cuenta
 
@@ -35,7 +35,7 @@ Los pasos 2 a 4 **no se pueden saltar** escribiendo la dirección: cada uno env�
 
 ## Reglas de dominio
 
-- **Revisión previa.** La cochera nace `pending_review` y solo aparece en las búsquedas cuando pasa a `active`. Si el back-office la rechaza, el anfitrión ve el motivo y puede publicar de nuevo. (En producción esto es Django Admin; aquí se simula y se aprueba sola a los 5 segundos.)
+- **Revisión previa.** La cochera nace `pending_review` y solo aparece en las búsquedas cuando pasa a `active`. Si el back-office la rechaza, el anfitrión ve el motivo y puede publicar de nuevo. (En producción lo hace una persona en el back-office; aquí se simula y se aprueba sola a los 5 segundos.)
 - **Radio de 3 km.** El pin debe quedar a menos de 3 km del recinto; la pantalla lo dice en texto, no solo con color, y el servidor lo vuelve a comprobar.
 - **Autos sugeridos según las medidas** (regla orientativa, editable): compacto desde 400 × 220 cm, sedán desde 470 × 240, SUV desde 500 × 250 con 200 cm de altura, pick-up desde 560 × 260 con 210 cm. Si el anfitrión los cambia a mano, las medidas dejan de sobrescribirlos.
 - **Fotos:** de 3 a 8, JPG, PNG o WebP, de hasta 10 MB. Se suben con el servicio de almacenamiento (URLs firmadas en producción). La primera es la portada.
@@ -49,7 +49,7 @@ Los pasos 2 a 4 **no se pueden saltar** escribiendo la dirección: cada uno env�
 
 ## Contrato de la API
 
-Se añadió a `backend/openapi.draft.yaml`: `GET` y `POST /api/host/spaces`, `PATCH /api/host/spaces/{spaceId}` y `GET /api/host/bookings`. La verificación de identidad ya no exige un auto registrado (los anfitriones no tienen).
+Se añadió a `docs/api/openapi.draft.yaml`: `GET` y `POST /api/host/spaces`, `PATCH /api/host/spaces/{spaceId}` y `GET /api/host/bookings`. La verificación de identidad ya no exige un auto registrado (los anfitriones no tienen).
 
 ## Capturas
 
@@ -82,20 +82,20 @@ Se añadió a `backend/openapi.draft.yaml`: `GET` y `POST /api/host/spaces`, `PA
 
 - **El mapa es una ilustración.** El pin se coloca tocando o con las flechas (50 m por pulsación) y no hay búsqueda de direcciones; el mapa real y la geocodificación llegan con Google Maps.
 - **Las fotos no se guardan de verdad** en la API simulada: se muestran como ilustraciones tras recargar. El servicio de almacenamiento real (Cloud Storage) llega cuando se pida.
-- **Aprobación simulada.** En la práctica la hace una persona en Django Admin, con su propio tiempo y criterios.
+- **Aprobación simulada.** En la práctica la hace una persona en el back-office, con su propio tiempo y criterios.
 - **Las "reglas para anfitriones" son un texto provisional** que debe redactar y revisar un abogado, igual que el aviso de privacidad.
 - **Falta:** editar los demás datos de una cochera ya publicada, eliminarla, cobros al anfitrión (Stripe Connect), cancelaciones iniciadas por el anfitrión, reseñas del anfitrión a conductores y mensajes entre ambos.
 - **Reserva instantánea.** El anfitrión no aprueba cada reserva.
 - Sigue sin probarse con lector de pantalla real ni en un teléfono físico.
 
-## Cambio de modo (D-018)
+## Cambio de modo
 
 - **Pruebas unitarias:** cada modo muestra su barra y no la del otro, la pestaña actual está marcada, el aviso aparece solo en modo anfitrión y lleva de vuelta en un toque, el Perfil ofrece el cambio correcto y oculta los autos en modo anfitrión, la invitación es un enlace a `/host`, y los enlaces viejos redirigen.
 - **De punta a punta (móvil y escritorio, con axe):** pasar de conductor a anfitrión y de vuelta, moverse entre las pestañas de cada modo, que el botón de atrás y adelante sigan al modo, la invitación en Explorar, mirar el modo anfitrión sin cuenta, la redirección de enlaces viejos y la traducción del aviso.
 - **Capturas nuevas:** `0-explore-invitation`, `10-profile-driver-mode` y `11-profile-host-mode` en `docs/host/screenshots/`.
 - **Defecto que encontró la revisión:** en el Perfil de modo anfitrión aparecían dos botones idénticos "Cambiar a modo conductor" (el aviso y una tarjeta). Se dejó solo el aviso. Además, "Completar mi cuenta" y "Cerrar sesión" salían pegados.
 
-## Recordar el último modo (D-019)
+## Recordar el último modo
 
 - La app guarda el modo en el dispositivo y, al abrirla en `/`, lleva a un anfitrión con cuenta lista a su modo. Una sola vez por pestaña; enlaces, recargas y "Explorar" nunca saltan. Cerrar sesión lo olvida.
 - **Pruebas:** 14 de integración (`modeMemory.test.tsx`), las de `modePreference.test.ts` y 4 e2e que abren la app en una pestaña nueva (`mode-switch.spec.ts`).

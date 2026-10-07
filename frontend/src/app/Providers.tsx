@@ -20,7 +20,7 @@ export function Providers({ children, services, apiBaseUrl }: ProvidersProps) {
         defaultOptions: { queries: { staleTime: 10_000, refetchOnWindowFocus: true } },
       }),
   )
-  // Demo sessions persist in the browser only while the mock API is on (D-014).
+  // Demo sessions persist in the browser only while the mock API is on.
   const [defaultServices] = useState(() =>
     createMockServices({ persist: import.meta.env.VITE_USE_MOCK_API === 'true' }),
   )

@@ -1,5 +1,5 @@
-# DRAFT API contract written by the frontend (D-014).
-# The Django Ninja backend (Phase 5) must satisfy this, or change it by agreement.
+# DRAFT API contract written by the frontend.
+# The backend (built by another person, their choice of stack) must satisfy this, or change it by agreement.
 # Rules: money = integer cents; instants = UTC ISO 8601; exact address only after a booking is confirmed.
 openapi: 3.1.0
 info:

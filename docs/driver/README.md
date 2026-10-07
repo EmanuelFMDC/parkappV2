@@ -1,6 +1,6 @@
 # Pantallas del conductor (Fase 3)
 
-Reservar una cochera toma **cuatro pasos como máximo**: Recinto, Cochera, Horario y Pago. Antes del paso 3 hace falta una **cuenta verificada** (D-016). Para verlo: `npm run dev` en `frontend/` y abrir **/**. La API es simulada en el navegador (D-014), así que funciona sin backend.
+Reservar una cochera toma **cuatro pasos como máximo**: Recinto, Cochera, Horario y Pago. Antes del paso 3 hace falta una **cuenta verificada**. Para verlo: `npm run dev` en `frontend/` y abrir **/**. La API es simulada en el navegador, así que funciona sin backend.
 
 ## El flujo
 
@@ -40,7 +40,7 @@ El viaje (recinto, horario y auto elegido) vive en la **URL**, así que el botó
 
 ## Contrato de la API
 
-`backend/openapi.draft.yaml` es el contrato que el backend (Fase 5) deberá cumplir. Los tipos del cliente se generan con `npm run api:types`. Cubre recintos, eventos, búsqueda con disponibilidad, detalle, reseñas, cotización, reservas (crear, listar, ver, confirmar, cancelar) y cuenta (`/api/me`, `/api/me/profile`, `/api/me/vehicles`, `/api/me/identity`).
+`docs/api/openapi.draft.yaml` es el contrato que el backend deberá cumplir. Los tipos del cliente se generan con `npm run api:types`. Cubre recintos, eventos, búsqueda con disponibilidad, detalle, reseñas, cotización, reservas (crear, listar, ver, confirmar, cancelar) y cuenta (`/api/me`, `/api/me/profile`, `/api/me/vehicles`, `/api/me/identity`).
 
 ## API simulada
 

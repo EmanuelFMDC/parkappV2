@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-/** Starts the in-browser API (D-014). Used while there is no real backend. */
+/** Starts the in-browser API. Used while there is no real backend. */
 export async function startMockApi() {
   const db = createDemoDb()
   if (import.meta.env.MODE === 'e2e') window.__mockDb = db

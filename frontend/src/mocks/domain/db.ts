@@ -70,7 +70,7 @@ function randomCode(): string {
 }
 
 /**
- * In-memory stand-in for the Django backend. It enforces the same rules the real one must:
+ * In-memory stand-in for the backend. It enforces the same rules the real one must:
  * no overlapping bookings on a space, integer-cent pricing, UTC dates, and the exact address
  * only after confirmation.
  */

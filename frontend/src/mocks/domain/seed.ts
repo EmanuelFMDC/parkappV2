@@ -4,7 +4,7 @@ import { offsetPoint } from './geo'
 
 /**
  * Sample data. Venue names come from the project spec; coordinates are APPROXIMATE
- * and must be verified before production (see docs/decisiones.md D-014).
+ * and must be verified before production (see docs/decisiones.md).
  */
 export const venues: Venue[] = [
   {
