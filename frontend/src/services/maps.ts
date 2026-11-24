@@ -29,8 +29,12 @@ export function createMockMapService(): MapService {
         { id: 'mock-place-1', description: `${query}, Guadalajara`, location: GUADALAJARA_CENTER },
       ]
     },
+    /**
+     * A public Google Maps directions link: no API key and no SDK, so it is not an integration.
+     * It opens the Maps app on a phone and the website on a computer.
+     */
     navigationUrl({ lat, lng }) {
-      return `https://maps.example.invalid/dir/?destination=${lat},${lng}`
+      return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
     },
   }
 }

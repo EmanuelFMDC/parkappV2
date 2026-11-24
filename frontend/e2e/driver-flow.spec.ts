@@ -109,6 +109,10 @@ test.describe('driver books a garage in four steps', () => {
     await expect(ticket.getByText('JAL-482-A')).toBeVisible()
     await expect(page.getByText('Calle de ejemplo').first()).toBeVisible()
     await expect(ticket.getByText(/^[A-Z0-9]{6}$/)).toBeVisible()
+    // Step 4, "Llegar": directions to the exact pin, in the maps app
+    const directions = page.getByRole('link', { name: /Cómo llegar/ })
+    await expect(directions).toHaveAttribute('href', /google\.com\/maps\/dir\/\?api=1&destination=/)
+    await expect(directions).toHaveAttribute('target', '_blank')
     await expectAccessible(page)
 
     // My bookings

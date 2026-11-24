@@ -50,6 +50,7 @@ Fuente: presentación final del proyecto (modelo de negocio).
 
 - **Cuatro pasos:** Recinto, Cochera (lista y detalle), Horario, Pago. El inicio de sesión aparece dentro del pago, solo si hace falta.
 - **El viaje vive en la URL** (recinto y horario). Horario por defecto: llegada 2 horas antes del evento y salida 1 hora después de que termina, redondeado a horas completas.
+- **Paso 4, "Llegar":** la reserva confirmada trae el pin exacto (`space.location`, como la dirección, solo tras confirmar) y un botón "Cómo llegar" que abre la ruta en Google Maps en otra pestaña o en la app de mapas del teléfono. Es un enlace público sin clave ni SDK, detrás de `MapService.navigationUrl`; no cuenta como integrar Google Maps.
 - **La reserva se crea al pagar.** Nace `pending_payment` con apartado de 10 minutos y se confirma solo si el pago tuvo éxito. Dirección exacta y código solo tras confirmar.
 - **Cuenta verificada antes del paso 3.** El paso 2 es abierto; el 3 y el 4 exigen cuenta completa y verificada, y el servidor también lo exige (403). Quien continúa sin ella va a `/account/new` y vuelve al mismo horario.
 - **Cuenta en cuatro etapas:** teléfono, datos personales (nombre legal, fecha de nacimiento, mayoría de edad, correo, aviso de privacidad), auto (placa, marca, modelo, color, tipo) e identidad (INE y selfie, simulada).

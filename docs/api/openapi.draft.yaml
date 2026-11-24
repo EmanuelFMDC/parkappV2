@@ -643,7 +643,7 @@ components:
         status: { $ref: '#/components/schemas/BookingStatus' }
         space:
           type: object
-          required: [id, title, neighborhood, address, photoUrl, spotLabel]
+          required: [id, title, neighborhood, address, location, photoUrl, spotLabel]
           properties:
             id: { type: string }
             title: { type: string }
@@ -651,6 +651,11 @@ components:
             address:
               type: [string, 'null']
               description: Exact address. Only present once status is confirmed or completed
+            location:
+              description: Exact pin, for turn-by-turn directions. Only present once confirmed or completed
+              anyOf:
+                - $ref: '#/components/schemas/LatLng'
+                - type: 'null'
             photoUrl: { type: [string, 'null'] }
             spotLabel:
               type: [string, 'null']

@@ -149,3 +149,15 @@ describe('host cancels', () => {
     })
   })
 })
+
+describe('getting there (step 4)', () => {
+  it('a confirmed booking links to turn-by-turn directions to the exact pin', async () => {
+    const b = confirmedBooking(5)
+    const { lat, lng } = testDb().getSpace('akron-1').location
+    await renderBooking(b.id)
+    const link = await screen.findByRole('link', { name: /Cómo llegar/ })
+    expect(link).toHaveAttribute('href', expect.stringContaining(`destination=${lat},${lng}`))
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'))
+  })
+})

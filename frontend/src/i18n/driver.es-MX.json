@@ -185,6 +185,8 @@
       "expired": "El apartado venció. Busca otra cochera.",
       "cancelledNote": "Esta reserva fue cancelada.",
       "where": "Dónde estacionar",
+      "directions": "Cómo llegar",
+      "opensNewTab": "(se abre en Google Maps)",
       "total": "Total",
       "cancel": "Cancelar reserva",
       "cancelTitle": "¿Cancelar esta reserva?",

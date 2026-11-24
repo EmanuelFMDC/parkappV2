@@ -491,6 +491,8 @@ export interface components {
                 neighborhood: string;
                 /** @description Exact address. Only present once status is confirmed or completed */
                 address: string | null;
+                /** @description Exact pin, for turn-by-turn directions. Only present once confirmed or completed */
+                location: components["schemas"]["LatLng"] | null;
                 photoUrl: string | null;
                 /** @description Where to park inside the property, shown after confirmation */
                 spotLabel: string | null;

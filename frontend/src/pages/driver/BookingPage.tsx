@@ -1,10 +1,11 @@
-import { CalendarX, CheckCircle2 } from 'lucide-react'
+import { CalendarX, CheckCircle2, Navigation } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Page } from '../../components/layout/Page'
 import {
   Button,
+  buttonClasses,
   ConfirmDialog,
   EmptyState,
   Skeleton,
@@ -21,6 +22,7 @@ import { errorMessage } from '../../lib/errors'
 import { formatCents } from '../../lib/money'
 import { formatDateTime } from '../../lib/time'
 import { useNow } from '../../lib/useNow'
+import { useServices } from '../../services/context'
 
 /** One booking. Confirmed bookings show the event ticket; the others explain their state. */
 export default function BookingPage() {
@@ -33,6 +35,7 @@ export default function BookingPage() {
   const cancel = useCancelBooking()
   const [confirming, setConfirming] = useState(false)
   const now = useNow()
+  const { maps } = useServices()
   const lang = i18n.language
   const b = booking.data
   const justBooked = params.get('new') === '1' && b?.status === 'confirmed'
@@ -168,6 +171,18 @@ export default function BookingPage() {
                 </h2>
                 <p>{b.space.address}</p>
                 <p className="text-ink-muted">{b.space.spotLabel}</p>
+                {b.status === 'confirmed' && b.space.location && (
+                  <a
+                    href={maps.navigationUrl(b.space.location)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`${buttonClasses({ block: true })} mt-3`}
+                  >
+                    <Navigation aria-hidden className="size-5" />
+                    {t('bookings.detail.directions')}
+                    <span className="sr-only">{t('bookings.detail.opensNewTab')}</span>
+                  </a>
+                )}
               </section>
             )}
 

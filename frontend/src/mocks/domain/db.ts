@@ -200,6 +200,7 @@ export function createDb({
         title: space.title,
         neighborhood: space.neighborhood,
         address: revealed ? store.addressOf(space.id) : null,
+        location: revealed ? space.location : null,
         photoUrl: space.photoUrls[0] ?? null,
         spotLabel: revealed ? b.spotLabel : null,
       },

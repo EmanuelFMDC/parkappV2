@@ -335,3 +335,12 @@ describe('cancelling (free until 2 h before, then 20 %)', () => {
     expect(() => book('akron-1', 5, 7, OTHER)).not.toThrow()
   })
 })
+
+describe('getting there', () => {
+  it('gives the exact pin only once the booking is confirmed, like the address', () => {
+    const held = book('akron-1', 2, 4)
+    expect(held.space.location).toBeNull()
+    const confirmed = db.confirmBooking(USER, held.id, 'pi_1')
+    expect(confirmed.space.location).toEqual(db.getSpace('akron-1').location)
+  })
+})

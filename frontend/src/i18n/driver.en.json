@@ -185,6 +185,8 @@
       "expired": "The hold expired. Find another garage.",
       "cancelledNote": "This booking was cancelled.",
       "where": "Where to park",
+      "directions": "Get directions",
+      "opensNewTab": "(opens in Google Maps)",
       "total": "Total",
       "cancel": "Cancel booking",
       "cancelTitle": "Cancel this booking?",
