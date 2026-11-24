@@ -71,7 +71,8 @@
       "too_early": "Aún es pronto: la llegada se registra desde 30 minutos antes.",
       "booking_over": "Esta reserva ya terminó.",
       "not_checkable": "Esta reserva no se puede registrar.",
-      "not_checked_in": "Primero registra tu llegada."
+      "not_checked_in": "Primero registra tu llegada.",
+      "outside_availability": "El anfitrión no renta esta cochera en ese horario."
     }
   },
   "auth": {

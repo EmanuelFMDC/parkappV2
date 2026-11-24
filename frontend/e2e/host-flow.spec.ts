@@ -16,7 +16,8 @@ import {
   waitForMockDb,
 } from './helpers'
 
-const TITLE = 'Cochera techada junto al estadio'
+/** ParkApp writes the title from the features and the neighborhood. */
+const TITLE = 'Cochera techada en Jardines Universidad'
 
 test.describe('host lists a garage in four steps', () => {
   test('a newcomer registers as a host, lists a garage, and drivers can find it once approved', async ({
@@ -55,7 +56,6 @@ test.describe('host lists a garage in four steps', () => {
     await page.getByLabel('Calle y número').fill('Av. Patria 1234')
     await page.getByLabel('Colonia').fill('Jardines Universidad')
     await page.getByLabel('Municipio').selectOption('Zapopan')
-    await page.getByLabel('Referencias (opcional)').fill('Portón negro junto a la farmacia')
     await expect(page.getByRole('status').filter({ hasText: 'de Estadio Akron' })).toBeVisible()
     await page.getByRole('button', { name: 'Mover al este' }).click()
     await expect(
@@ -64,16 +64,14 @@ test.describe('host lists a garage in four steps', () => {
     await expectAccessible(page)
     await page.getByRole('button', { name: 'Continuar' }).click()
 
-    // Step 2 of 4: dimensions; the cars that fit are suggested
+    // Step 2 of 4: dimensions (ParkApp works out the cars that fit) and how many spots
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Medidas del espacio')
     await expect(page.getByText('Paso 2 de 4')).toBeVisible()
     await page.getByLabel(/Largo/).fill('520')
     await page.getByLabel(/Ancho/).fill('300')
     await page.getByLabel(/Altura de la entrada/).fill('230')
-    await expect(page.getByLabel('Compacto')).toBeChecked()
-    await expect(page.getByLabel('Sedán')).toBeChecked()
-    await expect(page.getByLabel('SUV')).toBeChecked()
-    await expect(page.getByLabel('Pick-up')).not.toBeChecked()
+    await expect(page.getByText(/Caben:/).locator('..')).toContainText('Compacto, Sedán, SUV.')
+    await expect(page.getByLabel(/Cuántos cajones iguales/)).toHaveValue('1')
     await page.getByLabel('Techado').check()
     await page.getByLabel('Portón eléctrico').check()
     await expectAccessible(page)
@@ -91,8 +89,9 @@ test.describe('host lists a garage in four steps', () => {
     )
     await expect(page.getByText('3 de 8 fotos (mínimo 3)')).toBeVisible()
     await expect(page.getByText('Portada')).toBeVisible()
-    await page.getByLabel('Título del anuncio').fill(TITLE)
-    await page.getByLabel('Descripción (opcional)').fill('Entrada amplia y portón eléctrico.')
+    await page
+      .getByLabel('Descripción (opcional)')
+      .fill('Entrada amplia. Portón negro junto a la farmacia.')
     await expectAccessible(page)
     await page.getByRole('button', { name: 'Continuar' }).click()
 
@@ -101,8 +100,8 @@ test.describe('host lists a garage in four steps', () => {
     await expect(page.getByText('Paso 4 de 4')).toBeVisible()
     await expect(page.getByText('$60 por hora')).toBeVisible()
     await expect(page.getByText('Una reserva de 4 horas te deja $290.')).toBeVisible()
-    await expect(page.getByText(TITLE)).toBeVisible()
-    await page.getByLabel(/Acepto las reglas para anfitriones/).check()
+    await expect(page.getByRole('switch', { name: 'Disponible siempre' })).toBeChecked()
+    await page.getByLabel(/Declaro que tengo derecho a rentar/).check()
     await expectAccessible(page)
     await page.getByRole('button', { name: 'Publicar cochera' }).click()
 

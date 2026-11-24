@@ -23,6 +23,7 @@ import {
   OVERTIME_GRACE_MS,
   overtimeHours,
 } from '../../lib/arrival'
+import { isWithinAvailability } from '../../lib/availability'
 import { percentOf, priceBooking } from '../../lib/tariffs'
 import { createAccounts } from './accounts'
 import { ApiError, notFound } from './errors'
@@ -184,15 +185,24 @@ export function createDb({
     if (changed) save()
   }
 
+  /**
+   * Free while, at every instant of the window, fewer bookings hold the space than it has
+   * identical spots. (Two back-to-back bookings use one spot, not two.)
+   */
   function isFree(spaceId: string, startsAt: string, endsAt: string): boolean {
     const s = Date.parse(startsAt)
     const e = Date.parse(endsAt)
-    return !bookings.some(
-      (b) =>
-        b.spaceId === spaceId &&
-        BLOCKING.includes(b.status) &&
-        overlaps(s, e, Date.parse(b.startsAt), Date.parse(b.endsAt)),
+    const held = bookings
+      .filter((b) => b.spaceId === spaceId && BLOCKING.includes(b.status))
+      .map((b) => [Date.parse(b.startsAt), Date.parse(b.endsAt)] as const)
+      .filter(([bs, be]) => overlaps(s, e, bs, be))
+    // The busiest moment starts when the window or one of the bookings starts.
+    const moments = [s, ...held.map(([bs]) => bs).filter((t) => t > s)]
+    const busiest = Math.max(
+      0,
+      ...moments.map((t) => held.filter(([bs, be]) => bs <= t && t < be).length),
     )
+    return busiest < store.quantityOf(spaceId)
   }
 
   function summary(space: Space, venue: Venue, startsAt: string, endsAt: string): SpaceSummary {
@@ -336,12 +346,16 @@ export function createDb({
       const venue = requireVenue(venueId)
       validateWindow(startsAt, endsAt)
       expireStale()
-      return store
-        .active()
-        .filter((s) => store.venueIdOf(s.id) === venue.id)
-        .map((s) => summary(s, venue, startsAt, endsAt))
-        .filter((s) => s.distanceM <= venue.radiusM)
-        .sort((a, b) => a.distanceM - b.distanceM)
+      return (
+        store
+          .active()
+          .filter((s) => store.venueIdOf(s.id) === venue.id)
+          // Outside the host's schedule the space is not on offer at all.
+          .filter((s) => isWithinAvailability(store.availabilityOf(s.id), startsAt, endsAt))
+          .map((s) => summary(s, venue, startsAt, endsAt))
+          .filter((s) => s.distanceM <= venue.radiusM)
+          .sort((a, b) => a.distanceM - b.distanceM)
+      )
     },
 
     getSpace(id: string): Space {
@@ -375,6 +389,9 @@ export function createDb({
       const q = quoteWindow(store.tariff(space.id), input.startsAt, input.endsAt)
       if (Date.parse(input.startsAt) < now() - 5 * 60_000) {
         throw new ApiError(422, 'in_the_past', 'The booking cannot start in the past')
+      }
+      if (!isWithinAvailability(store.availabilityOf(space.id), input.startsAt, input.endsAt)) {
+        throw new ApiError(409, 'outside_availability', 'The host does not rent it at that time')
       }
       expireStale()
       if (!isFree(space.id, input.startsAt, input.endsAt)) {

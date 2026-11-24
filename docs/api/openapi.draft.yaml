@@ -835,7 +835,7 @@ components:
     HostSpace:
       type: object
       required:
-        [id, status, title, description, venue, street, neighborhood, municipality, references, location, distanceM, dimensions, vehicleTypes, features, priceCentsPerHour, zoneSurchargeCents, photoUrls, reviewNote, createdAt]
+        [id, status, title, description, venue, street, neighborhood, municipality, references, location, distanceM, dimensions, vehicleTypes, features, priceCentsPerHour, zoneSurchargeCents, photoUrls, quantity, availability, reviewNote, createdAt]
       properties:
         id: { type: string }
         status: { $ref: '#/components/schemas/SpaceStatus' }
@@ -862,6 +862,8 @@ components:
           items: { $ref: '#/components/schemas/SpaceFeature' }
         priceCentsPerHour: { type: integer, description: Set by ParkApp from the tariff }
         zoneSurchargeCents: { type: integer }
+        quantity: { type: integer }
+        availability: { $ref: '#/components/schemas/Availability' }
         photoUrls:
           type: array
           items: { type: string }
@@ -872,32 +874,56 @@ components:
     HostSpaceCreate:
       type: object
       required:
-        [venueId, street, neighborhood, municipality, location, dimensions, vehicleTypes, features, title, description, photoKeys, acceptHostTerms]
+        [venueId, street, neighborhood, municipality, location, dimensions, features, description, photoKeys, quantity, availability, acceptHostTerms]
       properties:
         venueId: { type: string }
         street: { type: string }
         neighborhood: { type: string }
         municipality: { $ref: '#/components/schemas/Municipality' }
-        references: { type: string }
+        references: { type: string, description: Deprecated; the form puts landmarks in the description }
         location: { $ref: '#/components/schemas/LatLng' }
-        dimensions: { $ref: '#/components/schemas/Dimensions' }
-        vehicleTypes:
-          type: array
-          items: { $ref: '#/components/schemas/VehicleType' }
+        dimensions:
+          $ref: '#/components/schemas/Dimensions'
+          description: The server works out which cars fit (422 fits_no_car if none does)
         features:
           type: array
           items: { $ref: '#/components/schemas/SpaceFeature' }
-        title: { type: string, description: 5 to 60 characters }
-        description: { type: string, description: Up to 500 characters }
+        description: { type: string, description: Up to 500 characters, landmarks included }
         photoKeys:
           type: array
           description: Object keys returned by the signed-upload step; 3 to 8 photos
           items: { type: string }
-        acceptHostTerms: { type: boolean, description: Must be true }
+        quantity:
+          type: integer
+          description: Identical spots in this listing, 1 to 20; each booking takes one
+        availability: { $ref: '#/components/schemas/Availability' }
+        acceptHostTerms:
+          type: boolean
+          description: >
+            Must be true. The host accepts the host rules and declares the right to rent the space
+            (owner, a lease that allows it, or the building's permission).
     HostSpaceUpdate:
       type: object
       properties:
         status: { type: string, enum: [active, paused] }
+        availability: { $ref: '#/components/schemas/Availability' }
+    Availability:
+      description: >
+        When the host rents the space, in Mexico City time; null means always. A booking must fall
+        entirely inside it (409 outside_availability) and searches leave the space out otherwise.
+      type: [object, 'null']
+      required: [days, fromHour, toHour]
+      properties:
+        days:
+          type: array
+          description: ISO weekdays, 1 = Monday to 7 = Sunday, no repeats
+          items: { type: integer, minimum: 1, maximum: 7 }
+        fromHour: { type: integer, minimum: 0, maximum: 23 }
+        toHour:
+          type: integer
+          minimum: 1
+          maximum: 24
+          description: When not after fromHour, the window runs overnight into the next morning
     HostBooking:
       type: object
       required: [id, status, space, startsAt, endsAt, driver, subtotalCents, cancelledBy, checkedInAt, checkedOutAt, overtimeHours, createdAt]

@@ -16,6 +16,8 @@ const akron = venues.find((v) => v.id === 'akron')!
 let clock = T0
 let db: MockDb
 
+const TITLE = 'Cochera techada en Jardines Universidad' // written by ParkApp
+
 const valid = (over: Partial<HostSpaceCreate> = {}): HostSpaceCreate => ({
   venueId: 'akron',
   street: 'Av. Patria 1234',
@@ -24,9 +26,9 @@ const valid = (over: Partial<HostSpaceCreate> = {}): HostSpaceCreate => ({
   references: 'Portón negro junto a la farmacia',
   location: offsetPoint(akron.location, 600, 90),
   dimensions: { lengthCm: 520, widthCm: 300, heightCm: 230 },
-  vehicleTypes: ['compact', 'sedan', 'suv'],
+  quantity: 1,
+  availability: null,
   features: ['covered', 'gate'],
-  title: 'Cochera techada junto al estadio',
   description: 'Entrada amplia y portón eléctrico.',
   photoKeys: ['mock/a.jpg', 'mock/b.jpg', 'mock/c.jpg'],
   acceptHostTerms: true,
@@ -112,7 +114,7 @@ describe('review before it goes live', () => {
     const space = publishAndApprove()
     expect(db.listHostSpaces(HOST)[0]?.status).toBe('active')
     const found = search().find((s) => s.id === space.id)
-    expect(found).toMatchObject({ title: valid().title, priceCentsPerHour: 6000, available: true })
+    expect(found).toMatchObject({ title: TITLE, priceCentsPerHour: 6000, available: true })
     expect(found!.distanceM).toBeGreaterThan(550)
     expect(found!.distanceM).toBeLessThan(650)
   })
@@ -148,9 +150,6 @@ describe('what a host may publish', () => {
       { dimensions: { lengthCm: 50, widthCm: 300, heightCm: 230 } },
       'invalid_dimensions',
     ],
-    ['no car type', { vehicleTypes: [] }, 'vehicle_types_required'],
-    ['a short title', { title: 'Hola' }, 'invalid_title'],
-    ['a long title', { title: 'x'.repeat(61) }, 'invalid_title'],
     ['a long description', { description: 'x'.repeat(501) }, 'invalid_description'],
     ['two photos', { photoKeys: ['a', 'b'] }, 'photos_required'],
     ['nine photos', { photoKeys: Array.from({ length: 9 }, (_, i) => `p${i}`) }, 'too_many_photos'],
@@ -243,10 +242,10 @@ describe('managing a published space', () => {
   it('lists only my spaces, newest first', () => {
     db.createHostSpace(HOST, valid())
     clock += 1000
-    db.createHostSpace(HOST, valid({ street: 'Calle Segunda 55', title: 'Otra cochera cercana' }))
+    db.createHostSpace(HOST, valid({ street: 'Calle Segunda 55', neighborhood: 'Providencia' }))
     expect(db.listHostSpaces(HOST).map((s) => s.title)).toEqual([
-      'Otra cochera cercana',
-      valid().title,
+      'Cochera techada en Providencia',
+      TITLE,
     ])
   })
 })
@@ -374,7 +373,7 @@ describe('persistence', () => {
     const second = createDb({ now: () => clock, storage })
     expect(second.listHostSpaces(HOST)).toHaveLength(1)
     expect(second.listHostSpaces(HOST)[0]).toMatchObject({
-      title: valid().title,
+      title: TITLE,
       status: 'pending_review',
     })
   })

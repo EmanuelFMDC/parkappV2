@@ -30,13 +30,13 @@ const complete: HostDraft = {
   lengthCm: '520',
   widthCm: '300',
   heightCm: '230',
-  vehicleTypes: ['compact', 'sedan'],
   photos: [
     { key: 'a', name: 'a.jpg' },
     { key: 'b', name: 'b.jpg' },
     { key: 'c', name: 'c.jpg' },
   ],
-  title: 'Cochera techada junto al estadio',
+  quantity: '1',
+  availability: null,
   acceptTerms: true,
 }
 
@@ -83,13 +83,26 @@ describe('validateSize', () => {
     expect(validateSize({ ...complete, ...over })).toEqual({ field, code: 'invalid_dimensions' })
   })
 
-  it('needs at least one type of car', () => {
-    expect(validateSize({ ...complete, vehicleTypes: [] })?.code).toBe('vehicle_types_required')
+  it('needs measurements where at least one standard car fits', () => {
+    expect(
+      validateSize({ ...complete, lengthCm: '300', widthCm: '200', heightCm: '180' })?.code,
+    ).toBe('fits_no_car')
+  })
+
+  it.each([
+    ['0', 'invalid_quantity'],
+    ['21', 'invalid_quantity'],
+    ['1.5', 'invalid_quantity'],
+    ['', 'invalid_quantity'],
+    ['1', null],
+    ['20', null],
+  ])('quantity %j -> %j', (quantity, expected) => {
+    expect(validateSize({ ...complete, quantity })?.code ?? null).toBe(expected)
   })
 })
 
 describe('validatePhotos', () => {
-  it('accepts three photos and a good title', () => {
+  it('accepts three photos; ParkApp writes the title', () => {
     expect(validatePhotos(complete)).toBeNull()
   })
 
@@ -101,9 +114,7 @@ describe('validatePhotos', () => {
     expect(validatePhotos({ ...complete, photos: nine })?.code).toBe('too_many_photos')
   })
 
-  it('needs a title of 5 to 60 characters and a description of at most 500', () => {
-    expect(validatePhotos({ ...complete, title: 'Hola' })?.code).toBe('invalid_title')
-    expect(validatePhotos({ ...complete, title: 'x'.repeat(61) })?.code).toBe('invalid_title')
+  it('needs a description of at most 500 characters', () => {
     expect(validatePhotos({ ...complete, description: 'x'.repeat(501) })?.code).toBe(
       'invalid_description',
     )

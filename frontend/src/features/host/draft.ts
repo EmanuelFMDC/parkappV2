@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
-import type { LatLng, Municipality, SpaceFeature, VehicleType } from '../../api/types'
+import type { LatLng, Municipality, SpaceFeature } from '../../api/types'
+import type { Availability } from '../../lib/availability'
 
 export interface DraftPhoto {
   /** Object key returned by the signed-upload step. */
@@ -13,18 +14,17 @@ export interface HostDraft {
   street: string
   neighborhood: string
   municipality: Municipality | ''
-  references: string
   location: LatLng | null
   lengthCm: string
   widthCm: string
   heightCm: string
-  vehicleTypes: VehicleType[]
-  /** Once the host edits the car types by hand, changing the size stops overwriting them. */
-  typesTouched: boolean
   features: SpaceFeature[]
   photos: DraftPhoto[]
-  title: string
   description: string
+  /** Identical spots, as typed. */
+  quantity: string
+  /** When the host rents it; null = always. */
+  availability: Availability | null
   acceptTerms: boolean
 }
 
@@ -33,17 +33,15 @@ export const EMPTY_DRAFT: HostDraft = {
   street: '',
   neighborhood: '',
   municipality: '',
-  references: '',
   location: null,
   lengthCm: '',
   widthCm: '',
   heightCm: '',
-  vehicleTypes: [],
-  typesTouched: false,
   features: [],
   photos: [],
-  title: '',
   description: '',
+  quantity: '1',
+  availability: null,
   acceptTerms: false,
 }
 

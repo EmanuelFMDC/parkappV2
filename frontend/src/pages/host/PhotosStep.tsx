@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { Input, Textarea } from '../../components/ui'
+import { Textarea } from '../../components/ui'
 import { HostStepFrame } from '../../features/host/HostStepFrame'
 import { stepPath, useStepGuard } from '../../features/host/steps'
 import { useHostDraft } from '../../features/host/draft'
 import { PhotoUploader } from '../../features/host/PhotoUploader'
 import { validatePhotos, type FieldProblem } from '../../features/host/validate'
-import { DESCRIPTION_MAX, TITLE_MAX, TITLE_MIN } from '../../lib/hostRules'
+import { DESCRIPTION_MAX } from '../../lib/hostRules'
 
-/** Step 3 of 4 for hosts: photos, a title and a short description. */
+/** Step 3 of 4 for hosts: photos and a short description. ParkApp writes the title. */
 export default function PhotosStep() {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -43,14 +43,6 @@ export default function PhotosStep() {
         photos={draft.photos}
         onChange={(photos) => change({ photos })}
         error={err('photos')}
-      />
-      <Input
-        label={t('host.photos.titleLabel')}
-        hint={t('host.photos.titleHint', { min: TITLE_MIN, max: TITLE_MAX })}
-        maxLength={TITLE_MAX + 20}
-        value={draft.title}
-        error={err('title')}
-        onChange={(e) => change({ title: e.target.value })}
       />
       <Textarea
         label={t('host.photos.descriptionLabel')}

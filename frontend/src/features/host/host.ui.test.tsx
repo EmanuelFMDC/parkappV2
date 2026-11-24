@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
@@ -77,13 +77,13 @@ const readyDraft = (over: Partial<HostDraft> = {}): HostDraft => ({
   lengthCm: '520',
   widthCm: '300',
   heightCm: '230',
-  vehicleTypes: ['compact', 'sedan', 'suv'],
+  quantity: '1',
+  availability: null,
   photos: [
     { key: 'mock/a.jpg', name: 'a.jpg' },
     { key: 'mock/b.jpg', name: 'b.jpg' },
     { key: 'mock/c.jpg', name: 'c.jpg' },
   ],
-  title: 'Cochera techada junto al estadio',
   acceptTerms: true,
   ...over,
 })
@@ -228,35 +228,33 @@ describe('size step', () => {
   async function renderSize() {
     const services = await signedIn()
     verifiedHostWithoutCar()
-    saveDraft(readyDraft({ lengthCm: '', widthCm: '', heightCm: '', vehicleTypes: [] }))
+    saveDraft(readyDraft({ lengthCm: '', widthCm: '', heightCm: '' }))
     renderPage('/host/new/size', <SizeStep />, 'host/new/size', services)
     await screen.findByRole('heading', { name: 'Medidas del espacio' })
   }
   const type = async (label: string, value: string) =>
     userEvent.type(screen.getByLabelText(new RegExp(label)), value)
 
-  it('suggests which cars fit as the measurements are typed', async () => {
+  it('works out which cars fit as the measurements are typed, without asking', async () => {
     await renderSize()
     await type('Largo', '520')
     await type('Ancho', '300')
     await type('Altura', '230')
-    expect(screen.getByLabelText('Compacto')).toBeChecked()
-    expect(screen.getByLabelText('Sedán')).toBeChecked()
-    expect(screen.getByLabelText('SUV')).toBeChecked()
-    expect(screen.getByLabelText('Pick-up')).not.toBeChecked()
+    expect(screen.getByText(/Caben:/).parentElement).toHaveTextContent('Compacto, Sedán, SUV.')
+    expect(screen.queryByRole('checkbox', { name: 'Pick-up' })).not.toBeInTheDocument()
   })
 
-  it('stops overwriting the choice once the host edits it by hand', async () => {
+  it('asks how many identical spots, 1 by default', async () => {
     await renderSize()
+    const quantity = screen.getByLabelText(/Cuántos cajones iguales/)
+    expect(quantity).toHaveValue('1')
     await type('Largo', '520')
     await type('Ancho', '300')
     await type('Altura', '230')
-    await userEvent.click(screen.getByLabelText('SUV'))
-    expect(screen.getByLabelText('SUV')).not.toBeChecked()
-
-    await userEvent.clear(screen.getByLabelText(/Largo/))
-    await userEvent.type(screen.getByLabelText(/Largo/), '600')
-    expect(screen.getByLabelText('SUV')).not.toBeChecked()
+    await userEvent.clear(quantity)
+    await userEvent.type(quantity, '0')
+    await userEvent.click(screen.getByRole('button', { name: 'Continuar' }))
+    expect(await screen.findByText('Escribe cuántos cajones, entre 1 y 20.')).toBeInTheDocument()
   })
 
   it('warns when the measurements fit no standard car', async () => {
@@ -294,7 +292,7 @@ describe('publishing', () => {
 
     const [space] = testDb().listHostSpaces(USER)
     expect(space).toMatchObject({
-      title: 'Cochera techada junto al estadio',
+      title: 'Cochera en Jardines Universidad', // written by ParkApp
       priceCentsPerHour: 6000, // the Akron tariff
       street: 'Av. Patria 1234',
     })
@@ -310,10 +308,29 @@ describe('publishing', () => {
     expect(screen.queryByRole('textbox', { name: /precio/i })).not.toBeInTheDocument()
   })
 
+  it('publishes with a schedule: weekend evenings to start, then edited', async () => {
+    await renderPrice()
+    const always = await screen.findByRole('switch', { name: 'Disponible siempre' })
+    expect(always).toBeChecked()
+    await userEvent.click(always)
+    expect(screen.getByRole('button', { name: 'viernes' })).toHaveAttribute('aria-pressed', 'true')
+    await userEvent.click(screen.getByRole('button', { name: 'domingo' }))
+    await userEvent.selectOptions(screen.getByLabelText('Hasta'), '2')
+    expect(screen.getByText('Termina a la mañana siguiente.')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Publicar cochera' }))
+    expect(await screen.findByTestId('where')).toHaveTextContent('/host/new/done')
+    expect(testDb().listHostSpaces(USER)[0]?.availability).toEqual({
+      days: [5, 6],
+      fromHour: 16,
+      toHour: 2,
+    })
+  })
+
   it('needs the host rules accepted', async () => {
     await renderPrice({ acceptTerms: false })
     await userEvent.click(screen.getByRole('button', { name: 'Publicar cochera' }))
-    expect(await screen.findByText(/aceptar las reglas para anfitriones/)).toBeInTheDocument()
+    expect(await screen.findByText(/declarar que puedes rentar el espacio/)).toBeInTheDocument()
   })
 
   it('sends the host back to fix the address when the server finds a duplicate', async () => {
@@ -325,9 +342,9 @@ describe('publishing', () => {
       municipality: 'Zapopan',
       location: offsetPoint(akron.location, 500, 90),
       dimensions: { lengthCm: 520, widthCm: 300, heightCm: 230 },
-      vehicleTypes: ['sedan'],
+      quantity: 1,
+      availability: null,
       features: [],
-      title: 'Ya publicada antes',
       description: '',
       photoKeys: ['a', 'b', 'c'],
       acceptHostTerms: true,
@@ -381,9 +398,9 @@ describe('host home', () => {
       municipality: 'Zapopan',
       location: offsetPoint(akron.location, 500, 90),
       dimensions: { lengthCm: 520, widthCm: 300, heightCm: 230 },
-      vehicleTypes: ['sedan'],
+      quantity: 1,
+      availability: null,
       features: [],
-      title: 'Cochera para pausar',
       description: '',
       photoKeys: ['a', 'b', 'c'],
       acceptHostTerms: true,
@@ -408,9 +425,9 @@ describe('host home', () => {
       municipality: 'Zapopan',
       location: offsetPoint(akron.location, 500, 90),
       dimensions: { lengthCm: 520, widthCm: 300, heightCm: 230 },
-      vehicleTypes: ['sedan'],
+      quantity: 1,
+      availability: null,
       features: [],
-      title: 'Cochera con precio',
       description: '',
       photoKeys: ['a', 'b', 'c'],
       acceptHostTerms: true,
@@ -421,6 +438,40 @@ describe('host home', () => {
     expect(await screen.findByText('Ganas $60 por hora')).toBeInTheDocument()
     expect(screen.getByText(/\+ \$50 por reserva/)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Cambiar precio' })).not.toBeInTheDocument()
+  })
+
+  it('shows the spots and schedule of a space, and changes the schedule', async () => {
+    const services = await signedIn()
+    verifiedHostWithoutCar()
+    testDb().createHostSpace(USER, {
+      venueId: 'akron',
+      street: 'Av. Patria 1234',
+      neighborhood: 'Jardines Universidad',
+      municipality: 'Zapopan',
+      location: offsetPoint(akron.location, 500, 90),
+      dimensions: { lengthCm: 520, widthCm: 300, heightCm: 230 },
+      quantity: 3,
+      availability: null,
+      features: [],
+      description: '',
+      photoKeys: ['a', 'b', 'c'],
+      acceptHostTerms: true,
+    })
+    testDb().approveAllSpacesNow()
+    renderHome(services)
+
+    expect(await screen.findByText(/3 cajones · Disponible siempre/)).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Cambiar horario' }))
+    const dialog = screen.getByRole('dialog', { name: 'Cambiar horario' })
+    await userEvent.click(within(dialog).getByRole('switch', { name: 'Disponible siempre' }))
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Guardar horario' }))
+
+    expect(await screen.findByText(/3 cajones · vie, sáb, dom, de 4/)).toBeInTheDocument()
+    expect(testDb().listHostSpaces(USER)[0]?.availability).toEqual({
+      days: [5, 6, 7],
+      fromHour: 16,
+      toHour: 24,
+    })
   })
 
   it('shows a rejected space with the reason and a way to list it again', async () => {
@@ -434,9 +485,9 @@ describe('host home', () => {
       municipality: 'Zapopan',
       location: offsetPoint(akron.location, 500, 90),
       dimensions: { lengthCm: 520, widthCm: 300, heightCm: 230 },
-      vehicleTypes: ['sedan'],
+      quantity: 1,
+      availability: null,
       features: [],
-      title: 'Cochera rechazada',
       description: '',
       photoKeys: ['a', 'b', 'c'],
       acceptHostTerms: true,

@@ -89,12 +89,6 @@ export default function LocationStep() {
           ))}
         </Select>
       </div>
-      <Input
-        label={t('host.location.references')}
-        hint={t('host.location.referencesHint')}
-        value={draft.references}
-        onChange={(e) => change({ references: e.target.value })}
-      />
 
       <section aria-labelledby="pin-title" className="space-y-3">
         <h2 id="pin-title" className="text-title font-semibold">

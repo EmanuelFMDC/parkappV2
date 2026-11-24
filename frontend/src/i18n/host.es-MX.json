@@ -17,15 +17,16 @@
       "invalid_address": "Escribe la calle, el número y la colonia.",
       "invalid_municipality": "Elige un municipio de la zona metropolitana.",
       "invalid_dimensions": "Revisa el largo, el ancho y la altura.",
-      "vehicle_types_required": "Elige al menos un tipo de auto que quepa.",
-      "invalid_title": "El título debe tener entre 5 y 60 caracteres.",
       "invalid_description": "La descripción puede tener hasta 500 caracteres.",
       "photos_required": "Agrega al menos 3 fotos.",
       "too_many_photos": "Puedes agregar hasta 8 fotos.",
-      "terms_required": "Para publicar debes aceptar las reglas para anfitriones.",
+      "terms_required": "Para publicar debes declarar que puedes rentar el espacio y aceptar las reglas.",
       "duplicate_space": "Ya publicaste una cochera en esta dirección.",
       "not_editable": "Una cochera en revisión o rechazada no se puede pausar ni reactivar.",
-      "own_space": "No puedes reservar tu propia cochera."
+      "own_space": "No puedes reservar tu propia cochera.",
+      "fits_no_car": "Con esas medidas no cabe un auto estándar. Revisa los números.",
+      "invalid_quantity": "Escribe cuántos cajones, entre 1 y 20.",
+      "invalid_availability": "Elige al menos un día y dos horas distintas."
     }
   },
   "host": {
@@ -67,7 +68,9 @@
       "resume": "Reactivar",
       "republish": "Publicar de nuevo",
       "earnPerHour": "Ganas {{amount}} por hora",
-      "surchargeNote": "+ {{amount}} por reserva en zona de recinto"
+      "surchargeNote": "+ {{amount}} por reserva en zona de recinto",
+      "spots_one": "{{count}} cajón",
+      "spots_other": "{{count}} cajones"
     },
     "booking": {
       "verified": "Identidad verificada",
@@ -93,8 +96,6 @@
       "neighborhood": "Colonia",
       "municipality": "Municipio",
       "municipalityPlaceholder": "Elige un municipio",
-      "references": "Referencias (opcional)",
-      "referencesHint": "Ayuda al conductor a encontrar la entrada.",
       "pinTitle": "Marca la entrada en el mapa",
       "pinHelp": "Toca el mapa o usa las flechas. El pin debe quedar a menos de {{radius}} del recinto.",
       "nudge": "Mover el pin 50 metros",
@@ -110,15 +111,16 @@
     },
     "size": {
       "title": "Medidas del espacio",
-      "intro": "Mide el lugar donde se estaciona el auto. Con eso sugerimos qué autos caben.",
+      "intro": "Mide el lugar donde se estaciona el auto. Con eso calculamos qué autos caben.",
       "length": "Largo (cm)",
       "width": "Ancho (cm)",
       "height": "Altura de la entrada (cm)",
       "range": "Entre {{min}} y {{max}}",
-      "types": "¿Qué autos caben?",
-      "typesHint": "Los sugerimos según las medidas. Puedes cambiarlos.",
       "features": "¿Qué ofrece?",
-      "noSuggestion": "Con esas medidas no cabe un auto estándar. Revisa los números."
+      "fitsTitle": "Caben:",
+      "fitsHint": "Lo calculamos con las medidas.",
+      "quantity": "¿Cuántos cajones iguales rentas?",
+      "quantityHint": "Si tienes varios cajones con las mismas medidas, publícalos juntos. Entre {{min}} y {{max}}."
     },
     "photos": {
       "title": "Fotos y descripción",
@@ -132,10 +134,8 @@
       "tooBig": "{{name}}: pesa más de 10 MB.",
       "tooMany": "Solo caben {{max}} fotos.",
       "uploadFailed": "{{name}}: no se pudo subir. Intenta de nuevo.",
-      "titleLabel": "Título del anuncio",
-      "titleHint": "Entre {{min}} y {{max}} caracteres.",
       "descriptionLabel": "Descripción (opcional)",
-      "descriptionHint": "Cómo se entra, horarios y qué debe saber el conductor."
+      "descriptionHint": "Cómo se entra y referencias para encontrar la entrada. El título lo escribimos por ti."
     },
     "price": {
       "title": "Precio",
@@ -151,10 +151,12 @@
       "sizeLine": "{{length}} × {{width}} cm, altura de entrada {{height}} cm",
       "photosLine_one": "{{count}} foto",
       "photosLine_other": "{{count}} fotos",
-      "terms": "Acepto las reglas para anfitriones: mantener el lugar libre en los horarios reservados y recibir solo a quien tenga reserva.",
+      "terms": "Declaro que tengo derecho a rentar este espacio (soy dueño, mi contrato lo permite o tengo permiso del condominio) y acepto las reglas para anfitriones: mantenerlo libre en los horarios reservados y recibir solo a quien tenga reserva.",
       "publish": "Publicar cochera",
       "publishing": "Publicando…",
-      "fix": "Corregir"
+      "fix": "Corregir",
+      "spotsLine_one": "{{count}} cajón",
+      "spotsLine_other": "{{count}} cajones iguales"
     },
     "done": {
       "title": "Tu cochera está en revisión",
@@ -163,7 +165,23 @@
       "another": "Publicar otra"
     },
     "nextUp": "Siguiente: {{step}}",
-    "lastStep": "Último paso"
+    "lastStep": "Último paso",
+    "availability": {
+      "title": "¿Cuándo lo rentas?",
+      "always": "Disponible siempre",
+      "alwaysHint": "Disponible todos los días, a toda hora.",
+      "someHint": "Solo en los días y horas que elijas.",
+      "days": "Días",
+      "from": "Desde",
+      "to": "Hasta",
+      "midnight": "Medianoche",
+      "overnight": "Termina a la mañana siguiente.",
+      "change": "Cambiar horario",
+      "save": "Guardar horario",
+      "cancel": "Cancelar",
+      "summaryAlways": "Disponible siempre",
+      "summary": "{{days}}, de {{from}} a {{to}}"
+    }
   },
   "mode": {
     "hostBanner": "Modo anfitrión",

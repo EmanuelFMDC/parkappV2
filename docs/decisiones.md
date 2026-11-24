@@ -64,13 +64,16 @@ Fuente: presentación final del proyecto (modelo de negocio).
 
 ## Modo anfitrión
 
-- **Alta en cuatro pasos:** ubicación, dimensiones, fotos, precio (solo muestra lo que gana; ver Precios). Más "Mis cocheras" (pausar, reactivar) y "Reservas recibidas".
+- **Alta en cuatro pasos:** ubicación, medidas y número de cajones, fotos y descripción, precio y horario (el precio solo muestra lo que gana; ver Precios). Más "Mis cocheras" (pausar, reactivar, cambiar horario) y "Reservas recibidas".
 - **Identidad:** mismo registro que el conductor, sin pedir auto. Sin identidad verificada no se puede publicar.
 - **Ubicación:** dirección escrita más pin en el mapa ilustrado, con botones de dirección para teclado y lector de pantalla. Sin geocodificación hasta Google Maps.
 - **Revisión antes de publicar.** Una cochera nueva nace `pending_review`; el back-office la aprueba o rechaza con un motivo. Solo las `active` aparecen en las búsquedas.
 - **Un anfitrión no puede reservar su propia cochera** (422 `own_space`).
 - **Qué ve el anfitrión de un conductor:** nombre de pila, insignia, auto y precio; nunca teléfono, correo ni INE.
-- **Autos sugeridos por medidas** con umbrales orientativos y editables (`lib/hostRules.ts`); validar con un anfitrión real.
+- **Menos de 15 campos para publicar (14):** recinto, calle y número, colonia, municipio, pin, largo, ancho, alto, características, número de cajones, fotos, descripción, horario y una casilla de declaración y reglas. ParkApp escribe el título ("Cochera techada en Jardines Universidad") y calcula qué autos caben con las medidas (`lib/hostRules.ts`, umbrales orientativos; validar con un anfitrión real). Las referencias van en la descripción.
+- **Registro múltiple:** un anuncio puede tener de 1 a 20 cajones iguales. Cada reserva ocupa uno, y el cajón está libre mientras en ningún momento de la ventana estén ocupados todos.
+- **Horario:** "Disponible siempre" o días de la semana entre dos horas (hora de Ciudad de México; si la hora final no es mayor que la inicial, termina a la mañana siguiente). Fuera del horario la cochera no aparece en las búsquedas y reservarla da 409 `outside_availability`. Se sugiere viernes a domingo de 4 p.m. a medianoche y se puede cambiar después en "Mis cocheras" (`lib/availability.ts`).
+- **Declaración de derecho a rentar:** va en la misma casilla que las reglas para anfitriones (dueño, contrato que lo permite o permiso del condominio). `acceptHostTerms` cubre ambas.
 - **Precio:** lo fija ParkApp por zona. El anfitrión ve "Ganas $X por hora" y, en cada reserva recibida, lo que gana (renta + $50 de zona).
 - **Una cochera sin reseñas dice "Nueva"** en vez de 0.0. Pausar no cancela reservas confirmadas.
 - **El borrador del alta vive en `sessionStorage`** y no sale del navegador hasta publicar.

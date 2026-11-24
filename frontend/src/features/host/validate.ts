@@ -7,10 +7,12 @@ import {
   PHOTOS_MAX,
   PHOTOS_MIN,
   STREET_MIN,
-  TITLE_MAX,
-  TITLE_MIN,
+  QUANTITY_MAX,
+  QUANTITY_MIN,
   dimensionsInRange,
+  suggestVehicleTypes,
 } from '../../lib/hostRules'
+import { validAvailability } from '../../lib/availability'
 import type { HostDraft } from './draft'
 
 export type HostStep = 'location' | 'size' | 'photos' | 'price'
@@ -59,25 +61,28 @@ export function validateSize(draft: HostDraft): FieldProblem | null {
     if (!(d[key] >= min && d[key] <= max)) return { field, code: 'invalid_dimensions' }
   }
   if (!dimensionsInRange(d)) return { field: 'length', code: 'invalid_dimensions' }
-  if (draft.vehicleTypes.length === 0) return { field: 'types', code: 'vehicle_types_required' }
+  if (suggestVehicleTypes(d).length === 0) return { field: 'length', code: 'fits_no_car' }
+  const quantity = toInt(draft.quantity)
+  if (!(quantity >= QUANTITY_MIN && quantity <= QUANTITY_MAX)) {
+    return { field: 'quantity', code: 'invalid_quantity' }
+  }
   return null
 }
 
 export function validatePhotos(draft: HostDraft): FieldProblem | null {
-  const title = draft.title.trim()
   if (draft.photos.length < PHOTOS_MIN) return { field: 'photos', code: 'photos_required' }
   if (draft.photos.length > PHOTOS_MAX) return { field: 'photos', code: 'too_many_photos' }
-  if (title.length < TITLE_MIN || title.length > TITLE_MAX) {
-    return { field: 'title', code: 'invalid_title' }
-  }
   if (draft.description.length > DESCRIPTION_MAX) {
     return { field: 'description', code: 'invalid_description' }
   }
   return null
 }
 
-/** The price is set by ParkApp from the zone, so the last step only needs the host rules. */
+/** The last step: when the host rents it, and the host rules with the right-to-rent declaration. */
 export function validatePrice(draft: HostDraft): FieldProblem | null {
+  if (draft.availability && !validAvailability(draft.availability)) {
+    return { field: 'availability', code: 'invalid_availability' }
+  }
   if (!draft.acceptTerms) return { field: 'terms', code: 'terms_required' }
   return null
 }
@@ -113,14 +118,13 @@ export function buildCreateInput(draft: HostDraft): HostSpaceCreate | null {
     street: draft.street.trim(),
     neighborhood: draft.neighborhood.trim(),
     municipality: draft.municipality,
-    references: draft.references.trim(),
     location: draft.location,
     dimensions,
-    vehicleTypes: draft.vehicleTypes,
     features: draft.features,
-    title: draft.title.trim(),
     description: draft.description.trim(),
     photoKeys: draft.photos.map((p) => p.key),
+    quantity: toInt(draft.quantity),
+    availability: draft.availability,
     acceptHostTerms: draft.acceptTerms,
   }
 }
@@ -132,8 +136,9 @@ const STEP_OF_CODE: Record<string, HostStep> = {
   outside_radius: 'location',
   duplicate_space: 'location',
   invalid_dimensions: 'size',
-  vehicle_types_required: 'size',
-  invalid_title: 'photos',
+  fits_no_car: 'size',
+  invalid_quantity: 'size',
+  invalid_availability: 'price',
   invalid_description: 'photos',
   photos_required: 'photos',
   too_many_photos: 'photos',

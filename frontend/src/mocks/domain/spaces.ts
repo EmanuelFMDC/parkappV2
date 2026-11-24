@@ -12,12 +12,13 @@ import {
   PHOTOS_MAX,
   PHOTOS_MIN,
   STREET_MIN,
-  TITLE_MAX,
-  TITLE_MIN,
+  QUANTITY_MAX,
+  QUANTITY_MIN,
   MUNICIPALITIES,
-  VEHICLE_TYPES,
   dimensionsInRange,
+  suggestVehicleTypes,
 } from '../../lib/hostRules'
+import { validAvailability, type Availability } from '../../lib/availability'
 import { tariffFor, type Tariff } from '../../lib/tariffs'
 import { ApiError, notFound } from './errors'
 import { distanceM } from './geo'
@@ -37,6 +38,10 @@ interface Meta {
   reviewNote: string | null
   createdAt: string
   reviewStartedAt: number | null
+  /** Identical spots; each booking takes one. Older saved spaces have none (= 1). */
+  quantity?: number
+  /** When the host rents it; null or missing = always. */
+  availability?: Availability | null
 }
 
 interface Stored {
@@ -57,6 +62,22 @@ export interface HostLabel {
 }
 
 const invalid = (code: string, message: string) => new ApiError(422, code, message)
+
+function checkAvailability(a: Availability | null | undefined) {
+  if (a && !validAvailability(a)) {
+    throw invalid('invalid_availability', 'Pick at least one day and two different hours')
+  }
+}
+
+/** ParkApp writes the title so the host has one field less: "Cochera techada en Providencia". */
+export function autoTitle(features: string[], quantity: number, neighborhood: string): string {
+  const covered = features.includes('covered')
+  const noun =
+    quantity > 1
+      ? `${quantity} cajones${covered ? ' techados' : ''}`
+      : `Cochera${covered ? ' techada' : ''}`
+  return `${noun} en ${neighborhood}`
+}
 
 /**
  * Every space on the platform: the sample ones and the ones hosts publish. Public searches only
@@ -164,6 +185,8 @@ export function createSpaceStore({ now, storage, reviewDelayMs = 5000 }: Options
       priceCentsPerHour: space.priceCentsPerHour,
       zoneSurchargeCents: space.zoneSurchargeCents,
       photoUrls: space.photoUrls,
+      quantity: meta.quantity ?? 1,
+      availability: meta.availability ?? null,
       reviewNote: meta.reviewNote,
       createdAt: meta.createdAt,
     }
@@ -185,16 +208,17 @@ export function createSpaceStore({ now, storage, reviewDelayMs = 5000 }: Options
     if (!dimensionsInRange(input.dimensions)) {
       throw invalid('invalid_dimensions', 'Check the length, width and height')
     }
+    if (suggestVehicleTypes(input.dimensions).length === 0) {
+      throw invalid('fits_no_car', 'No standard car fits these measurements')
+    }
     if (
-      input.vehicleTypes.length === 0 ||
-      !input.vehicleTypes.every((t) => VEHICLE_TYPES.includes(t))
+      !Number.isInteger(input.quantity) ||
+      input.quantity < QUANTITY_MIN ||
+      input.quantity > QUANTITY_MAX
     ) {
-      throw invalid('vehicle_types_required', 'Pick at least one type of car that fits')
+      throw invalid('invalid_quantity', `Between ${QUANTITY_MIN} and ${QUANTITY_MAX} spots`)
     }
-    const title = input.title.trim()
-    if (title.length < TITLE_MIN || title.length > TITLE_MAX) {
-      throw invalid('invalid_title', `The title needs ${TITLE_MIN} to ${TITLE_MAX} characters`)
-    }
+    checkAvailability(input.availability)
     if (input.description.length > DESCRIPTION_MAX) {
       throw invalid(
         'invalid_description',
@@ -225,6 +249,8 @@ export function createSpaceStore({ now, storage, reviewDelayMs = 5000 }: Options
         .filter((e) => e.meta.status === 'active')
         .map((e) => e.space),
     isActive: (id: string): boolean => entry(id)?.meta.status === 'active',
+    quantityOf: (id: string): number => entry(id)?.meta.quantity ?? 1,
+    availabilityOf: (id: string): Availability | null => entry(id)?.meta.availability ?? null,
     tariff(id: string): Tariff {
       const e = entry(id)
       if (!e) throw notFound('Space')
@@ -266,7 +292,7 @@ export function createSpaceStore({ now, storage, reviewDelayMs = 5000 }: Options
       counter += 1
       const space: Space = {
         id: `host_${counter}`,
-        title: input.title.trim(),
+        title: autoTitle(input.features, input.quantity, input.neighborhood.trim()),
         neighborhood: input.neighborhood.trim(),
         location: input.location,
         distanceM: distanceM(input.location, venue.location),
@@ -281,7 +307,7 @@ export function createSpaceStore({ now, storage, reviewDelayMs = 5000 }: Options
         available: true,
         description: input.description.trim(),
         dimensions: input.dimensions,
-        vehicleTypes: input.vehicleTypes,
+        vehicleTypes: suggestVehicleTypes(input.dimensions),
         host: { displayName: host.displayName, verified: true, memberSince: host.memberSince },
       }
       const stored: Stored = {
@@ -296,6 +322,8 @@ export function createSpaceStore({ now, storage, reviewDelayMs = 5000 }: Options
           reviewNote: null,
           createdAt: new Date(now()).toISOString(),
           reviewStartedAt: now(),
+          quantity: input.quantity,
+          availability: input.availability ?? null,
         },
       }
       hosted.push(stored)
@@ -315,6 +343,10 @@ export function createSpaceStore({ now, storage, reviewDelayMs = 5000 }: Options
           )
         }
         e.meta.status = patch.status
+      }
+      if (patch.availability !== undefined) {
+        checkAvailability(patch.availability)
+        e.meta.availability = patch.availability
       }
       save()
       return toHostSpace(e)

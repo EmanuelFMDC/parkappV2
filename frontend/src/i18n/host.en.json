@@ -17,15 +17,16 @@
       "invalid_address": "Enter the street, number and neighborhood.",
       "invalid_municipality": "Pick a municipality in the metropolitan area.",
       "invalid_dimensions": "Check the length, width and height.",
-      "vehicle_types_required": "Pick at least one type of car that fits.",
-      "invalid_title": "The title needs 5 to 60 characters.",
       "invalid_description": "The description can have up to 500 characters.",
       "photos_required": "Add at least 3 photos.",
       "too_many_photos": "You can add up to 8 photos.",
-      "terms_required": "To publish you must accept the host rules.",
+      "terms_required": "To list it you must declare you can rent the space and accept the rules.",
       "duplicate_space": "You already listed a garage at this address.",
       "not_editable": "A garage under review or rejected can't be paused or resumed.",
-      "own_space": "You can't book your own garage."
+      "own_space": "You can't book your own garage.",
+      "fits_no_car": "No standard car fits those measurements. Check the numbers.",
+      "invalid_quantity": "Enter how many spots, between 1 and 20.",
+      "invalid_availability": "Pick at least one day and two different hours."
     }
   },
   "host": {
@@ -67,7 +68,9 @@
       "resume": "Resume",
       "republish": "List again",
       "earnPerHour": "You earn {{amount}} per hour",
-      "surchargeNote": "+ {{amount}} per booking in a venue zone"
+      "surchargeNote": "+ {{amount}} per booking in a venue zone",
+      "spots_one": "{{count}} spot",
+      "spots_other": "{{count}} spots"
     },
     "booking": {
       "verified": "Identity verified",
@@ -93,8 +96,6 @@
       "neighborhood": "Neighborhood",
       "municipality": "Municipality",
       "municipalityPlaceholder": "Pick a municipality",
-      "references": "Landmarks (optional)",
-      "referencesHint": "Helps the driver find the entrance.",
       "pinTitle": "Mark the entrance on the map",
       "pinHelp": "Tap the map or use the arrows. The pin must be within {{radius}} of the venue.",
       "nudge": "Move the pin 50 meters",
@@ -110,15 +111,16 @@
     },
     "size": {
       "title": "Space dimensions",
-      "intro": "Measure where the car parks. We use it to suggest which cars fit.",
+      "intro": "Measure where the car parks. We use it to work out which cars fit.",
       "length": "Length (cm)",
       "width": "Width (cm)",
       "height": "Entrance height (cm)",
       "range": "Between {{min}} and {{max}}",
-      "types": "Which cars fit?",
-      "typesHint": "We suggest them from the measurements. You can change them.",
       "features": "What does it offer?",
-      "noSuggestion": "No standard car fits those measurements. Check the numbers."
+      "fitsTitle": "Fits:",
+      "fitsHint": "Worked out from the measurements.",
+      "quantity": "How many identical spots do you rent?",
+      "quantityHint": "If you have several spots with the same size, list them together. Between {{min}} and {{max}}."
     },
     "photos": {
       "title": "Photos and description",
@@ -132,10 +134,8 @@
       "tooBig": "{{name}}: it's larger than 10 MB.",
       "tooMany": "Only {{max}} photos fit.",
       "uploadFailed": "{{name}}: it couldn't be uploaded. Try again.",
-      "titleLabel": "Listing title",
-      "titleHint": "Between {{min}} and {{max}} characters.",
       "descriptionLabel": "Description (optional)",
-      "descriptionHint": "How to get in, hours, and what the driver should know."
+      "descriptionHint": "How to get in, and landmarks to find the entrance. We write the title for you."
     },
     "price": {
       "title": "Price",
@@ -151,10 +151,12 @@
       "sizeLine": "{{length}} × {{width}} cm, entrance height {{height}} cm",
       "photosLine_one": "{{count}} photo",
       "photosLine_other": "{{count}} photos",
-      "terms": "I accept the host rules: keep the spot free during reserved hours and only receive people with a booking.",
+      "terms": "I declare I have the right to rent this space (I own it, my lease allows it, or the building has given permission) and I accept the host rules: keep it free during booked hours and only let in people with a booking.",
       "publish": "List garage",
       "publishing": "Listing…",
-      "fix": "Fix it"
+      "fix": "Fix it",
+      "spotsLine_one": "{{count}} spot",
+      "spotsLine_other": "{{count}} identical spots"
     },
     "done": {
       "title": "Your garage is under review",
@@ -163,7 +165,23 @@
       "another": "List another"
     },
     "nextUp": "Next: {{step}}",
-    "lastStep": "Last step"
+    "lastStep": "Last step",
+    "availability": {
+      "title": "When do you rent it?",
+      "always": "Always available",
+      "alwaysHint": "Available every day, around the clock.",
+      "someHint": "Only on the days and hours you choose.",
+      "days": "Days",
+      "from": "From",
+      "to": "Until",
+      "midnight": "Midnight",
+      "overnight": "Ends the next morning.",
+      "change": "Change schedule",
+      "save": "Save schedule",
+      "cancel": "Cancel",
+      "summaryAlways": "Always available",
+      "summary": "{{days}}, {{from}} to {{to}}"
+    }
   },
   "mode": {
     "hostBanner": "Host mode",

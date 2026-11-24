@@ -36,7 +36,6 @@ test('host flow screenshots', async ({ page }, testInfo) => {
   await page.getByLabel('Calle y número').fill('Av. Patria 1234')
   await page.getByLabel('Colonia').fill('Jardines Universidad')
   await page.getByLabel('Municipio').selectOption('Zapopan')
-  await page.getByLabel('Referencias (opcional)').fill('Portón negro junto a la farmacia')
   await page.getByRole('button', { name: 'Mover al este' }).click()
   await page.getByRole('button', { name: 'Mover al norte' }).click()
   await page.getByRole('group', { name: 'Mapa de cocheras cercanas' }).scrollIntoViewIfNeeded()
@@ -61,13 +60,12 @@ test('host flow screenshots', async ({ page }, testInfo) => {
     })),
   )
   await expect(page.getByText('4 de 8 fotos (mínimo 3)')).toBeVisible()
-  await page.getByLabel('Título del anuncio').fill('Cochera techada junto al estadio')
   await page.getByLabel('Descripción (opcional)').fill('Entrada amplia y portón eléctrico.')
   await shot('4-photos')
   await page.getByRole('button', { name: 'Continuar' }).click()
 
   // Step 4: what the host earns (ParkApp sets the price)
-  await page.getByLabel(/Acepto las reglas para anfitriones/).check()
+  await page.getByLabel(/Declaro que tengo derecho a rentar/).check()
   await shot('5-price')
   await page.getByRole('button', { name: 'Publicar cochera' }).click()
 

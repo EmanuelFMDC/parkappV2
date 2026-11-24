@@ -71,7 +71,8 @@
       "too_early": "It's too early: check-in opens 30 minutes before the start.",
       "booking_over": "This booking has already ended.",
       "not_checkable": "This booking can't be checked in.",
-      "not_checked_in": "Check in first."
+      "not_checked_in": "Check in first.",
+      "outside_availability": "The host doesn't rent this garage at that time."
     }
   },
   "auth": {

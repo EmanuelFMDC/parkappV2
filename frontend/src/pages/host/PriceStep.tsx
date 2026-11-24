@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, Navigate } from 'react-router-dom'
 import { Checkbox } from '../../components/ui'
+import { AvailabilityField } from '../../features/host/AvailabilityField'
 import { HostStepFrame } from '../../features/host/HostStepFrame'
 import { stepPath, useStepGuard } from '../../features/host/steps'
 import { useHostDraft } from '../../features/host/draft'
@@ -21,7 +22,7 @@ import { tariffFor, type Tariff } from '../../lib/tariffs'
 
 const EXAMPLE_HOURS = 4
 
-/** Step 4 of 4 for hosts: what they will earn (ParkApp sets the price), a last look, and publishing. */
+/** Step 4 of 4 for hosts: what they earn (ParkApp sets the price), when they rent it, and publishing. */
 export default function PriceStep() {
   const { t, i18n } = useTranslation()
   const { draft, patch, clear } = useHostDraft()
@@ -118,7 +119,9 @@ export default function PriceStep() {
         <h2 id="summary-title" className="text-title font-semibold">
           {t('host.price.summary')}
         </h2>
-        <p className="font-semibold">{draft.title}</p>
+        <p className="font-semibold">
+          {t('host.price.spotsLine', { count: Number(draft.quantity) || 1 })}
+        </p>
         <p className="text-ink-muted">
           {draft.street}, {draft.neighborhood}, {draft.municipality}
         </p>
@@ -133,6 +136,12 @@ export default function PriceStep() {
           {t('host.price.photosLine', { count: draft.photos.length })}
         </p>
       </section>
+
+      <AvailabilityField
+        value={draft.availability}
+        onChange={(availability) => change({ availability })}
+        error={err('availability')}
+      />
 
       <Checkbox
         label={t('host.price.terms')}

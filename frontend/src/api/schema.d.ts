@@ -671,6 +671,8 @@ export interface components {
             /** @description Set by ParkApp from the tariff */
             priceCentsPerHour: number;
             zoneSurchargeCents: number;
+            quantity: number;
+            availability: components["schemas"]["Availability"];
             photoUrls: string[];
             /** @description Why back-office rejected the space, when it did */
             reviewNote: string | null;
@@ -682,24 +684,35 @@ export interface components {
             street: string;
             neighborhood: string;
             municipality: components["schemas"]["Municipality"];
+            /** @description Deprecated; the form puts landmarks in the description */
             references?: string;
             location: components["schemas"]["LatLng"];
+            /** @description The server works out which cars fit (422 fits_no_car if none does) */
             dimensions: components["schemas"]["Dimensions"];
-            vehicleTypes: components["schemas"]["VehicleType"][];
             features: components["schemas"]["SpaceFeature"][];
-            /** @description 5 to 60 characters */
-            title: string;
             /** @description Up to 500 characters */
             description: string;
             /** @description Object keys returned by the signed-upload step; 3 to 8 photos */
             photoKeys: string[];
-            /** @description Must be true */
+            /** @description Identical spots in this listing, 1 to 20; each booking takes one */
+            quantity: number;
+            availability: components["schemas"]["Availability"];
+            /** @description Must be true. The host accepts the host rules and declares the right to rent the space (owner, a lease that allows it, or the building's permission). */
             acceptHostTerms: boolean;
         };
         HostSpaceUpdate: {
             /** @enum {string} */
             status?: "active" | "paused";
+            availability?: components["schemas"]["Availability"];
         };
+        /** @description When the host rents the space, in Mexico City time; null means always. A booking must fall entirely inside it (409 outside_availability) and searches leave the space out otherwise. */
+        Availability: {
+            /** @description ISO weekdays, 1 = Monday to 7 = Sunday, no repeats */
+            days: number[];
+            fromHour: number;
+            /** @description When not after fromHour, the window runs overnight into the next morning */
+            toHour: number;
+        } | null;
         HostBooking: {
             id: string;
             status: components["schemas"]["BookingStatus"];

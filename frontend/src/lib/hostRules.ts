@@ -5,8 +5,9 @@ export const PHOTOS_MIN = 3
 export const PHOTOS_MAX = 8
 export const PHOTO_MAX_BYTES = 10 * 1024 * 1024
 export const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp']
-export const TITLE_MIN = 5
-export const TITLE_MAX = 60
+/** Identical spots one listing can hold (a small lot or a building's garage). */
+export const QUANTITY_MIN = 1
+export const QUANTITY_MAX = 20
 export const DESCRIPTION_MAX = 500
 export const STREET_MIN = 5
 

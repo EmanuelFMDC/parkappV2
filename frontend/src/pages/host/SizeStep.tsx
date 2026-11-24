@@ -1,17 +1,22 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import type { SpaceFeature, VehicleType } from '../../api/types'
+import type { SpaceFeature } from '../../api/types'
 import { Checkbox, Input } from '../../components/ui'
 import { HostStepFrame } from '../../features/host/HostStepFrame'
 import { stepPath, useStepGuard } from '../../features/host/steps'
 import { useHostDraft } from '../../features/host/draft'
 import { dimensionsOf, validateSize, type FieldProblem } from '../../features/host/validate'
-import { DIMENSION_LIMITS, VEHICLE_TYPES, suggestVehicleTypes } from '../../lib/hostRules'
+import {
+  DIMENSION_LIMITS,
+  QUANTITY_MAX,
+  QUANTITY_MIN,
+  suggestVehicleTypes,
+} from '../../lib/hostRules'
 
 const FEATURES: SpaceFeature[] = ['covered', 'gate', 'camera', 'ev_charger', 'lit']
 
-/** Step 2 of 4 for hosts: how big the space is and what it offers. */
+/** Step 2 of 4 for hosts: how big the space is, how many identical spots, and what it offers. */
 export default function SizeStep() {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -28,13 +33,7 @@ export default function SizeStep() {
 
   const setDimension = (key: 'lengthCm' | 'widthCm' | 'heightCm', value: string) => {
     setProblem(null)
-    const next = { ...draft, [key]: value }
-    // Until the host picks car types by hand, they follow the measurements.
-    const d = dimensionsOf(next)
-    const suggested = [d.lengthCm, d.widthCm, d.heightCm].every(Number.isFinite)
-      ? suggestVehicleTypes(d)
-      : []
-    patch({ [key]: value, ...(draft.typesTouched ? {} : { vehicleTypes: suggested }) })
+    patch({ [key]: value })
   }
 
   const toggle = <T extends string>(list: T[], item: T) =>
@@ -48,7 +47,8 @@ export default function SizeStep() {
 
   const d = dimensionsOf(draft)
   const measured = [d.lengthCm, d.widthCm, d.heightCm].every(Number.isFinite)
-  const nothingFits = measured && suggestVehicleTypes(d).length === 0
+  const fits = measured ? suggestVehicleTypes(d) : []
+  const nothingFits = measured && fits.length === 0
 
   return (
     <HostStepFrame
@@ -86,30 +86,29 @@ export default function SizeStep() {
       </div>
       {nothingFits && (
         <p className="rounded-control bg-warning-50 p-4 font-medium text-warning-700">
-          {t('host.size.noSuggestion')}
+          {t('errors.code.fits_no_car')}
         </p>
       )}
 
-      <fieldset className="space-y-1">
-        <legend className="text-title font-semibold">{t('host.size.types')}</legend>
-        <p className="pb-2 text-caption text-ink-muted">{t('host.size.typesHint')}</p>
-        {VEHICLE_TYPES.map((type: VehicleType) => (
-          <Checkbox
-            key={type}
-            label={t(`vehicles.${type}`)}
-            checked={draft.vehicleTypes.includes(type)}
-            onChange={() => {
-              setProblem(null)
-              patch({ vehicleTypes: toggle(draft.vehicleTypes, type), typesTouched: true })
-            }}
-          />
-        ))}
-        {err('types') && (
-          <p role="alert" className="text-caption font-medium text-danger-600">
-            {err('types')}
-          </p>
-        )}
-      </fieldset>
+      {fits.length > 0 && (
+        <p className="rounded-control bg-primary-soft p-4">
+          <span className="font-semibold">{t('host.size.fitsTitle')}</span>{' '}
+          {fits.map((type) => t(`vehicles.${type}`)).join(', ')}.{' '}
+          <span className="text-ink-muted">{t('host.size.fitsHint')}</span>
+        </p>
+      )}
+
+      <Input
+        label={t('host.size.quantity')}
+        hint={t('host.size.quantityHint', { min: QUANTITY_MIN, max: QUANTITY_MAX })}
+        inputMode="numeric"
+        value={draft.quantity}
+        error={err('quantity')}
+        onChange={(e) => {
+          setProblem(null)
+          patch({ quantity: e.target.value })
+        }}
+      />
 
       <fieldset className="space-y-1">
         <legend className="pb-2 text-title font-semibold">{t('host.size.features')}</legend>
