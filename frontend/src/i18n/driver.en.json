@@ -128,7 +128,7 @@
       "fits": "Fits",
       "reviews": "Reviews",
       "reviewsEmpty": "No reviews yet.",
-      "addressNote": "The exact address is shown once you confirm your booking.",
+      "addressNote": "The pin on the map is approximate, about 100 to 200 m off. The exact address and location are shown once you confirm your booking.",
       "total": "Total for your time",
       "continue": "Choose time",
       "unavailable": "This garage is no longer available for your time. Pick another or change the time.",
@@ -159,7 +159,7 @@
       "note": "This is a simulation: nothing is charged.",
       "cta": "Pay and book · {{total}}",
       "paying": "Booking…",
-      "freeCancel": "Free cancellation until 10 minutes before you arrive.",
+      "freeCancel": "Free cancellation until 2 hours before you arrive.",
       "addressNote": "You'll see the exact address and your access code once it's confirmed.",
       "pickAnother": "Pick another garage"
     },

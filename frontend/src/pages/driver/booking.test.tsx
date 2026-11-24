@@ -6,7 +6,7 @@ import { Providers } from '../../app/Providers'
 import i18n from '../../i18n'
 import { offsetPoint } from '../../lib/geo'
 import { API_URL } from '../../mocks/handlers'
-import { venues } from '../../mocks/domain/seed'
+import { buildSpaces, venues } from '../../mocks/domain/seed'
 import { resetTestDb, testDb } from '../../mocks/server'
 import { createMockServices } from '../../services'
 import HostBookingsPage from '../host/HostBookingsPage'
@@ -153,7 +153,8 @@ describe('host cancels', () => {
 describe('getting there (step 4)', () => {
   it('a confirmed booking links to turn-by-turn directions to the exact pin', async () => {
     const b = confirmedBooking(5)
-    const { lat, lng } = testDb().getSpace('akron-1').location
+    // The exact pin, not the approximate one drivers see before booking.
+    const { lat, lng } = buildSpaces().find((s) => s.id === 'akron-1')!.location
     await renderBooking(b.id)
     const link = await screen.findByRole('link', { name: /Cómo llegar/ })
     expect(link).toHaveAttribute('href', expect.stringContaining(`destination=${lat},${lng}`))

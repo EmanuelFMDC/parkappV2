@@ -3,12 +3,16 @@ import { createDb, type MockDb } from './db'
 import { ApiError } from './errors'
 import { VENUE_HOURLY_CENTS, ZONE_SURCHARGE_CENTS } from '../../lib/tariffs'
 import { percentOf } from '../../lib/tariffs'
+import { distanceM } from '../../lib/geo'
 import { seedDemoBookings } from './demo'
+import { buildSpaces } from './seed'
 import { quoteWindow } from './pricing'
 
 const T0 = Date.parse('2026-10-10T12:00:00.000Z')
 const iso = (ms: number) => new Date(ms).toISOString()
 const hours = (n: number) => n * 3_600_000
+/** Where a seeded space really is (only the host and confirmed drivers see this). */
+const exactOf = (id: string) => buildSpaces().find((s) => s.id === id)!.location
 
 let clock = T0
 let db: MockDb
@@ -341,6 +345,31 @@ describe('getting there', () => {
     const held = book('akron-1', 2, 4)
     expect(held.space.location).toBeNull()
     const confirmed = db.confirmBooking(USER, held.id, 'pi_1')
-    expect(confirmed.space.location).toEqual(db.getSpace('akron-1').location)
+    expect(confirmed.space.location).toEqual(exactOf('akron-1'))
+  })
+})
+
+describe('privacy before booking', () => {
+  it('shows an approximate pin, 100 to 200 m off, in searches and on the detail', () => {
+    const exact = exactOf('akron-1')
+    const listed = db.searchSpaces('akron', iso(T0 + hours(2)), iso(T0 + hours(4)))
+    const inList = listed.find((s) => s.id === 'akron-1')!.location
+    const onDetail = db.getSpace('akron-1').location
+    for (const shown of [inList, onDetail]) {
+      const off = distanceM(shown, exact)
+      expect(off).toBeGreaterThanOrEqual(99)
+      expect(off).toBeLessThanOrEqual(201)
+    }
+  })
+
+  it('keeps the same approximate pin on every request, so it cannot be averaged out', () => {
+    const a = db.getSpace('akron-1').location
+    const b = db.getSpace('akron-1').location
+    expect(a).toEqual(b)
+  })
+
+  it('rounds the distance to the venue to 50 m', () => {
+    const listed = db.searchSpaces('akron', iso(T0 + hours(2)), iso(T0 + hours(4)))
+    for (const s of listed) expect(s.distanceM % 50).toBe(0)
   })
 })

@@ -1,17 +1,17 @@
 # Pantallas del conductor (Fase 3)
 
-Reservar una cochera toma **cuatro pasos como máximo**: Recinto, Cochera, Horario y Pago. Antes del paso 3 hace falta una **cuenta verificada**. Para verlo: `npm run dev` en `frontend/` y abrir **/**. La API es simulada en el navegador, así que funciona sin backend.
+Reservar una cochera toma **cuatro pasos como máximo**: Recinto, Cochera, Horario y Pago. Después, en la reserva, el conductor llega con "Cómo llegar" y registra su llegada y su salida. Antes del paso 3 hace falta una **cuenta verificada**. Para verlo: `npm run dev` en `frontend/` y abrir **/**. La API es simulada en el navegador, así que funciona sin backend.
 
 ## El flujo
 
 | Paso         | Ruta                                           | Qué hace la persona                                                                                                                             |
 | ------------ | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Recinto   | `/`                                            | Elige recinto y evento. Se prellena llegada 2 h antes y salida 1 h después                                                                      |
-| 2. Cochera   | `/venues/:venueId/spaces` y `/spaces/:spaceId` | Mapa y lista con disponibilidad en vivo; abre el detalle (fotos, reseñas, medidas). **Abierto a todos**                                         |
+| 1. Recinto   | `/`                                            | Elige recinto y evento. Se prellena llegada 2 h antes y salida 1 h después, en horas completas                                                  |
+| 2. Cochera   | `/venues/:venueId/spaces` y `/spaces/:spaceId` | Mapa (punto aproximado) y lista con disponibilidad en vivo; abre el detalle (fotos, reseñas, medidas). **Abierto a todos**                     |
 | Cuenta       | `/account/new`                                 | Si continúa sin cuenta completa, el botón dice "Crear cuenta para continuar" y la lleva aquí. Al terminar vuelve al paso 3 con su mismo horario |
-| 3. Horario   | `/book/:spaceId/time`                          | **Solo con cuenta verificada.** Ajusta llegada y salida, elige su auto (ya registrado, sin escribir la placa) y ve el precio exacto             |
+| 3. Horario   | `/book/:spaceId/time`                          | **Solo con cuenta verificada.** Ajusta llegada y salida por horas, elige su auto y ve el desglose: renta, zona, comisión, IVA y total           |
 | 4. Pago      | `/book/:spaceId/pay`                           | **Solo con cuenta verificada.** Revisa y paga. Aquí se crea la reserva                                                                          |
-| Boleto       | `/bookings/:bookingId`                         | Boleto con código y dirección exacta; puede cancelar                                                                                            |
+| Boleto       | `/bookings/:bookingId`                         | Boleto con código y dirección exacta; "Cómo llegar", registrar llegada y salida con fotos, reportar un problema y cancelar                     |
 | Mis reservas | `/bookings`                                    | Lista de reservas                                                                                                                               |
 | Perfil       | `/profile`                                     | Idioma, datos, estado de verificación y autos (agregar o quitar)                                                                                |
 
@@ -32,15 +32,18 @@ El viaje (recinto, horario y auto elegido) vive en la **URL**, así que el botó
 - **El auto debe caber.** Cada cochera acepta ciertos tipos de auto. El detalle avisa si ninguno de tus autos cabe, el paso 3 marca los que no caben, y el servidor rechaza la reserva (422 `vehicle_not_supported`).
 - **Sin doble reserva.** Si alguien reserva la cochera mientras la persona paga, el servidor responde 409 y la pantalla lo explica y ofrece elegir otra. La lista marca "No disponible" sola (consulta cada 15 s y al volver a la ventana; sin WebSockets).
 - **Apartado de 10 minutos.** La reserva nace `pending_payment`. Si el pago falla, no se confirma ni se entrega código o dirección, y el lugar se libera al vencer.
-- **Dirección exacta solo tras confirmar.** Antes se ve únicamente la zona.
-- **Lo que ve el anfitrión** (diseño, se aplica en la Fase 4): nombre de pila, auto e insignia de identidad verificada; nunca teléfono, correo ni INE.
+- **Dirección y punto exactos solo tras confirmar.** Antes se ve la colonia, un punto desplazado 100 a 200 m y la distancia redondeada a 50 m.
+- **Precio fijado por ParkApp:** tarifa del recinto × horas + $50 en zona de recinto + 15 % de comisión + 16 % de IVA sobre la comisión. Reservas por horas completas.
+- **Lo que ve el anfitrión:** nombre de pila, auto e insignia de identidad verificada; nunca teléfono, correo ni INE.
 - **Dinero en centavos enteros y fechas en UTC.** El precio lo calcula el servidor; las fechas se muestran en hora de Ciudad de México.
-- **Cancelación gratis hasta 10 minutos antes de la llegada.**
+- **Cancelación:** gratis hasta 2 horas antes del inicio; después, penalización del 20 % del total. Si cancela el anfitrión, se devuelve el 100 %.
+- **Llegada y salida:** se registran con 2 a 4 fotos; la llegada abre 30 minutos antes. Salir más de 10 minutos tarde cobra cada hora iniciada.
+- **Incidencias:** se reportan hasta 7 días después del fin; ParkApp media.
 - **Cada conductor solo ve sus reservas y sus autos.**
 
 ## Contrato de la API
 
-`docs/api/openapi.draft.yaml` es el contrato que el backend deberá cumplir. Los tipos del cliente se generan con `npm run api:types`. Cubre recintos, eventos, búsqueda con disponibilidad, detalle, reseñas, cotización, reservas (crear, listar, ver, confirmar, cancelar) y cuenta (`/api/me`, `/api/me/profile`, `/api/me/vehicles`, `/api/me/identity`).
+`docs/api/openapi.draft.yaml` es el contrato que el backend deberá cumplir. Los tipos del cliente se generan con `npm run api:types`. Cubre recintos, eventos, búsqueda con disponibilidad, detalle, reseñas, cotización con desglose, reservas (crear, listar, ver, confirmar, cancelar, llegada, salida, incidencias) y cuenta (`/api/me`, `/api/me/profile`, `/api/me/vehicles`, `/api/me/identity`).
 
 ## API simulada
 
@@ -66,8 +69,8 @@ Se activa con `VITE_USE_MOCK_API=true` y **no viaja en producción** (el código
 
 ## Verificación automática
 
-- **318 pruebas unitarias y de pantalla (Vitest, contando también las del anfitrión):** reglas de la API simulada (doble reserva, precios sin fracciones, expiración, privacidad de la dirección, cancelación, persistencia), **cuentas** (nombre, mayoría de edad, correo, consentimiento, autos, identidad pendiente, aprobada y rechazada, aislamiento entre cuentas), etapas de la cuenta y redirecciones seguras, guarda de pasos 3 y 4 (sin cuenta, a medias, identidad pendiente, verificada), registro completo, pago correcto, pago fallido que no confirma, cochera tomada por otra persona, auto que no cabe, y que **no falte ninguna traducción**.
-- **77 pruebas de punta a punta (Playwright, móvil y escritorio, contando también las del anfitrión), con axe WCAG 2.1 AA en cada pantalla:** flujo completo desde cero (crear cuenta en el paso 2, reservar y cancelar), pasos 3 y 4 inaccesibles escribiendo la dirección, cuenta a medias, identidad rechazada con reintento, menor de edad y falta de consentimiento, auto que no cabe, conductor verificado que pasa directo, doble reserva mientras se paga, lista que marca "No disponible", persistencia tras recargar, inglés y 404.
+- **Pruebas unitarias y de pantalla (Vitest, contando también las del anfitrión; 409 al cierre de la ronda de la presentación final):** reglas de la API simulada (doble reserva, precios sin fracciones, expiración, privacidad de la dirección, cancelación, persistencia), **cuentas** (nombre, mayoría de edad, correo, consentimiento, autos, identidad pendiente, aprobada y rechazada, aislamiento entre cuentas), etapas de la cuenta y redirecciones seguras, guarda de pasos 3 y 4 (sin cuenta, a medias, identidad pendiente, verificada), registro completo, pago correcto, pago fallido que no confirma, cochera tomada por otra persona, auto que no cabe, y que **no falte ninguna traducción**.
+- **Pruebas de punta a punta (Playwright, móvil y escritorio, contando también las del anfitrión; 87 al cierre de esa ronda), con axe WCAG 2.1 AA en cada pantalla:** flujo completo desde cero (crear cuenta en el paso 2, reservar y cancelar), pasos 3 y 4 inaccesibles escribiendo la dirección, cuenta a medias, identidad rechazada con reintento, menor de edad y falta de consentimiento, auto que no cabe, conductor verificado que pasa directo, doble reserva mientras se paga, lista que marca "No disponible", persistencia tras recargar, inglés y 404.
 
 ## Defectos que encontró la revisión (ya corregidos)
 
@@ -86,5 +89,6 @@ Se activa con `VITE_USE_MOCK_API=true` y **no viaja en producción** (el código
 - **Mapa y fotos son ilustraciones**; pagos, SMS y Google son simulados. El código de prueba es `000000`.
 - **Datos de ejemplo.** Los recintos usan los nombres de la spec con coordenadas aproximadas que hay que verificar. Los textos de cocheras y reseñas vienen de la API y no se traducen.
 - **El selector de fecha es el nativo del navegador**, así que su formato depende del idioma del navegador.
-- **Sin reseñas nuevas, notificaciones ni cobro de cancelación tardía.** Falta aplicar el idioma del perfil al iniciar sesión.
+- **Sin reseñas nuevas ni notificaciones.** Los reembolsos y cobros de hora extra son simulados. Falta aplicar el idioma del perfil al iniciar sesión.
+- **Tarifas provisionales** en `frontend/src/lib/tariffs.ts`; las define el negocio.
 - **No probado con lector de pantalla real** ni en un teléfono físico. axe cubre estructura y contraste, no cómo se anuncia.

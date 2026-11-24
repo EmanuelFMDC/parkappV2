@@ -87,7 +87,10 @@ test('host flow screenshots', async ({ page }, testInfo) => {
       const booking = db.createBooking(other, {
         spaceId: space.id,
         startsAt: new Date(Date.parse(event.startsAt) - 2 * 3_600_000).toISOString(),
-        endsAt: new Date(Date.parse(event.endsAt) + 3_600_000).toISOString(),
+        // Whole hours: the event ends at 23:30, so the booking runs to 1:00.
+        endsAt: new Date(
+          Math.ceil((Date.parse(event.endsAt) + 3_600_000) / 3_600_000) * 3_600_000,
+        ).toISOString(),
         vehicleId,
       })
       db.confirmBooking(other, booking.id, 'pi_demo')

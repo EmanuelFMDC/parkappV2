@@ -29,7 +29,7 @@ import { isWithinAvailability } from '../../lib/availability'
 import { percentOf, priceBooking } from '../../lib/tariffs'
 import { createAccounts } from './accounts'
 import { ApiError, notFound } from './errors'
-import { distanceM } from './geo'
+import { approximateLocation, distanceM, roundedDistanceM } from './geo'
 import { quoteWindow, validateWindow } from './pricing'
 import { buildEvents, buildReviews, venues } from './seed'
 import { createSpaceStore } from './spaces'
@@ -217,8 +217,8 @@ export function createDb({
       id: space.id,
       title: space.title,
       neighborhood: space.neighborhood,
-      location: space.location,
-      distanceM: distanceM(space.location, venue.location),
+      location: approximateLocation(space.id, space.location),
+      distanceM: roundedDistanceM(distanceM(space.location, venue.location)),
       priceCentsPerHour: space.priceCentsPerHour,
       rating: space.rating,
       reviewCount: space.reviewCount,
@@ -400,7 +400,12 @@ export function createDb({
     getSpace(id: string): Space {
       const space = requireActiveSpace(id)
       const venue = venueOf(space)
-      return { ...space, distanceM: distanceM(space.location, venue.location), available: true }
+      return {
+        ...space,
+        location: approximateLocation(space.id, space.location),
+        distanceM: roundedDistanceM(distanceM(space.location, venue.location)),
+        available: true,
+      }
     },
     listReviews: (spaceId: string): Review[] => {
       requireSpace(spaceId)

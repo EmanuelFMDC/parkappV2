@@ -49,7 +49,7 @@ test.describe('driver books a garage in four steps', () => {
     await page.getByRole('button', { name: AVAILABLE_GARAGE, exact: true }).click()
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(AVAILABLE_GARAGE)
     await expect(page.getByRole('heading', { name: 'Reseñas' })).toBeVisible()
-    await expect(page.getByText('La dirección exacta se muestra cuando confirmas')).toBeVisible()
+    await expect(page.getByText(/El punto en el mapa es aproximado/)).toBeVisible()
     await expectAccessible(page)
 
     // Continuing without an account sends the driver to create one

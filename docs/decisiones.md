@@ -50,6 +50,7 @@ Fuente: presentación final del proyecto (modelo de negocio).
 
 - **Cuatro pasos:** Recinto, Cochera (lista y detalle), Horario, Pago. El inicio de sesión aparece dentro del pago, solo si hace falta.
 - **El viaje vive en la URL** (recinto y horario). Horario por defecto: llegada 2 horas antes del evento y salida 1 hora después de que termina, redondeado a horas completas.
+- **Ubicación aproximada antes de reservar:** la búsqueda y el detalle muestran un punto desplazado de 100 a 200 m (siempre el mismo para cada cochera, para que no se pueda promediar) y la distancia al recinto redondeada a 50 m. La dirección y el punto exactos llegan con la reserva confirmada.
 - **Paso 4, "Llegar":** la reserva confirmada trae el pin exacto (`space.location`, como la dirección, solo tras confirmar) y un botón "Cómo llegar" que abre la ruta en Google Maps en otra pestaña o en la app de mapas del teléfono. Es un enlace público sin clave ni SDK, detrás de `MapService.navigationUrl`; no cuenta como integrar Google Maps.
 - **Llegada y salida (check-in / check-out):** la llegada se registra desde 30 minutos antes del inicio y hasta el fin; la salida, después de la llegada. En ambas el conductor sube de 2 a 4 fotos del auto y del cajón (respaldo ante daños; `lib/arrival.ts`). La reserva pasa a `in_use` y luego a `completed`, y sigue bloqueando el cajón mientras está en uso.
 - **Hora extra:** salir más de 10 minutos después del fin cobra cada hora iniciada a la tarifa por hora + 15 % de comisión + IVA sobre la comisión, sin el cargo de zona. Se carga a la tarjeta de la reserva al registrar la salida (en producción, Stripe fuera de sesión). El anfitrión ve la hora de llegada, de salida y las horas extra.
@@ -89,6 +90,11 @@ Fuente: presentación final del proyecto (modelo de negocio).
 - **La app recuerda el último modo** (`localStorage`). Solo se restaura el modo anfitrión, al abrir en `/` sin parámetros, una vez por pestaña (`sessionStorage`) y si la cuenta de anfitrión está lista. Nunca se redirige por un enlace, una recarga o al elegir conductor. Cerrar sesión lo olvida. Sin almacenamiento, abre en conductor.
 
 ## Backend
+
+- **Contradicción por resolver:** la presentación final (diapositiva 11) propone React Native, un API Gateway en Node.js, FastAPI (núcleo y pagos) y MongoDB Atlas. `CLAUDE.md` y este repo usan React como PWA con Capacitor, dejan la app nativa fuera de alcance y piden que la doble reserva sea imposible a nivel de base de datos. Quien construye el backend decide su stack, pero conviene alinear la presentación con el repo (o al revés).
+  - **Frontend:** se queda en React + Capacitor; un solo código cubre web, iOS y Android.
+  - **Base de datos:** con varios cajones por anuncio, "sin doble reserva" significa no superar la cantidad de cajones en ningún momento. En una base relacional se garantiza con una restricción de exclusión o un bloqueo por cochera dentro de la transacción; en MongoDB hace falta una transacción con bloqueo explícito por cochera.
+- **El contrato sigue siendo `docs/api/openapi.draft.yaml`.** Cada regla que hoy aplica la API simulada está escrita en su descripción.
 
 
 ## Legal y confianza

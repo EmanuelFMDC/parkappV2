@@ -128,7 +128,7 @@
       "fits": "Caben",
       "reviews": "Reseñas",
       "reviewsEmpty": "Aún no hay reseñas.",
-      "addressNote": "La dirección exacta se muestra cuando confirmas tu reserva.",
+      "addressNote": "El punto en el mapa es aproximado, a unos 100 a 200 m. La dirección y la ubicación exactas se muestran cuando confirmas tu reserva.",
       "total": "Total por tu horario",
       "continue": "Elegir horario",
       "unavailable": "Esta cochera ya no está disponible en tu horario. Elige otra o cambia el horario.",
@@ -159,7 +159,7 @@
       "note": "Es una simulación: no se hace ningún cargo.",
       "cta": "Pagar y reservar · {{total}}",
       "paying": "Reservando…",
-      "freeCancel": "Cancelación gratis hasta 10 minutos antes de tu llegada.",
+      "freeCancel": "Cancelación gratis hasta 2 horas antes de tu llegada.",
       "addressNote": "Verás la dirección exacta y tu código de acceso al confirmar.",
       "pickAnother": "Elegir otra cochera"
     },
