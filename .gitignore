@@ -23,3 +23,6 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Demo video output (large binaries)
+frontend/scripts/demo/out/

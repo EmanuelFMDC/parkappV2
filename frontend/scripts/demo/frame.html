@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="es-MX">
+  <head>
+    <meta charset="utf-8" />
+    <title>ParkApp · demo</title>
+    <style>
+      :root {
+        --blue: #0f3d91;
+        --blue-deep: #081d4a;
+        --amber: #ffb21a;
+        --ink: #081230;
+        --paper: #f6f7fa;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+      }
+      body {
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        background: radial-gradient(
+          1200px 900px at 15% 20%,
+          #164aa8 0%,
+          var(--blue) 45%,
+          var(--blue-deep) 100%
+        );
+        color: white;
+      }
+      .stage {
+        display: grid;
+        grid-template-columns: 1fr 520px;
+        gap: 80px;
+        height: 100%;
+        padding: 70px 120px 70px 130px;
+        align-items: center;
+      }
+      .brand {
+        position: absolute;
+        top: 56px;
+        left: 130px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-weight: 800;
+        font-size: 30px;
+        letter-spacing: -0.5px;
+      }
+      .brand .mark {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: var(--amber);
+        color: var(--ink);
+        display: grid;
+        place-items: center;
+        font-size: 26px;
+      }
+      .copy {
+        max-width: 900px;
+      }
+      .chip {
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        margin-bottom: 28px;
+      }
+      .title {
+        font-size: 64px;
+        line-height: 1.08;
+        font-weight: 800;
+        letter-spacing: -1.5px;
+        margin-bottom: 28px;
+      }
+      .text {
+        font-size: 33px;
+        line-height: 1.45;
+        color: #dbe6fb;
+      }
+      .text b {
+        color: white;
+      }
+      .text .hi {
+        color: var(--amber);
+        font-weight: 700;
+      }
+      .fade {
+        animation: fade 0.45s ease-out;
+      }
+      @keyframes fade {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .phone {
+        justify-self: center;
+        width: 486px;
+        height: 1004px;
+        border-radius: 64px;
+        background: #05070d;
+        padding: 18px;
+        box-shadow:
+          0 40px 90px rgba(0, 0, 0, 0.45),
+          inset 0 0 0 3px #2a2f3a;
+        position: relative;
+      }
+      .screen {
+        width: 450px;
+        height: 968px;
+        border-radius: 48px;
+        overflow: hidden;
+        background: var(--paper);
+        position: relative;
+      }
+      #app {
+        width: 390px;
+        height: 839px;
+        border: 0;
+        transform: scale(1.1538);
+        transform-origin: 0 0;
+        background: var(--paper);
+      }
+      .card {
+        position: absolute;
+        inset: 0;
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0 200px;
+        background: radial-gradient(
+          1400px 900px at 20% 10%,
+          #164aa8 0%,
+          var(--blue) 40%,
+          var(--blue-deep) 100%
+        );
+        z-index: 10;
+      }
+      .card.on {
+        display: flex;
+      }
+      .card .kicker {
+        font-size: 30px;
+        color: var(--amber);
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 22px;
+      }
+      .card h1 {
+        font-size: 104px;
+        line-height: 1.02;
+        letter-spacing: -3px;
+        font-weight: 800;
+        margin-bottom: 30px;
+      }
+      .card p {
+        font-size: 38px;
+        line-height: 1.4;
+        color: #dbe6fb;
+        max-width: 1400px;
+      }
+      .card ul {
+        margin-top: 40px;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px 60px;
+        max-width: 1500px;
+      }
+      .card li {
+        font-size: 32px;
+        color: white;
+        padding-left: 44px;
+        position: relative;
+        line-height: 1.35;
+      }
+      .card li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 14px;
+        width: 18px;
+        height: 18px;
+        border-radius: 6px;
+        background: var(--amber);
+      }
+      .progress {
+        position: absolute;
+        left: 130px;
+        right: 130px;
+        bottom: 44px;
+        height: 6px;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.15);
+      }
+      .progress span {
+        display: block;
+        height: 100%;
+        width: 0;
+        border-radius: 3px;
+        background: var(--amber);
+        transition: width 0.6s ease;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="brand"><span class="mark">P</span>ParkApp</div>
+    <div class="stage">
+      <div class="copy" id="copy">
+        <div class="chip" id="chip"></div>
+        <h2 class="title" id="title"></h2>
+        <p class="text" id="text"></p>
+      </div>
+      <div class="phone">
+        <div class="screen"><iframe id="app" name="app" title="ParkApp"></iframe></div>
+      </div>
+    </div>
+    <div class="progress"><span id="bar"></span></div>
+    <section class="card" id="card">
+      <div class="kicker" id="kicker"></div>
+      <h1 id="cardTitle"></h1>
+      <p id="cardText"></p>
+      <ul id="cardList"></ul>
+    </section>
+    <script>
+      window.say = (chip, title, html) => {
+        const copy = document.getElementById('copy')
+        copy.classList.remove('fade')
+        void copy.offsetWidth
+        copy.classList.add('fade')
+        document.getElementById('chip').textContent = chip
+        document.getElementById('chip').style.display = chip ? 'inline-block' : 'none'
+        document.getElementById('title').textContent = title
+        document.getElementById('text').innerHTML = html
+      }
+      window.card = (kicker, title, text, items = []) => {
+        const card = document.getElementById('card')
+        document.getElementById('kicker').textContent = kicker
+        document.getElementById('cardTitle').textContent = title
+        document.getElementById('cardText').innerHTML = text
+        document.getElementById('cardList').innerHTML = items.map((i) => `<li>${i}</li>`).join('')
+        card.classList.remove('fade')
+        void card.offsetWidth
+        card.classList.add('on', 'fade')
+      }
+      window.hideCard = () => document.getElementById('card').classList.remove('on')
+      window.progress = (fraction) =>
+        (document.getElementById('bar').style.width = `${fraction * 100}%`)
+    </script>
+  </body>
+</html>
