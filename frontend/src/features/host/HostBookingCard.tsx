@@ -49,6 +49,25 @@ export function HostBookingCard({ booking }: { booking: HostBooking }) {
         <CarFront aria-hidden className="size-5 shrink-0 text-primary" />
         {describeVehicle(booking.driver.vehicle)}
       </p>
+      {(booking.checkedInAt || booking.checkedOutAt) && (
+        <ul className="space-y-0.5 text-caption text-ink-muted">
+          {booking.checkedInAt && (
+            <li>
+              {t('host.booking.arrived', { time: formatDateTime(booking.checkedInAt, lang, when) })}
+            </li>
+          )}
+          {booking.checkedOutAt && (
+            <li>
+              {t('host.booking.left', { time: formatDateTime(booking.checkedOutAt, lang, when) })}
+            </li>
+          )}
+          {(booking.overtimeHours ?? 0) > 0 && (
+            <li className="font-medium text-ink">
+              {t('host.booking.overtime', { count: booking.overtimeHours ?? 0 })}
+            </li>
+          )}
+        </ul>
+      )}
       {booking.cancelledBy && (
         <p className="rounded-control bg-canvas p-3 text-caption text-ink-muted">
           {booking.cancelledBy === 'host'

@@ -57,3 +57,32 @@ export function useCancelBooking() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bookings'] }),
   })
 }
+
+/** Arriving (check-in) and leaving (check-out), each with photos of the car and the spot. */
+export function useCheckInOut() {
+  const api = useApi()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      bookingId,
+      step,
+      photoKeys,
+    }: {
+      bookingId: string
+      step: 'check-in' | 'check-out'
+      photoKeys: string[]
+    }) =>
+      unwrap(
+        step === 'check-in'
+          ? api.POST('/api/bookings/{bookingId}/check-in', {
+              params: { path: { bookingId } },
+              body: { photoKeys },
+            })
+          : api.POST('/api/bookings/{bookingId}/check-out', {
+              params: { path: { bookingId } },
+              body: { photoKeys },
+            }),
+      ),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bookings'] }),
+  })
+}

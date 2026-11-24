@@ -114,6 +114,18 @@ export function createHandlers(db: MockDb, latencyMs = 0): HttpHandler[] {
         db.confirmBooking(userIdFrom(c.request), param(c, 'bookingId'), body.paymentIntentId),
       )({ request, params })
     }),
+    http.post(url('/api/bookings/:bookingId/check-in'), async ({ request, params }) => {
+      const body = (await request.clone().json()) as { photoKeys: unknown }
+      return route((c) => db.checkIn(userIdFrom(c.request), param(c, 'bookingId'), body.photoKeys))(
+        { request, params },
+      )
+    }),
+    http.post(url('/api/bookings/:bookingId/check-out'), async ({ request, params }) => {
+      const body = (await request.clone().json()) as { photoKeys: unknown }
+      return route((c) =>
+        db.checkOut(userIdFrom(c.request), param(c, 'bookingId'), body.photoKeys),
+      )({ request, params })
+    }),
     http.post(
       url('/api/bookings/:bookingId/cancel'),
       route((c) => db.cancelBooking(userIdFrom(c.request), param(c, 'bookingId'))),

@@ -331,6 +331,46 @@ export interface paths {
         patch: operations["updateHostSpace"];
         trace?: never;
     };
+    "/api/bookings/{bookingId}/check-in": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The driver arrives and photographs the car and the spot
+         * @description Opens 30 minutes before the start (checkInOpensAt) and closes at the end. 2 to 4 photos, uploaded first through the signed-upload step. The booking becomes in_use.
+         */
+        post: operations["checkIn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bookings/{bookingId}/check-out": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The driver leaves and photographs the car and the spot
+         * @description Leaving more than 10 minutes after the end (overtimeStartsAt) charges every started extra hour at overtimeHourCents (hourly rate + 15 % commission + VAT on it, no zone charge) to the card used for the booking. The booking becomes completed.
+         */
+        post: operations["checkOut"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/host/bookings/{bookingId}/cancel": {
         parameters: {
             query?: never;
@@ -478,10 +518,14 @@ export interface components {
             /** @description One of the driver's registered vehicles */
             vehicleId: string;
         };
+        CheckPhotos: {
+            /** @description Object keys from the signed-upload step; 2 to 4 photos of the car and the spot */
+            photoKeys: string[];
+        };
         /** @enum {string|null} */
         CancelledBy: "driver" | "host" | null;
         /** @enum {string} */
-        BookingStatus: "pending_payment" | "confirmed" | "cancelled" | "expired" | "completed";
+        BookingStatus: "pending_payment" | "confirmed" | "in_use" | "cancelled" | "expired" | "completed";
         Booking: {
             id: string;
             status: components["schemas"]["BookingStatus"];
@@ -528,6 +572,28 @@ export interface components {
             cancellationFeeCents: number | null;
             /** @description What went back to the driver when it was cancelled; null while not cancelled */
             refundCents: number | null;
+            /**
+             * Format: date-time
+             * @description 30 minutes before the start
+             */
+            checkInOpensAt: string;
+            /**
+             * Format: date-time
+             * @description 10 minutes after the end; leaving later charges extra hours
+             */
+            overtimeStartsAt: string;
+            /** @description One extra hour, all included (rate + commission + VAT on it) */
+            overtimeHourCents: number;
+            /** Format: date-time */
+            checkedInAt: string | null;
+            /** Format: date-time */
+            checkedOutAt: string | null;
+            checkInPhotoCount: number;
+            checkOutPhotoCount: number;
+            /** @description Set at check-out */
+            overtimeHours: number | null;
+            /** @description Charged at check-out */
+            overtimeCents: number | null;
             /** Format: date-time */
             createdAt: string;
         };
@@ -653,6 +719,11 @@ export interface components {
             /** @description What the host is paid (rent + zone charge) */
             subtotalCents: number;
             cancelledBy: components["schemas"]["CancelledBy"];
+            /** Format: date-time */
+            checkedInAt: string | null;
+            /** Format: date-time */
+            checkedOutAt: string | null;
+            overtimeHours: number | null;
             /** Format: date-time */
             createdAt: string;
         };
@@ -1263,6 +1334,82 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
             /** @description A space under review or rejected cannot be paused or resumed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            422: components["responses"]["Invalid"];
+        };
+    };
+    checkIn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                bookingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckPhotos"];
+            };
+        };
+        responses: {
+            /** @description In use */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Booking"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            /** @description too_early, booking_over, or not confirmed (not_checkable) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            422: components["responses"]["Invalid"];
+        };
+    };
+    checkOut: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                bookingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckPhotos"];
+            };
+        };
+        responses: {
+            /** @description Completed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Booking"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            /** @description Not checked in (not_checked_in) */
             409: {
                 headers: {
                     [name: string]: unknown;

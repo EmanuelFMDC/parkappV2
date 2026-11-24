@@ -5,6 +5,7 @@ import { Badge, type BadgeTone } from '../../components/ui'
 const tones: Record<BookingStatus, BadgeTone> = {
   pending_payment: 'warning',
   confirmed: 'success',
+  in_use: 'brand',
   cancelled: 'neutral',
   expired: 'neutral',
   completed: 'brand',

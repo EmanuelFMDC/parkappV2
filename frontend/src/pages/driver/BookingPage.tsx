@@ -15,6 +15,7 @@ import {
 import { useAuth } from '../../features/auth/context'
 import { formatPlate } from '../../features/account/vehicleFit'
 import { useBooking, useCancelBooking } from '../../features/bookings/hooks'
+import { ArrivalPanel } from '../../features/bookings/ArrivalPanel'
 import { PriceBreakdown } from '../../features/bookings/PriceBreakdown'
 import { StatusBadge } from '../../features/bookings/StatusBadge'
 import { WindowSummary } from '../../features/bookings/WindowSummary'
@@ -121,7 +122,7 @@ export default function BookingPage() {
             <StatusBadge status={b.status} />
             <PriceBreakdown price={b} />
 
-            {b.status === 'confirmed' || b.status === 'completed' ? (
+            {b.status === 'confirmed' || b.status === 'in_use' || b.status === 'completed' ? (
               <TicketStub
                 title={b.space.title}
                 address={b.space.address ?? b.space.neighborhood}
@@ -164,6 +165,8 @@ export default function BookingPage() {
               </section>
             )}
 
+            <ArrivalPanel booking={b} />
+
             {b.space.address && (
               <section aria-labelledby="where-title" className="space-y-1">
                 <h2 id="where-title" className="text-title font-semibold">
@@ -176,7 +179,7 @@ export default function BookingPage() {
                     href={maps.navigationUrl(b.space.location)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`${buttonClasses({ block: true })} mt-3`}
+                    className={`${buttonClasses({ variant: 'brand', block: true })} mt-3`}
                   >
                     <Navigation aria-hidden className="size-5" />
                     {t('bookings.detail.directions')}

@@ -10,6 +10,7 @@ import { sampleSpaces } from '../samples'
 const bookingStatuses: BookingStatus[] = [
   'pending_payment',
   'confirmed',
+  'in_use',
   'completed',
   'cancelled',
   'expired',

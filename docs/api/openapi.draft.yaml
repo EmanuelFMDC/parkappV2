@@ -430,6 +430,67 @@ paths:
               schema: { $ref: '#/components/schemas/Problem' }
         '422': { $ref: '#/components/responses/Invalid' }
 
+  /api/bookings/{bookingId}/check-in:
+    post:
+      operationId: checkIn
+      summary: The driver arrives and photographs the car and the spot
+      description: >
+        Opens 30 minutes before the start (checkInOpensAt) and closes at the end. 2 to 4 photos,
+        uploaded first through the signed-upload step. The booking becomes in_use.
+      security: [{ bearer: [] }]
+      parameters:
+        - { name: bookingId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CheckPhotos' }
+      responses:
+        '200':
+          description: In use
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Booking' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: too_early, booking_over, or not confirmed (not_checkable)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Problem' }
+        '422': { $ref: '#/components/responses/Invalid' }
+
+  /api/bookings/{bookingId}/check-out:
+    post:
+      operationId: checkOut
+      summary: The driver leaves and photographs the car and the spot
+      description: >
+        Leaving more than 10 minutes after the end (overtimeStartsAt) charges every started extra
+        hour at overtimeHourCents (hourly rate + 15 % commission + VAT on it, no zone charge) to the
+        card used for the booking. The booking becomes completed.
+      security: [{ bearer: [] }]
+      parameters:
+        - { name: bookingId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CheckPhotos' }
+      responses:
+        '200':
+          description: Completed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Booking' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: Not checked in (not_checked_in)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Problem' }
+        '422': { $ref: '#/components/responses/Invalid' }
+
   /api/host/bookings/{bookingId}/cancel:
     post:
       operationId: cancelHostBooking
@@ -628,16 +689,24 @@ components:
         startsAt: { type: string, format: date-time }
         endsAt: { type: string, format: date-time }
         vehicleId: { type: string, description: One of the driver's registered vehicles }
+    CheckPhotos:
+      type: object
+      required: [photoKeys]
+      properties:
+        photoKeys:
+          type: array
+          description: Object keys from the signed-upload step; 2 to 4 photos of the car and the spot
+          items: { type: string }
     CancelledBy:
       type: [string, 'null']
       enum: [driver, host, null]
     BookingStatus:
       type: string
-      enum: [pending_payment, confirmed, cancelled, expired, completed]
+      enum: [pending_payment, confirmed, in_use, cancelled, expired, completed]
     Booking:
       type: object
       required:
-        [id, status, space, venueName, startsAt, endsAt, vehicle, rentCents, zoneSurchargeCents, subtotalCents, commissionCents, vatCents, totalCents, expiresAt, accessCode, freeCancelUntil, lateCancelFeeCents, cancelledBy, cancellationFeeCents, refundCents, createdAt]
+        [id, status, space, venueName, startsAt, endsAt, vehicle, rentCents, zoneSurchargeCents, subtotalCents, commissionCents, vatCents, totalCents, expiresAt, accessCode, freeCancelUntil, lateCancelFeeCents, cancelledBy, cancellationFeeCents, refundCents, checkInOpensAt, overtimeStartsAt, overtimeHourCents, checkedInAt, checkedOutAt, checkInPhotoCount, checkOutPhotoCount, overtimeHours, overtimeCents, createdAt]
       properties:
         id: { type: string }
         status: { $ref: '#/components/schemas/BookingStatus' }
@@ -689,6 +758,20 @@ components:
         refundCents:
           type: [integer, 'null']
           description: What went back to the driver when it was cancelled; null while not cancelled
+        checkInOpensAt: { type: string, format: date-time, description: 30 minutes before the start }
+        overtimeStartsAt:
+          type: string
+          format: date-time
+          description: 10 minutes after the end; leaving later charges extra hours
+        overtimeHourCents:
+          type: integer
+          description: One extra hour, all included (rate + commission + VAT on it)
+        checkedInAt: { type: [string, 'null'], format: date-time }
+        checkedOutAt: { type: [string, 'null'], format: date-time }
+        checkInPhotoCount: { type: integer }
+        checkOutPhotoCount: { type: integer }
+        overtimeHours: { type: [integer, 'null'], description: Set at check-out }
+        overtimeCents: { type: [integer, 'null'], description: Charged at check-out }
         createdAt: { type: string, format: date-time }
     VehicleType:
       type: string
@@ -817,7 +900,7 @@ components:
         status: { type: string, enum: [active, paused] }
     HostBooking:
       type: object
-      required: [id, status, space, startsAt, endsAt, driver, subtotalCents, cancelledBy, createdAt]
+      required: [id, status, space, startsAt, endsAt, driver, subtotalCents, cancelledBy, checkedInAt, checkedOutAt, overtimeHours, createdAt]
       properties:
         id: { type: string }
         status: { $ref: '#/components/schemas/BookingStatus' }
@@ -838,4 +921,7 @@ components:
             vehicle: { $ref: '#/components/schemas/Vehicle' }
         subtotalCents: { type: integer, description: What the host is paid (rent + zone charge), before commission and VAT }
         cancelledBy: { $ref: '#/components/schemas/CancelledBy' }
+        checkedInAt: { type: [string, 'null'], format: date-time }
+        checkedOutAt: { type: [string, 'null'], format: date-time }
+        overtimeHours: { type: [integer, 'null'] }
         createdAt: { type: string, format: date-time }

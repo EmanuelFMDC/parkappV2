@@ -78,7 +78,11 @@
       "cancelConfirm": "Sí, cancelar",
       "cancelKeep": "Mantener",
       "cancelledByHost": "Cancelaste esta reserva; el conductor recibió el 100 % de vuelta.",
-      "cancelledByDriver": "El conductor canceló esta reserva."
+      "cancelledByDriver": "El conductor canceló esta reserva.",
+      "arrived": "Llegó el {{time}}.",
+      "left": "Salió el {{time}}.",
+      "overtime_one": "{{count}} hora extra.",
+      "overtime_other": "{{count}} horas extra."
     },
     "location": {
       "title": "¿Dónde está tu cochera?",

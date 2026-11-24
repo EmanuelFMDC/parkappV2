@@ -16,7 +16,14 @@ import type {
   Venue,
   VenueEvent,
 } from '../../api/types'
-import { percentOf } from '../../lib/tariffs'
+import {
+  CHECK_IN_EARLY_MS,
+  CHECK_PHOTOS_MAX,
+  CHECK_PHOTOS_MIN,
+  OVERTIME_GRACE_MS,
+  overtimeHours,
+} from '../../lib/arrival'
+import { percentOf, priceBooking } from '../../lib/tariffs'
 import { createAccounts } from './accounts'
 import { ApiError, notFound } from './errors'
 import { distanceM } from './geo'
@@ -51,6 +58,12 @@ interface StoredBooking {
   cancelledBy: 'driver' | 'host' | null
   cancellationFeeCents: number | null
   refundCents: number | null
+  checkedInAt: string | null
+  checkedOutAt: string | null
+  checkInPhotoKeys: string[]
+  checkOutPhotoKeys: string[]
+  overtimeHours: number | null
+  overtimeCents: number | null
   createdAt: string
 }
 
@@ -64,7 +77,7 @@ interface DbOptions {
   reviewDelayMs?: number
 }
 
-const BLOCKING: Booking['status'][] = ['pending_payment', 'confirmed']
+const BLOCKING: Booking['status'][] = ['pending_payment', 'confirmed', 'in_use']
 
 function overlaps(aStart: number, aEnd: number, bStart: number, bEnd: number): boolean {
   return aStart < bEnd && bStart < aEnd
@@ -113,11 +126,20 @@ export function createDb({
       cancellationFeeCents: b.cancellationFeeCents ?? (b.status === 'cancelled' ? 0 : null),
       refundCents: b.refundCents ?? (b.status === 'cancelled' ? 0 : null),
     }
-    if (b.commissionCents !== undefined) return { ...b, ...cancellation }
+    const arrival = {
+      checkedInAt: b.checkedInAt ?? null,
+      checkedOutAt: b.checkedOutAt ?? null,
+      checkInPhotoKeys: b.checkInPhotoKeys ?? [],
+      checkOutPhotoKeys: b.checkOutPhotoKeys ?? [],
+      overtimeHours: b.overtimeHours ?? null,
+      overtimeCents: b.overtimeCents ?? null,
+    }
+    if (b.commissionCents !== undefined) return { ...b, ...cancellation, ...arrival }
     const { serviceFeeCents = 0, ...rest } = b
     return {
       ...rest,
       ...cancellation,
+      ...arrival,
       rentCents: b.subtotalCents,
       zoneSurchargeCents: 0,
       commissionCents: serviceFeeCents,
@@ -191,7 +213,7 @@ export function createDb({
 
   function toBooking(b: StoredBooking): Booking {
     const space = requireSpace(b.spaceId)
-    const revealed = b.status === 'confirmed' || b.status === 'completed'
+    const revealed = b.status === 'confirmed' || b.status === 'in_use' || b.status === 'completed'
     return {
       id: b.id,
       status: b.status,
@@ -221,8 +243,34 @@ export function createDb({
       cancelledBy: b.cancelledBy,
       cancellationFeeCents: b.cancellationFeeCents,
       refundCents: b.refundCents,
+      checkInOpensAt: new Date(Date.parse(b.startsAt) - CHECK_IN_EARLY_MS).toISOString(),
+      overtimeStartsAt: new Date(Date.parse(b.endsAt) + OVERTIME_GRACE_MS).toISOString(),
+      overtimeHourCents: overtimePrice(b, 1).totalCents,
+      checkedInAt: b.checkedInAt,
+      checkedOutAt: b.checkedOutAt,
+      checkInPhotoCount: b.checkInPhotoKeys.length,
+      checkOutPhotoCount: b.checkOutPhotoKeys.length,
+      overtimeHours: b.overtimeHours,
+      overtimeCents: b.overtimeCents,
       createdAt: b.createdAt,
     }
+  }
+
+  /** Extra hours: the space's hourly rate with commission and VAT, without the zone charge. */
+  function overtimePrice(b: StoredBooking, hours: number) {
+    const { hourlyCents } = store.tariff(b.spaceId)
+    return priceBooking({ hourlyCents, zoneSurchargeCents: 0 }, hours)
+  }
+
+  function checkPhotos(photoKeys: unknown) {
+    const keys = Array.isArray(photoKeys) ? photoKeys.filter((k) => typeof k === 'string') : []
+    if (keys.length < CHECK_PHOTOS_MIN) {
+      throw new ApiError(422, 'check_photos_required', `Add at least ${CHECK_PHOTOS_MIN} photos`)
+    }
+    if (keys.length > CHECK_PHOTOS_MAX) {
+      throw new ApiError(422, 'check_too_many_photos', `Add at most ${CHECK_PHOTOS_MAX} photos`)
+    }
+    return keys as string[]
   }
 
   /** Only a confirmed booking that has not started, or an unpaid hold, can be cancelled. */
@@ -256,6 +304,9 @@ export function createDb({
       driver: { ...card, firstName: card.firstName || 'Conductor', vehicle: b.vehicle },
       subtotalCents: b.subtotalCents,
       cancelledBy: b.cancelledBy,
+      checkedInAt: b.checkedInAt,
+      checkedOutAt: b.checkedOutAt,
+      overtimeHours: b.overtimeHours,
       createdAt: b.createdAt,
     }
   }
@@ -355,6 +406,12 @@ export function createDb({
         cancelledBy: null,
         cancellationFeeCents: null,
         refundCents: null,
+        checkedInAt: null,
+        checkedOutAt: null,
+        checkInPhotoKeys: [],
+        checkOutPhotoKeys: [],
+        overtimeHours: null,
+        overtimeCents: null,
         createdAt: new Date(now()).toISOString(),
       }
       bookings.push(stored)
@@ -393,6 +450,44 @@ export function createDb({
       assertCancellable(b)
       const late = now() > Date.parse(b.startsAt) - FREE_CANCEL_MS
       markCancelled(b, 'driver', late ? percentOf(b.totalCents, LATE_CANCEL_BPS) : 0)
+      return toBooking(b)
+    },
+
+    /** The driver arrives: photos of the car and the spot, and the booking is in use. */
+    checkIn(userId: string | null, id: string, photoKeys: unknown): Booking {
+      const b = ownBooking(requireUser(userId), id)
+      if (b.status !== 'confirmed') {
+        throw new ApiError(409, 'not_checkable', 'Only a confirmed booking can be checked in')
+      }
+      if (now() < Date.parse(b.startsAt) - CHECK_IN_EARLY_MS) {
+        throw new ApiError(409, 'too_early', 'Check-in opens 30 minutes before the start')
+      }
+      if (now() >= Date.parse(b.endsAt)) {
+        throw new ApiError(409, 'booking_over', 'This booking has already ended')
+      }
+      b.checkInPhotoKeys = checkPhotos(photoKeys)
+      b.checkedInAt = new Date(now()).toISOString()
+      b.status = 'in_use'
+      save()
+      return toBooking(b)
+    },
+
+    /**
+     * The driver leaves: photos again, and every started hour after the grace period is charged to
+     * the card used for the booking (Stripe, off-session, in production).
+     */
+    checkOut(userId: string | null, id: string, photoKeys: unknown): Booking {
+      const b = ownBooking(requireUser(userId), id)
+      if (b.status !== 'in_use') {
+        throw new ApiError(409, 'not_checked_in', 'Check in before checking out')
+      }
+      b.checkOutPhotoKeys = checkPhotos(photoKeys)
+      const extra = overtimeHours(Date.parse(b.endsAt), now())
+      b.overtimeHours = extra
+      b.overtimeCents = extra > 0 ? overtimePrice(b, extra).totalCents : 0
+      b.checkedOutAt = new Date(now()).toISOString()
+      b.status = 'completed'
+      save()
       return toBooking(b)
     },
 
@@ -483,6 +578,12 @@ export function createDb({
         cancelledBy: null,
         cancellationFeeCents: null,
         refundCents: null,
+        checkedInAt: null,
+        checkedOutAt: null,
+        checkInPhotoKeys: [],
+        checkOutPhotoKeys: [],
+        overtimeHours: null,
+        overtimeCents: null,
         createdAt: new Date(now()).toISOString(),
       })
       save()

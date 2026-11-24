@@ -13,13 +13,25 @@ interface PhotoUploaderProps {
   photos: DraftPhoto[]
   onChange: (photos: DraftPhoto[]) => void
   error?: string
+  /** Limits; the host listing's by default. Arrival and departure photos use their own. */
+  min?: number
+  max?: number
+  /** Marks the first photo as the listing cover. */
+  showCover?: boolean
 }
 
 /**
  * Picks photos, checks type and size, and uploads each one through the storage service
  * (signed URLs in production). The first photo is the cover.
  */
-export function PhotoUploader({ photos, onChange, error }: PhotoUploaderProps) {
+export function PhotoUploader({
+  photos,
+  onChange,
+  error,
+  min = PHOTOS_MIN,
+  max = PHOTOS_MAX,
+  showCover = true,
+}: PhotoUploaderProps) {
   const { t } = useTranslation()
   const { storage } = useServices()
   const inputId = useId()
@@ -36,14 +48,14 @@ export function PhotoUploader({ photos, onChange, error }: PhotoUploaderProps) {
     const files = Array.from(event.target.files ?? [])
     event.target.value = '' // lets the same file be picked again after removing it
     const found: string[] = []
-    const room = PHOTOS_MAX - current.current.length
+    const room = max - current.current.length
     const accepted: File[] = []
     for (const file of files) {
       if (!PHOTO_TYPES.includes(file.type))
         found.push(t('host.photos.badType', { name: file.name }))
       else if (file.size > PHOTO_MAX_BYTES) found.push(t('host.photos.tooBig', { name: file.name }))
       else if (accepted.length >= room) {
-        found.push(t('host.photos.tooMany', { max: PHOTOS_MAX }))
+        found.push(t('host.photos.tooMany', { max }))
         break
       } else accepted.push(file)
     }
@@ -80,13 +92,13 @@ export function PhotoUploader({ photos, onChange, error }: PhotoUploaderProps) {
     setProblems([])
   }
 
-  const full = photos.length >= PHOTOS_MAX
+  const full = photos.length >= max
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <p className="font-semibold">
-          {t('host.photos.count', { count: photos.length, max: PHOTOS_MAX, min: PHOTOS_MIN })}
+          {t('host.photos.count', { count: photos.length, max, min })}
         </p>
         <label
           htmlFor={inputId}
@@ -130,7 +142,7 @@ export function PhotoUploader({ photos, onChange, error }: PhotoUploaderProps) {
                     className="aspect-[4/3] w-full"
                   />
                 )}
-                {i === 0 && (
+                {showCover && i === 0 && (
                   <span className="absolute left-2 top-2">
                     <Badge tone="brand">{t('host.photos.cover')}</Badge>
                   </span>

@@ -78,7 +78,11 @@
       "cancelConfirm": "Yes, cancel",
       "cancelKeep": "Keep it",
       "cancelledByHost": "You cancelled this booking; the driver got 100% back.",
-      "cancelledByDriver": "The driver cancelled this booking."
+      "cancelledByDriver": "The driver cancelled this booking.",
+      "arrived": "Arrived {{time}}.",
+      "left": "Left {{time}}.",
+      "overtime_one": "{{count}} extra hour.",
+      "overtime_other": "{{count}} extra hours."
     },
     "location": {
       "title": "Where is your garage?",

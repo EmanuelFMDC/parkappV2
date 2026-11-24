@@ -65,7 +65,13 @@
       "vehicle_required": "Registra tu auto para continuar.",
       "profile_incomplete": "Completa tus datos para continuar.",
       "identity_required": "Verifica tu identidad para reservar.",
-      "already_started": "La reserva ya empezó; ya no se puede cancelar."
+      "already_started": "La reserva ya empezó; ya no se puede cancelar.",
+      "check_photos_required": "Toma al menos {{min}} fotos: el auto y el cajón.",
+      "check_too_many_photos": "Sube como máximo 4 fotos.",
+      "too_early": "Aún es pronto: la llegada se registra desde 30 minutos antes.",
+      "booking_over": "Esta reserva ya terminó.",
+      "not_checkable": "Esta reserva no se puede registrar.",
+      "not_checked_in": "Primero registra tu llegada."
     }
   },
   "auth": {
@@ -176,7 +182,8 @@
       "confirmed": "Confirmada",
       "cancelled": "Cancelada",
       "expired": "Expirada",
-      "completed": "Completada"
+      "completed": "Completada",
+      "in_use": "En uso"
     },
     "detail": {
       "newTitle": "Lugar reservado",
@@ -278,5 +285,22 @@
       "retry": "Intentar de nuevo",
       "simulation": "Simulación: en esta versión de prueba no se pide ninguna imagen y la verificación se aprueba sola en unos segundos."
     }
+  },
+  "arrival": {
+    "opensAt": "Podrás registrar tu llegada desde el {{time}}.",
+    "inTitle": "Registrar tu llegada",
+    "inBody": "Toma fotos de tu auto ya estacionado y del cajón. Te protegen a ti y al anfitrión si hay algún daño.",
+    "inCta": "Registrar llegada",
+    "outTitle": "Registrar tu salida",
+    "outBody": "Antes de irte, toma fotos del auto y del cajón como los dejas.",
+    "outCta": "Registrar salida",
+    "inUseSince": "En uso desde el {{time}}.",
+    "leaveBy": "Sal antes del {{time}}. Después, cada hora extra iniciada cuesta {{price}}.",
+    "lateNow": "Ya pasó tu hora de salida: se cobra cada hora extra iniciada, {{price}} por hora, a la tarjeta de tu reserva.",
+    "summaryTitle": "Tu estancia",
+    "summary": "Llegaste el {{in}} y saliste el {{out}}.",
+    "noOvertime": "Sin cargos extra.",
+    "overtimeCharged_one": "{{count}} hora extra: se cobraron {{amount}}.",
+    "overtimeCharged_other": "{{count}} horas extra: se cobraron {{amount}}."
   }
 }

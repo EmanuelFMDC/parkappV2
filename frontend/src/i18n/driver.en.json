@@ -65,7 +65,13 @@
       "vehicle_required": "Register your car to continue.",
       "profile_incomplete": "Complete your details to continue.",
       "identity_required": "Verify your identity to book.",
-      "already_started": "The booking has already started; it can no longer be cancelled."
+      "already_started": "The booking has already started; it can no longer be cancelled.",
+      "check_photos_required": "Take at least {{min}} photos: the car and the spot.",
+      "check_too_many_photos": "Upload at most 4 photos.",
+      "too_early": "It's too early: check-in opens 30 minutes before the start.",
+      "booking_over": "This booking has already ended.",
+      "not_checkable": "This booking can't be checked in.",
+      "not_checked_in": "Check in first."
     }
   },
   "auth": {
@@ -176,7 +182,8 @@
       "confirmed": "Confirmed",
       "cancelled": "Cancelled",
       "expired": "Expired",
-      "completed": "Completed"
+      "completed": "Completed",
+      "in_use": "In use"
     },
     "detail": {
       "newTitle": "Spot booked",
@@ -278,5 +285,22 @@
       "retry": "Try again",
       "simulation": "Simulation: in this test version no image is requested and verification approves itself in a few seconds."
     }
+  },
+  "arrival": {
+    "opensAt": "You can check in from {{time}}.",
+    "inTitle": "Check in",
+    "inBody": "Take photos of your parked car and the spot. They protect you and the host if anything gets damaged.",
+    "inCta": "Check in",
+    "outTitle": "Check out",
+    "outBody": "Before you go, take photos of the car and the spot as you leave them.",
+    "outCta": "Check out",
+    "inUseSince": "In use since {{time}}.",
+    "leaveBy": "Leave before {{time}}. After that, every started extra hour costs {{price}}.",
+    "lateNow": "Your time is up: every started extra hour is charged, {{price}} per hour, to the card you booked with.",
+    "summaryTitle": "Your stay",
+    "summary": "You arrived {{in}} and left {{out}}.",
+    "noOvertime": "No extra charges.",
+    "overtimeCharged_one": "{{count}} extra hour: {{amount}} charged.",
+    "overtimeCharged_other": "{{count}} extra hours: {{amount}} charged."
   }
 }

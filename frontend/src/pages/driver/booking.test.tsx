@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Providers } from '../../app/Providers'
 import i18n from '../../i18n'
 import { offsetPoint } from '../../lib/geo'
@@ -159,5 +159,51 @@ describe('getting there (step 4)', () => {
     expect(link).toHaveAttribute('href', expect.stringContaining(`destination=${lat},${lng}`))
     expect(link).toHaveAttribute('target', '_blank')
     expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'))
+  })
+})
+
+describe('arriving and leaving', () => {
+  const photo = (name: string) => new File(['x'], name, { type: 'image/jpeg' })
+  const pick = (...names: string[]) =>
+    userEvent.upload(screen.getByLabelText('Agregar fotos'), names.map(photo))
+
+  beforeEach(() => {
+    URL.createObjectURL = vi.fn(() => 'blob:preview')
+    URL.revokeObjectURL = vi.fn()
+  })
+
+  it('says when check-in opens if it is too early', async () => {
+    const b = confirmedBooking(5)
+    await renderBooking(b.id)
+    expect(await screen.findByText(/Podrás registrar tu llegada desde/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Registrar llegada/ })).not.toBeInTheDocument()
+  })
+
+  it('checks in and out with photos, with no extra charge on time', async () => {
+    const b = confirmedBooking(0.1) // starts in 6 minutes: check-in is open
+    await renderBooking(b.id)
+
+    await userEvent.click(await screen.findByRole('button', { name: /Registrar llegada/ }))
+    expect(
+      await screen.findByText('Toma al menos 2 fotos: el auto y el cajón.'),
+    ).toBeInTheDocument()
+
+    await pick('auto.jpg', 'cajon.jpg')
+    expect(await screen.findByText('2 de 4 fotos (mínimo 2)')).toBeInTheDocument()
+    expect(screen.queryByText('Portada')).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: /Registrar llegada/ }))
+
+    expect(await screen.findByText('En uso', { exact: true })).toBeInTheDocument()
+    expect(screen.getByText(/Sal antes del/)).toBeInTheDocument()
+
+    await pick('auto2.jpg', 'cajon2.jpg')
+    await userEvent.click(await screen.findByRole('button', { name: /Registrar salida/ }))
+    expect(await screen.findByText('Sin cargos extra.')).toBeInTheDocument()
+    expect(testDb().getBooking(DRIVER, b.id)).toMatchObject({
+      status: 'completed',
+      checkInPhotoCount: 2,
+      checkOutPhotoCount: 2,
+      overtimeHours: 0,
+    })
   })
 })
