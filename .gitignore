@@ -5,6 +5,7 @@
 # Mode flags only (no secrets): enable the in-browser mock API
 !.env.development
 !.env.e2e
+!.env.demo
 *.pem
 *.key
 service-account*.json

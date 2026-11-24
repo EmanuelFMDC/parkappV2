@@ -21,6 +21,7 @@ Estado actual del frontend de ParkApp. El contexto general y las reglas no negoc
 
 - **El contrato lo escribe el frontend:** `docs/api/openapi.draft.yaml`. La API real lo cumple o se ajusta de común acuerdo.
 - **API simulada con MSW** en desarrollo y en las pruebas de punta a punta. Se activa con `VITE_USE_MOCK_API=true`. El código y el worker se eliminan de la compilación de producción.
+- **Demo instalable en GitHub Pages:** modo `demo` (`npm run build:demo`, base `/parkappV2/`). Usa la API simulada, pero responde dentro de la página interceptando `fetch` en vez de con el service worker de MSW, porque la PWA necesita ese lugar para su propio service worker (instalación y uso sin conexión). La compilación de producción no cambia: no lleva la API simulada.
 - **Cambiar a la API real** es cambiar `VITE_API_URL` y quitar el modo simulado; las pantallas no se tocan.
 - **Reglas que la simulación ya aplica y la API real debe respetar:** sin doble reserva (409), precios en centavos enteros, fechas en UTC, dirección exacta solo tras confirmar, permisos validados en el servidor.
 - **El precio lo calcula el servidor** (`/quote`); el cliente nunca suma. `formatCents` y los mocks de pago lanzan error con decimales.

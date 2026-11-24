@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build:e2e": "tsc -b && vite build --mode e2e",
+    "build:demo": "tsc -b && vite build --mode demo",
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "lint": "eslint .",

@@ -20,8 +20,12 @@ function stripMockWorker(mode: string): Plugin {
   }
 }
 
+/** The demo is served from GitHub Pages under the repository name. */
+const DEMO_BASE = process.env.DEMO_BASE ?? '/parkappV2/'
+
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
+  base: mode === 'demo' ? DEMO_BASE : '/',
   plugins: [
     react(),
     tailwindcss(),
@@ -37,7 +41,9 @@ export default defineConfig(({ mode }) => ({
         short_name: 'ParkApp',
         description: 'Renta cocheras por horas cerca de tu evento.',
         lang: 'es-MX',
-        start_url: '/',
+        id: mode === 'demo' ? DEMO_BASE : '/',
+        start_url: mode === 'demo' ? DEMO_BASE : '/',
+        scope: mode === 'demo' ? DEMO_BASE : '/',
         display: 'standalone',
         orientation: 'portrait',
         theme_color: '#0F3D91',
