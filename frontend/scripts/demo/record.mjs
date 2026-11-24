@@ -155,9 +155,10 @@ await say(
   'Elige recinto y evento',
   'Cinco estadios y auditorios de la ZMG, más el <b>Estadio 3 de Marzo</b>. Al elegir un evento, la app propone llegar <b>2 horas antes</b> y salir <b>1 hora después</b>, en horas completas.',
 )
-await tap(app.getByText('Estadio Akron', { exact: true }))
-await tap(app.getByText('Concierto de ejemplo'))
-await tap(app.getByRole('button', { name: 'Ver cocheras' }))
+await tap(app.getByRole('link', { name: /Estadio Akron/ }))
+await heading('Próximos eventos').waitFor()
+await pause(1500)
+await tap(app.getByRole('link', { name: /Concierto de ejemplo/ }))
 
 await heading('Cocheras cerca de Estadio Akron').waitFor()
 await say(

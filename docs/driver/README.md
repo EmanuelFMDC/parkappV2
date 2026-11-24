@@ -6,7 +6,7 @@ Reservar una cochera toma **cuatro pasos como máximo**: Recinto, Cochera, Horar
 
 | Paso         | Ruta                                           | Qué hace la persona                                                                                                                             |
 | ------------ | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Recinto   | `/`                                            | Elige recinto y evento. Se prellena llegada 2 h antes y salida 1 h después, en horas completas                                                  |
+| 1. Recinto   | `/` y `/venues/:venueId`                       | Toca un recinto y se abre otra pantalla con sus próximos eventos; al tocar uno pasa a las cocheras con llegada 2 h antes y salida 1 h después |
 | 2. Cochera   | `/venues/:venueId/spaces` y `/spaces/:spaceId` | Mapa (punto aproximado) y lista con disponibilidad en vivo; abre el detalle (fotos, reseñas, medidas). **Abierto a todos**                     |
 | Cuenta       | `/account/new`                                 | Si continúa sin cuenta completa, el botón dice "Crear cuenta para continuar" y la lleva aquí. Al terminar vuelve al paso 3 con su mismo horario |
 | 3. Horario   | `/book/:spaceId/time`                          | **Solo con cuenta verificada.** Ajusta llegada y salida por horas, elige su auto y ve el desglose: renta, zona, comisión, IVA y total           |
@@ -57,7 +57,7 @@ Se activa con `VITE_USE_MOCK_API=true` y **no viaja en producción** (el código
 
 | Pantalla                                                        | Archivos (`mobile-` y `desktop-`)                                                                                    |
 | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| 1. Recinto y evento                                             | `1-venue`                                                                                                            |
+| 1. Recinto y eventos                                            | `1-venue`, `1b-events`                                                                                               |
 | 2. Mapa y lista                                                 | `2-spaces`                                                                                                           |
 | 2. Detalle                                                      | `3-detail`, `3b-detail-reviews`                                                                                      |
 | Cuenta: teléfono, datos, auto, identidad, identidad en revisión | `4a-account-phone`, `4b-account-profile`, `4c-account-vehicle`, `4d-account-identity`, `4e-account-identity-pending` |

@@ -94,14 +94,12 @@
   "driver": {
     "venue": {
       "title": "¿A qué evento vas?",
-      "intro": "Elige el recinto y el evento. Te mostramos cocheras a menos de 3 km.",
+      "intro": "Elige el recinto. Después verás sus próximos eventos y las cocheras a menos de 3 km.",
       "venues": "Recintos",
-      "events": "Próximos eventos en {{venue}}",
       "eventsEmpty": "No hay eventos próximos en este recinto.",
-      "pickVenue": "Elige un recinto para ver sus eventos.",
-      "cta": "Ver cocheras",
-      "ctaHint": "Elige un evento para continuar",
-      "arrive": "Llegas 2 horas antes y te quedas hasta 1 hora después. Puedes cambiarlo más adelante."
+      "arrive": "Elige tu evento. Te sugerimos llegar 2 horas antes y quedarte hasta 1 hora después; puedes cambiarlo más adelante.",
+      "eventsTitle": "Próximos eventos",
+      "eventsEmptyBody": "Vuelve atrás y elige otro recinto."
     },
     "spaces": {
       "title": "Cocheras cerca de {{venue}}",

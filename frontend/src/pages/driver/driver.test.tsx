@@ -9,6 +9,7 @@ import { API_URL } from '../../mocks/handlers'
 import { testDb } from '../../mocks/server'
 import { createMockServices, type Services } from '../../services'
 import PayPage from './PayPage'
+import EventsPage from './EventsPage'
 import VenuePage from './VenuePage'
 
 const GOOGLE_USER = 'mock-google-user'
@@ -24,6 +25,7 @@ function renderAt(url: string, services?: Services) {
       <MemoryRouter initialEntries={[url]}>
         <Routes>
           <Route index element={<VenuePage />} />
+          <Route path="venues/:venueId" element={<EventsPage />} />
           <Route path="venues/:venueId/spaces" element={<Where />} />
           <Route path="book/:spaceId/time" element={<Where />} />
           <Route path="book/:spaceId/pay" element={<PayPage />} />
@@ -56,23 +58,33 @@ beforeEach(async () => {
   await i18n.changeLanguage('es-MX')
 })
 
-describe('VenuePage (step 1)', () => {
-  it('needs a venue and an event before it lets the driver continue', async () => {
+describe('step 1: venue, then its events on their own screen', () => {
+  it('opens the events of a venue as soon as the venue is tapped', async () => {
     renderAt('/')
-    const cta = screen.getByRole('button', { name: 'Ver cocheras' })
-    expect(cta).toBeDisabled()
+    expect(screen.queryByText('Concierto de ejemplo')).not.toBeInTheDocument()
+    await userEvent.click(await screen.findByRole('link', { name: /Estadio Akron/ }))
 
-    await userEvent.click(await screen.findByText('Estadio Akron'))
-    const events = await screen.findAllByText('Concierto de ejemplo')
-    expect(events.length).toBeGreaterThan(0)
-    expect(cta).toBeDisabled()
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Próximos eventos' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Estadio Akron')).toBeInTheDocument()
+    expect(screen.getByText(/Paso 1 de 4/)).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: /de ejemplo/ }).length).toBeGreaterThan(0)
+  })
 
-    await userEvent.click(events[0]!)
-    expect(cta).toBeEnabled()
-    await userEvent.click(cta)
-
+  it('goes straight to the garages when an event is tapped, with the suggested hours', async () => {
+    renderAt('/venues/akron')
+    await userEvent.click(await screen.findByRole('link', { name: /Concierto de ejemplo/ }))
     const where = await screen.findByTestId('where')
     expect(where).toHaveTextContent('/venues/akron/spaces?venue=akron&from=')
+  })
+
+  it('goes back to the venues', async () => {
+    renderAt('/venues/akron')
+    await userEvent.click(await screen.findByRole('button', { name: 'Volver' }))
+    expect(
+      await screen.findByRole('heading', { level: 1, name: '¿A qué evento vas?' }),
+    ).toBeInTheDocument()
   })
 
   it('shows the four-step progress', () => {

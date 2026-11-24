@@ -81,8 +81,7 @@ export async function pickAkronFirstEvent(page: Page) {
   await page.goto('/')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('¿A qué evento vas?')
   await page.getByText('Estadio Akron', { exact: true }).click()
-  await page.getByText('Concierto de ejemplo').click()
-  await page.getByRole('button', { name: 'Ver cocheras' }).click()
+  await page.getByRole('link', { name: /Concierto de ejemplo/ }).click()
   await expect(page).toHaveURL(/\/venues\/akron\/spaces\?/)
 }
 

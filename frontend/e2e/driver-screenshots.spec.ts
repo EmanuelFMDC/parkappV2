@@ -16,11 +16,13 @@ test('driver flow screenshots', async ({ page }, testInfo) => {
   }
 
   await page.goto('/')
-  await page.getByText('Estadio Akron', { exact: true }).click()
-  await page.getByText('Concierto de ejemplo').click()
+  await expect(page.getByRole('link', { name: /Estadio Akron/ })).toBeVisible()
   await shot('1-venue')
+  await page.getByRole('link', { name: /Estadio Akron/ }).click()
+  await expect(page.getByRole('link', { name: /Concierto de ejemplo/ })).toBeVisible()
+  await shot('1b-events')
 
-  await page.getByRole('button', { name: 'Ver cocheras' }).click()
+  await page.getByRole('link', { name: /Concierto de ejemplo/ }).click()
   await expect(
     page.getByRole('button', { name: 'Cajón techado para auto compacto', exact: true }),
   ).toBeVisible()

@@ -5,6 +5,7 @@ import { AppShell } from './components/layout/AppShell'
 import { RequireAccount } from './features/account/RequireAccount'
 
 const VenuePage = lazy(() => import('./pages/driver/VenuePage'))
+const EventsPage = lazy(() => import('./pages/driver/EventsPage'))
 const SpacesPage = lazy(() => import('./pages/driver/SpacesPage'))
 const SpaceDetailPage = lazy(() => import('./pages/driver/SpaceDetailPage'))
 const TimePage = lazy(() => import('./pages/driver/TimePage'))
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="design-system" element={<StyleguidePage />} />
             <Route element={<AppShell />}>
               <Route index element={<VenuePage />} />
+              <Route path="venues/:venueId" element={<EventsPage />} />
               <Route path="venues/:venueId/spaces" element={<SpacesPage />} />
               <Route path="spaces/:spaceId" element={<SpaceDetailPage />} />
               <Route path="account/new" element={<OnboardingPage />} />

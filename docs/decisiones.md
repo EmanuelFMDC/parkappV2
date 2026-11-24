@@ -49,7 +49,7 @@ Fuente: presentación final del proyecto (modelo de negocio).
 
 ## Modo conductor
 
-- **Cuatro pasos:** Recinto, Cochera (lista y detalle), Horario, Pago. El inicio de sesión aparece dentro del pago, solo si hace falta.
+- **Cuatro pasos:** Recinto (lista de recintos y, al tocar uno, sus eventos en otra pantalla para que quede claro que algo pasó), Cochera (lista y detalle), Horario, Pago. El inicio de sesión aparece dentro del pago, solo si hace falta.
 - **El viaje vive en la URL** (recinto y horario). Horario por defecto: llegada 2 horas antes del evento y salida 1 hora después de que termina, redondeado a horas completas.
 - **Ubicación aproximada antes de reservar:** la búsqueda y el detalle muestran un punto desplazado de 100 a 200 m (siempre el mismo para cada cochera, para que no se pueda promediar) y la distancia al recinto redondeada a 50 m. La dirección y el punto exactos llegan con la reserva confirmada.
 - **Paso 4, "Llegar":** la reserva confirmada trae el pin exacto (`space.location`, como la dirección, solo tras confirmar) y un botón "Cómo llegar" que abre la ruta en Google Maps en otra pestaña o en la app de mapas del teléfono. Es un enlace público sin clave ni SDK, detrás de `MapService.navigationUrl`; no cuenta como integrar Google Maps.

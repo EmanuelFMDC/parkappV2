@@ -30,12 +30,14 @@ test.describe('driver books a garage in four steps', () => {
     await page.goto('/')
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('¿A qué evento vas?')
     await expect(page.getByText('Paso 1 de 4')).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Ver cocheras' })).toBeDisabled()
     await expectAccessible(page)
 
-    await page.getByText('Estadio Akron', { exact: true }).click()
-    await page.getByText('Concierto de ejemplo').click()
-    await page.getByRole('button', { name: 'Ver cocheras' }).click()
+    // Tapping the venue opens its events on their own screen
+    await page.getByRole('link', { name: /Estadio Akron/ }).click()
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Próximos eventos')
+    await expect(page.getByText('Paso 1 de 4')).toBeVisible()
+    await expectAccessible(page)
+    await page.getByRole('link', { name: /Concierto de ejemplo/ }).click()
 
     // Step 2 of 4: browsing is open to everyone
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
