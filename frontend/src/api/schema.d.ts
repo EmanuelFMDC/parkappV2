@@ -193,7 +193,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Cancel a booking (free until 10 minutes before it starts) */
+        /**
+         * Cancel a booking (driver)
+         * @description Free until 2 hours before the start (freeCancelUntil). After that and until the start, ParkApp keeps 20 % of the total (lateCancelFeeCents) and refunds the rest. Once started it cannot be cancelled (409 already_started). An unpaid hold is dropped with nothing to refund.
+         */
         post: operations["cancelBooking"];
         delete?: never;
         options?: never;
@@ -328,6 +331,23 @@ export interface paths {
         patch: operations["updateHostSpace"];
         trace?: never;
     };
+    "/api/host/bookings/{bookingId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The host cancels a confirmed booking on one of their spaces; the driver gets 100 % back */
+        post: operations["cancelHostBooking"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/host/bookings": {
         parameters: {
             query?: never;
@@ -458,6 +478,8 @@ export interface components {
             /** @description One of the driver's registered vehicles */
             vehicleId: string;
         };
+        /** @enum {string|null} */
+        CancelledBy: "driver" | "host" | null;
         /** @enum {string} */
         BookingStatus: "pending_payment" | "confirmed" | "cancelled" | "expired" | "completed";
         Booking: {
@@ -492,6 +514,18 @@ export interface components {
             expiresAt: string | null;
             /** @description Shown once the booking is confirmed */
             accessCode: string | null;
+            /**
+             * Format: date-time
+             * @description 2 hours before the start; cancelling up to this instant is free
+             */
+            freeCancelUntil: string;
+            /** @description 20 % of the total */
+            lateCancelFeeCents: number;
+            cancelledBy: components["schemas"]["CancelledBy"];
+            /** @description What ParkApp kept when it was cancelled; null while not cancelled */
+            cancellationFeeCents: number | null;
+            /** @description What went back to the driver when it was cancelled; null while not cancelled */
+            refundCents: number | null;
             /** Format: date-time */
             createdAt: string;
         };
@@ -616,6 +650,7 @@ export interface components {
             };
             /** @description What the host is paid (rent + zone charge) */
             subtotalCents: number;
+            cancelledBy: components["schemas"]["CancelledBy"];
             /** Format: date-time */
             createdAt: string;
         };
@@ -981,7 +1016,7 @@ export interface operations {
             };
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
-            /** @description Too late to cancel, or already cancelled */
+            /** @description Already started (already_started), or already cancelled or finished (not_cancellable) */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -1235,6 +1270,39 @@ export interface operations {
                 };
             };
             422: components["responses"]["Invalid"];
+        };
+    };
+    cancelHostBooking: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                bookingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cancelled */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HostBooking"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            /** @description Already started (already_started), or not confirmed (not_cancellable) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
         };
     };
     listHostBookings: {

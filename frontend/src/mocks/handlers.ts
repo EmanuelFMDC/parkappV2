@@ -164,6 +164,10 @@ export function createHandlers(db: MockDb, latencyMs = 0): HttpHandler[] {
       url('/api/host/bookings'),
       route((c) => ({ items: db.listHostBookings(userIdFrom(c.request)) })),
     ),
+    http.post(
+      url('/api/host/bookings/:bookingId/cancel'),
+      route((c) => db.cancelHostBooking(userIdFrom(c.request), param(c, 'bookingId'))),
+    ),
   ]
 }
 

@@ -71,7 +71,14 @@
     },
     "booking": {
       "verified": "Identity verified",
-      "price": "You earn"
+      "price": "You earn",
+      "cancel": "Cancel booking",
+      "cancelTitle": "Cancel {{name}}'s booking?",
+      "cancelBody": "We refund 100% of their payment. Cancelling often can get your account suspended.",
+      "cancelConfirm": "Yes, cancel",
+      "cancelKeep": "Keep it",
+      "cancelledByHost": "You cancelled this booking; the driver got 100% back.",
+      "cancelledByDriver": "The driver cancelled this booking."
     },
     "location": {
       "title": "Where is your garage?",

@@ -231,7 +231,11 @@ paths:
   /api/bookings/{bookingId}/cancel:
     post:
       operationId: cancelBooking
-      summary: Cancel a booking (free until 10 minutes before it starts)
+      summary: Cancel a booking (driver)
+      description: >
+        Free until 2 hours before the start (freeCancelUntil). After that and until the start,
+        ParkApp keeps 20 % of the total (lateCancelFeeCents) and refunds the rest. Once started it
+        cannot be cancelled (409 already_started). An unpaid hold is dropped with nothing to refund.
       security: [{ bearer: [] }]
       parameters:
         - { name: bookingId, in: path, required: true, schema: { type: string } }
@@ -244,7 +248,7 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
         '409':
-          description: Too late to cancel, or already cancelled
+          description: Already started (already_started), or already cancelled or finished (not_cancellable)
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Problem' }
@@ -426,6 +430,27 @@ paths:
               schema: { $ref: '#/components/schemas/Problem' }
         '422': { $ref: '#/components/responses/Invalid' }
 
+  /api/host/bookings/{bookingId}/cancel:
+    post:
+      operationId: cancelHostBooking
+      summary: The host cancels a confirmed booking on one of their spaces; the driver gets 100 % back
+      security: [{ bearer: [] }]
+      parameters:
+        - { name: bookingId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Cancelled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HostBooking' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: Already started (already_started), or not confirmed (not_cancellable)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Problem' }
+
   /api/host/bookings:
     get:
       operationId: listHostBookings
@@ -603,13 +628,16 @@ components:
         startsAt: { type: string, format: date-time }
         endsAt: { type: string, format: date-time }
         vehicleId: { type: string, description: One of the driver's registered vehicles }
+    CancelledBy:
+      type: [string, 'null']
+      enum: [driver, host, null]
     BookingStatus:
       type: string
       enum: [pending_payment, confirmed, cancelled, expired, completed]
     Booking:
       type: object
       required:
-        [id, status, space, venueName, startsAt, endsAt, vehicle, rentCents, zoneSurchargeCents, subtotalCents, commissionCents, vatCents, totalCents, expiresAt, accessCode, createdAt]
+        [id, status, space, venueName, startsAt, endsAt, vehicle, rentCents, zoneSurchargeCents, subtotalCents, commissionCents, vatCents, totalCents, expiresAt, accessCode, freeCancelUntil, lateCancelFeeCents, cancelledBy, cancellationFeeCents, refundCents, createdAt]
       properties:
         id: { type: string }
         status: { $ref: '#/components/schemas/BookingStatus' }
@@ -644,6 +672,18 @@ components:
         accessCode:
           type: [string, 'null']
           description: Shown once the booking is confirmed
+        freeCancelUntil:
+          type: string
+          format: date-time
+          description: 2 hours before the start; cancelling up to this instant is free
+        lateCancelFeeCents: { type: integer, description: 20 % of the total, kept if cancelled later }
+        cancelledBy: { $ref: '#/components/schemas/CancelledBy' }
+        cancellationFeeCents:
+          type: [integer, 'null']
+          description: What ParkApp kept when it was cancelled; null while not cancelled
+        refundCents:
+          type: [integer, 'null']
+          description: What went back to the driver when it was cancelled; null while not cancelled
         createdAt: { type: string, format: date-time }
     VehicleType:
       type: string
@@ -772,7 +812,7 @@ components:
         status: { type: string, enum: [active, paused] }
     HostBooking:
       type: object
-      required: [id, status, space, startsAt, endsAt, driver, subtotalCents, createdAt]
+      required: [id, status, space, startsAt, endsAt, driver, subtotalCents, cancelledBy, createdAt]
       properties:
         id: { type: string }
         status: { $ref: '#/components/schemas/BookingStatus' }
@@ -792,4 +832,5 @@ components:
             identityVerified: { type: boolean }
             vehicle: { $ref: '#/components/schemas/Vehicle' }
         subtotalCents: { type: integer, description: What the host is paid (rent + zone charge), before commission and VAT }
+        cancelledBy: { $ref: '#/components/schemas/CancelledBy' }
         createdAt: { type: string, format: date-time }

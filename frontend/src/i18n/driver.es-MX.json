@@ -48,7 +48,6 @@
       "invalid_plate": "Escribe la placa completa.",
       "invalid_window": "Revisa las fechas y las horas.",
       "booking_expired": "Tu lugar apartado venció. Vuelve a elegir tu cochera.",
-      "too_late": "Ya no se puede cancelar gratis: faltan menos de 10 minutos.",
       "not_cancellable": "Esta reserva ya no se puede cancelar.",
       "unauthorized": "Inicia sesión para continuar.",
       "not_found": "No encontramos lo que buscas.",
@@ -65,7 +64,8 @@
       "vehicle_not_supported": "Tu auto no cabe en esta cochera.",
       "vehicle_required": "Registra tu auto para continuar.",
       "profile_incomplete": "Completa tus datos para continuar.",
-      "identity_required": "Verifica tu identidad para reservar."
+      "identity_required": "Verifica tu identidad para reservar.",
+      "already_started": "La reserva ya empezó; ya no se puede cancelar."
     }
   },
   "auth": {
@@ -188,7 +188,14 @@
       "total": "Total",
       "cancel": "Cancelar reserva",
       "cancelTitle": "¿Cancelar esta reserva?",
-      "cancelBody": "La cancelación es gratis hasta 10 minutos antes de tu llegada.",
+      "cancelBodyFree": "Aún es gratis: te devolvemos {{total}} completo.",
+      "cancelBodyLate": "Faltan menos de 2 horas: se cobra una penalización de {{fee}} (20 % del total) y te devolvemos el resto.",
+      "cancelBodyHold": "Aún no pagas este apartado, así que no se cobra nada.",
+      "policyFree": "Cancelación gratis hasta el {{time}}. Después, penalización de {{fee}} (20 %).",
+      "policyLate": "Si cancelas ahora se cobra una penalización de {{fee}} (20 %).",
+      "cancelledByHost": "El anfitrión canceló esta reserva. Te devolvemos {{refund}}, el 100 % de lo que pagaste.",
+      "refundFull": "Te devolvemos {{refund}}.",
+      "refundLate": "Te devolvemos {{refund}}; la penalización por cancelación tardía fue de {{fee}}.",
       "cancelConfirm": "Sí, cancelar",
       "cancelKeep": "Mantener reserva",
       "notFoundTitle": "No encontramos esta reserva",

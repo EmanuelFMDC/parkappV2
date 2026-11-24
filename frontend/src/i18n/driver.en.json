@@ -48,7 +48,6 @@
       "invalid_plate": "Enter the full license plate.",
       "invalid_window": "Check the dates and times.",
       "booking_expired": "Your held spot expired. Choose your garage again.",
-      "too_late": "Free cancellation has ended: less than 10 minutes to go.",
       "not_cancellable": "This booking can no longer be cancelled.",
       "unauthorized": "Sign in to continue.",
       "not_found": "We couldn't find what you're looking for.",
@@ -65,7 +64,8 @@
       "vehicle_not_supported": "Your car doesn't fit this garage.",
       "vehicle_required": "Register your car to continue.",
       "profile_incomplete": "Complete your details to continue.",
-      "identity_required": "Verify your identity to book."
+      "identity_required": "Verify your identity to book.",
+      "already_started": "The booking has already started; it can no longer be cancelled."
     }
   },
   "auth": {
@@ -188,7 +188,14 @@
       "total": "Total",
       "cancel": "Cancel booking",
       "cancelTitle": "Cancel this booking?",
-      "cancelBody": "Cancellation is free until 10 minutes before you arrive.",
+      "cancelBodyFree": "It's still free: we refund the full {{total}}.",
+      "cancelBodyLate": "It's less than 2 hours away: a {{fee}} penalty (20% of the total) applies and we refund the rest.",
+      "cancelBodyHold": "You haven't paid for this hold yet, so nothing is charged.",
+      "policyFree": "Free cancellation until {{time}}. After that, a {{fee}} penalty (20%).",
+      "policyLate": "Cancelling now carries a {{fee}} penalty (20%).",
+      "cancelledByHost": "The host cancelled this booking. We refund {{refund}}, 100% of what you paid.",
+      "refundFull": "We refund {{refund}}.",
+      "refundLate": "We refund {{refund}}; the late-cancellation penalty was {{fee}}.",
       "cancelConfirm": "Yes, cancel",
       "cancelKeep": "Keep booking",
       "notFoundTitle": "We can't find this booking",

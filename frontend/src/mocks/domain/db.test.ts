@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { createDb, type MockDb } from './db'
 import { ApiError } from './errors'
 import { VENUE_HOURLY_CENTS, ZONE_SURCHARGE_CENTS } from '../../lib/tariffs'
+import { percentOf } from '../../lib/tariffs'
 import { seedDemoBookings } from './demo'
 import { quoteWindow } from './pricing'
 
@@ -170,19 +171,6 @@ describe('booking lifecycle', () => {
     expect(db.listBookings(OTHER)).toEqual([])
   })
 
-  it('cancels for free until 10 minutes before the start, not after', () => {
-    const early = book('akron-1', 2, 4)
-    expect(db.cancelBooking(USER, early.id).status).toBe('cancelled')
-
-    const soon = db.createBooking(USER, {
-      spaceId: 'akron-2',
-      startsAt: iso(T0 + 5 * 60_000),
-      endsAt: iso(T0 + 5 * 60_000 + hours(2)),
-      vehicleId,
-    })
-    expectApiError(() => db.cancelBooking(USER, soon.id), 409, 'too_late')
-  })
-
   it('refuses to start in the past', () => {
     expectApiError(() => book('akron-1', -5, -3), 422, 'in_the_past')
   })
@@ -286,5 +274,64 @@ describe('persistence', () => {
 describe('demo data', () => {
   it('seeds taken spaces for every venue without breaking the booking rules', () => {
     expect(() => seedDemoBookings(db)).not.toThrow()
+  })
+})
+
+describe('cancelling (free until 2 h before, then 20 %)', () => {
+  const confirmed = (fromH: number, toH: number, spaceId = 'akron-1') =>
+    db.confirmBooking(USER, book(spaceId, fromH, toH).id, 'pi_1')
+
+  it('tells the driver until when it is free and what a late cancellation costs', () => {
+    const b = confirmed(5, 7)
+    expect(b.freeCancelUntil).toBe(iso(T0 + hours(3)))
+    expect(b.lateCancelFeeCents).toBe(percentOf(b.totalCents, 2000))
+    expect(b).toMatchObject({ cancelledBy: null, cancellationFeeCents: null, refundCents: null })
+  })
+
+  it('refunds everything when cancelled 2 hours or more before the start', () => {
+    const b = confirmed(5, 7)
+    clock = T0 + hours(3) // exactly 2 h before: still free
+    expect(db.cancelBooking(USER, b.id)).toMatchObject({
+      status: 'cancelled',
+      cancelledBy: 'driver',
+      cancellationFeeCents: 0,
+      refundCents: b.totalCents,
+    })
+  })
+
+  it('keeps 20 % of the total when cancelled later, and refunds the rest', () => {
+    const b = confirmed(5, 7)
+    clock = T0 + hours(3) + 60_000
+    const fee = percentOf(b.totalCents, 2000)
+    expect(db.cancelBooking(USER, b.id)).toMatchObject({
+      status: 'cancelled',
+      cancellationFeeCents: fee,
+      refundCents: b.totalCents - fee,
+    })
+  })
+
+  it('cannot be cancelled once it has started, or twice', () => {
+    const b = confirmed(5, 7)
+    clock = T0 + hours(5)
+    expectApiError(() => db.cancelBooking(USER, b.id), 409, 'already_started')
+
+    const other = confirmed(10, 12, 'akron-2')
+    db.cancelBooking(USER, other.id)
+    expectApiError(() => db.cancelBooking(USER, other.id), 409, 'not_cancellable')
+  })
+
+  it('drops an unpaid hold with nothing to charge or refund', () => {
+    const held = book('akron-1', 1, 3)
+    expect(db.cancelBooking(USER, held.id)).toMatchObject({
+      status: 'cancelled',
+      cancellationFeeCents: 0,
+      refundCents: 0,
+    })
+  })
+
+  it('frees the space for someone else', () => {
+    const b = confirmed(5, 7)
+    db.cancelBooking(USER, b.id)
+    expect(() => book('akron-1', 5, 7, OTHER)).not.toThrow()
   })
 })

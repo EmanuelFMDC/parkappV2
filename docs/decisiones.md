@@ -55,7 +55,8 @@ Fuente: presentación final del proyecto (modelo de negocio).
 - **Cuenta en cuatro etapas:** teléfono, datos personales (nombre legal, fecha de nacimiento, mayoría de edad, correo, aviso de privacidad), auto (placa, marca, modelo, color, tipo) e identidad (INE y selfie, simulada).
 - **La placa sale del auto registrado**, no se pide en el paso 3. El tipo de auto debe caber en la cochera (422 `vehicle_not_supported`).
 - **Supuestos fáciles de cambiar:** reserva instantánea sin aprobación del anfitrión; foto de perfil para después.
-- **Diferido:** reseñas nuevas, notificaciones, cobro por cancelación tardía y aplicar el idioma del perfil al iniciar sesión.
+- **Cancelación:** gratis hasta 2 horas antes del inicio (`freeCancelUntil`). Después y hasta el inicio, ParkApp retiene el 20 % del total (`lateCancelFeeCents`, lo calcula el servidor) y devuelve el resto. Ya empezada no se puede cancelar (409 `already_started`). Un apartado sin pagar se suelta sin cobro. La reserva cancelada guarda quién canceló, la penalización y el reembolso.
+- **Diferido:** reseñas nuevas, notificaciones, reembolsos reales con Stripe y aplicar el idioma del perfil al iniciar sesión.
 
 ## Modo anfitrión
 
@@ -69,7 +70,8 @@ Fuente: presentación final del proyecto (modelo de negocio).
 - **Precio:** lo fija ParkApp por zona. El anfitrión ve "Ganas $X por hora" y, en cada reserva recibida, lo que gana (renta + $50 de zona).
 - **Una cochera sin reseñas dice "Nueva"** en vez de 0.0. Pausar no cancela reservas confirmadas.
 - **El borrador del alta vive en `sessionStorage`** y no sale del navegador hasta publicar.
-- **Diferido:** editar otros datos de una cochera publicada, eliminarla, pagos al anfitrión (Stripe Connect), cancelaciones del anfitrión, reseñas a conductores y mensajería.
+- **El anfitrión puede cancelar** una reserva confirmada que no ha empezado; el conductor recibe el 100 %. El aviso advierte que cancelar seguido puede suspender la cuenta (la regla de suspensión aún no existe).
+- **Diferido:** editar otros datos de una cochera publicada, eliminarla, pagos al anfitrión (Stripe Connect), si el anfitrión recibe parte de la penalización por cancelación tardía, reseñas a conductores y mensajería.
 
 ## Una sola app, dos modos
 

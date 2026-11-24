@@ -16,6 +16,7 @@ import type {
   Venue,
   VenueEvent,
 } from '../../api/types'
+import { percentOf } from '../../lib/tariffs'
 import { createAccounts } from './accounts'
 import { ApiError, notFound } from './errors'
 import { distanceM } from './geo'
@@ -24,7 +25,9 @@ import { buildEvents, buildReviews, venues } from './seed'
 import { createSpaceStore } from './spaces'
 
 const PRE_BOOKING_MS = 10 * 60_000
-const FREE_CANCEL_MS = 10 * 60_000
+/** Cancelling is free until 2 hours before the start; later, ParkApp keeps 20 % of the total. */
+const FREE_CANCEL_MS = 2 * 3_600_000
+const LATE_CANCEL_BPS = 2000
 const STORAGE_KEY = 'parkapp.mock.bookings'
 
 interface StoredBooking {
@@ -45,6 +48,9 @@ interface StoredBooking {
   expiresAt: string | null
   accessCode: string | null
   spotLabel: string | null
+  cancelledBy: 'driver' | 'host' | null
+  cancellationFeeCents: number | null
+  refundCents: number | null
   createdAt: string
 }
 
@@ -102,10 +108,16 @@ export function createDb({
   }
   /** Bookings saved before the commission model kept a single service fee. */
   function upgrade(b: StoredBooking & { serviceFeeCents?: number }): StoredBooking {
-    if (b.commissionCents !== undefined) return b
+    const cancellation = {
+      cancelledBy: b.cancelledBy ?? (b.status === 'cancelled' ? ('driver' as const) : null),
+      cancellationFeeCents: b.cancellationFeeCents ?? (b.status === 'cancelled' ? 0 : null),
+      refundCents: b.refundCents ?? (b.status === 'cancelled' ? 0 : null),
+    }
+    if (b.commissionCents !== undefined) return { ...b, ...cancellation }
     const { serviceFeeCents = 0, ...rest } = b
     return {
       ...rest,
+      ...cancellation,
       rentCents: b.subtotalCents,
       zoneSurchargeCents: 0,
       commissionCents: serviceFeeCents,
@@ -203,6 +215,46 @@ export function createDb({
       totalCents: b.totalCents,
       expiresAt: b.status === 'pending_payment' ? b.expiresAt : null,
       accessCode: revealed ? b.accessCode : null,
+      freeCancelUntil: new Date(Date.parse(b.startsAt) - FREE_CANCEL_MS).toISOString(),
+      lateCancelFeeCents: percentOf(b.totalCents, LATE_CANCEL_BPS),
+      cancelledBy: b.cancelledBy,
+      cancellationFeeCents: b.cancellationFeeCents,
+      refundCents: b.refundCents,
+      createdAt: b.createdAt,
+    }
+  }
+
+  /** Only a confirmed booking that has not started, or an unpaid hold, can be cancelled. */
+  function assertCancellable(b: StoredBooking) {
+    if (b.status !== 'confirmed' && b.status !== 'pending_payment') {
+      throw new ApiError(409, 'not_cancellable', 'This booking can no longer be cancelled')
+    }
+    if (now() >= Date.parse(b.startsAt)) {
+      throw new ApiError(409, 'already_started', 'This booking has already started')
+    }
+  }
+
+  function markCancelled(b: StoredBooking, by: 'driver' | 'host', feeCents: number) {
+    const paid = b.status === 'confirmed'
+    b.status = 'cancelled'
+    b.cancelledBy = by
+    b.cancellationFeeCents = paid ? feeCents : 0
+    b.refundCents = paid ? b.totalCents - feeCents : 0
+    b.expiresAt = null
+    save()
+  }
+
+  function toHostBooking(b: StoredBooking): HostBooking {
+    const card = accounts.driverCard(b.userId)
+    return {
+      id: b.id,
+      status: b.status,
+      space: { id: b.spaceId, title: requireSpace(b.spaceId).title },
+      startsAt: b.startsAt,
+      endsAt: b.endsAt,
+      driver: { ...card, firstName: card.firstName || 'Conductor', vehicle: b.vehicle },
+      subtotalCents: b.subtotalCents,
+      cancelledBy: b.cancelledBy,
       createdAt: b.createdAt,
     }
   }
@@ -299,6 +351,9 @@ export function createDb({
         expiresAt: new Date(now() + PRE_BOOKING_MS).toISOString(),
         accessCode: null,
         spotLabel: null,
+        cancelledBy: null,
+        cancellationFeeCents: null,
+        refundCents: null,
         createdAt: new Date(now()).toISOString(),
       }
       bookings.push(stored)
@@ -334,15 +389,25 @@ export function createDb({
 
     cancelBooking(userId: string | null, id: string): Booking {
       const b = ownBooking(requireUser(userId), id)
-      if (b.status === 'cancelled' || b.status === 'expired' || b.status === 'completed') {
-        throw new ApiError(409, 'not_cancellable', 'This booking can no longer be cancelled')
-      }
-      if (now() > Date.parse(b.startsAt) - FREE_CANCEL_MS) {
-        throw new ApiError(409, 'too_late', 'Free cancellation ended 10 minutes before the start')
-      }
-      b.status = 'cancelled'
-      save()
+      assertCancellable(b)
+      const late = now() > Date.parse(b.startsAt) - FREE_CANCEL_MS
+      markCancelled(b, 'driver', late ? percentOf(b.totalCents, LATE_CANCEL_BPS) : 0)
       return toBooking(b)
+    },
+
+    /** The host cancels a booking on one of their spaces: the driver always gets 100 % back. */
+    cancelHostBooking(userId: string | null, id: string): HostBooking {
+      const uid = requireUser(userId)
+      expireStale()
+      const mine = new Set(store.idsFor(uid))
+      const b = bookings.find((x) => x.id === id && mine.has(x.spaceId))
+      if (!b) throw notFound('Booking')
+      if (b.status !== 'confirmed') {
+        throw new ApiError(409, 'not_cancellable', 'Only a confirmed booking can be cancelled')
+      }
+      assertCancellable(b)
+      markCancelled(b, 'host', 0)
+      return toHostBooking(b)
     },
 
     getMe: (userId: string | null): Me => accounts.get(userId),
@@ -375,19 +440,7 @@ export function createDb({
       return bookings
         .filter((b) => mine.has(b.spaceId) && !['pending_payment', 'expired'].includes(b.status))
         .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt))
-        .map((b) => {
-          const card = accounts.driverCard(b.userId)
-          return {
-            id: b.id,
-            status: b.status,
-            space: { id: b.spaceId, title: requireSpace(b.spaceId).title },
-            startsAt: b.startsAt,
-            endsAt: b.endsAt,
-            driver: { ...card, firstName: card.firstName || 'Conductor', vehicle: b.vehicle },
-            subtotalCents: b.subtotalCents,
-            createdAt: b.createdAt,
-          }
-        })
+        .map(toHostBooking)
     },
 
     /** Test and demo controls for simulated back-office, the identity provider and verified accounts. */
@@ -426,6 +479,9 @@ export function createDb({
         expiresAt: null,
         accessCode: 'FOREIG',
         spotLabel: null,
+        cancelledBy: null,
+        cancellationFeeCents: null,
+        refundCents: null,
         createdAt: new Date(now()).toISOString(),
       })
       save()

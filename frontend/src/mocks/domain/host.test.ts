@@ -281,6 +281,32 @@ describe('drivers and hosts', () => {
     expect(confirmed.space.address).toBe('Av. Patria 1234, Zapopan')
   })
 
+  it('a host can cancel a confirmed booking; the driver gets 100 % back', () => {
+    const vehicleId = db.getMe(DRIVER).vehicles[0]!.id
+    const b = db.confirmBooking(DRIVER, book(DRIVER, vehicleId).id, 'pi_1')
+    clock = Date.parse(window.startsAt) - 30 * 60_000 // even inside the driver's 2-hour window
+
+    expect(db.cancelHostBooking(HOST, b.id)).toMatchObject({
+      status: 'cancelled',
+      cancelledBy: 'host',
+    })
+    expect(db.getBooking(DRIVER, b.id)).toMatchObject({
+      status: 'cancelled',
+      cancelledBy: 'host',
+      cancellationFeeCents: 0,
+      refundCents: b.totalCents,
+    })
+    expectApiError(() => db.cancelHostBooking(HOST, b.id), 409, 'not_cancellable')
+  })
+
+  it("a host cannot cancel someone else's booking, or one that already started", () => {
+    const vehicleId = db.getMe(DRIVER).vehicles[0]!.id
+    const b = db.confirmBooking(DRIVER, book(DRIVER, vehicleId).id, 'pi_1')
+    expectApiError(() => db.cancelHostBooking('mock-user-other', b.id), 404, 'not_found')
+    clock = Date.parse(window.startsAt)
+    expectApiError(() => db.cancelHostBooking(HOST, b.id), 409, 'already_started')
+  })
+
   it('shows the host the first name, badge and car, never phone, email or ID', () => {
     const vehicleId = db.getMe(DRIVER).vehicles[0]!.id
     db.confirmBooking(DRIVER, book(DRIVER, vehicleId).id, 'pi_1')

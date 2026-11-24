@@ -117,14 +117,16 @@ test.describe('driver books a garage in four steps', () => {
     await expect(page.getByText('Confirmada', { exact: true })).toBeVisible()
     await expectAccessible(page)
 
-    // Cancel (free until 10 minutes before arrival)
+    // Cancel (free until 2 hours before the start; the event is days away)
     await page.getByRole('link', { name: new RegExp(AVAILABLE_GARAGE) }).click()
+    await expect(page.getByText(/Cancelación gratis hasta el/)).toBeVisible()
     await page.getByRole('button', { name: 'Cancelar reserva' }).click()
     const dialog = page.getByRole('dialog', { name: '¿Cancelar esta reserva?' })
-    await expect(dialog).toBeVisible()
+    await expect(dialog).toContainText('Aún es gratis')
     await dialog.getByRole('button', { name: 'Sí, cancelar' }).click()
     await expect(page.getByText('Cancelada', { exact: true })).toBeVisible()
     await expect(page.getByText('Esta reserva fue cancelada.')).toBeVisible()
+    await expect(page.getByText(/^Te devolvemos \$/)).toBeVisible()
     await expect(page.getByRole('button', { name: 'Cancelar reserva' })).toHaveCount(0)
   })
 

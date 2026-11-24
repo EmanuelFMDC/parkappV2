@@ -18,7 +18,9 @@ import { PriceBreakdown } from '../../features/bookings/PriceBreakdown'
 import { StatusBadge } from '../../features/bookings/StatusBadge'
 import { WindowSummary } from '../../features/bookings/WindowSummary'
 import { errorMessage } from '../../lib/errors'
+import { formatCents } from '../../lib/money'
 import { formatDateTime } from '../../lib/time'
+import { useNow } from '../../lib/useNow'
 
 /** One booking. Confirmed bookings show the event ticket; the others explain their state. */
 export default function BookingPage() {
@@ -30,6 +32,7 @@ export default function BookingPage() {
   const booking = useBooking(bookingId)
   const cancel = useCancelBooking()
   const [confirming, setConfirming] = useState(false)
+  const now = useNow()
   const lang = i18n.language
   const b = booking.data
   const justBooked = params.get('new') === '1' && b?.status === 'confirmed'
@@ -76,7 +79,20 @@ export default function BookingPage() {
   }
 
   const time = (iso: string) => formatDateTime(iso, lang, { hour: 'numeric', minute: '2-digit' })
-  const canCancel = b && (b.status === 'confirmed' || b.status === 'pending_payment')
+  const when = (iso: string) =>
+    formatDateTime(iso, lang, { weekday: 'short', hour: 'numeric', minute: '2-digit' })
+  const money = (cents: number) => formatCents(cents, lang)
+  const started = b ? now >= Date.parse(b.startsAt) : false
+  const canCancel = b && !started && (b.status === 'confirmed' || b.status === 'pending_payment')
+  // Free until 2 hours before the start; later, ParkApp keeps 20 % (amount set by the server).
+  const lateCancel = b ? now > Date.parse(b.freeCancelUntil) : false
+  const cancelBody = !b
+    ? ''
+    : b.status === 'pending_payment'
+      ? t('bookings.detail.cancelBodyHold')
+      : lateCancel
+        ? t('bookings.detail.cancelBodyLate', { fee: money(b.lateCancelFeeCents) })
+        : t('bookings.detail.cancelBodyFree', { total: money(b.totalCents) })
 
   return (
     <>
@@ -126,8 +142,22 @@ export default function BookingPage() {
                     ? t('bookings.detail.pending', { time: time(b.expiresAt) })
                     : b.status === 'expired'
                       ? t('bookings.detail.expired')
-                      : t('bookings.detail.cancelledNote')}
+                      : b.cancelledBy === 'host'
+                        ? t('bookings.detail.cancelledByHost', {
+                            refund: money(b.refundCents ?? 0),
+                          })
+                        : t('bookings.detail.cancelledNote')}
                 </p>
+                {b.cancelledBy === 'driver' && (b.refundCents ?? 0) > 0 && (
+                  <p className="text-ink-muted">
+                    {(b.cancellationFeeCents ?? 0) > 0
+                      ? t('bookings.detail.refundLate', {
+                          refund: money(b.refundCents ?? 0),
+                          fee: money(b.cancellationFeeCents ?? 0),
+                        })
+                      : t('bookings.detail.refundFull', { refund: money(b.refundCents ?? 0) })}
+                  </p>
+                )}
               </section>
             )}
 
@@ -150,6 +180,17 @@ export default function BookingPage() {
               </p>
             )}
 
+            {canCancel && b.status === 'confirmed' && (
+              <p className="text-caption text-ink-muted">
+                {lateCancel
+                  ? t('bookings.detail.policyLate', { fee: money(b.lateCancelFeeCents) })
+                  : t('bookings.detail.policyFree', {
+                      time: when(b.freeCancelUntil),
+                      fee: money(b.lateCancelFeeCents),
+                    })}
+              </p>
+            )}
+
             {canCancel && (
               <Button variant="danger" block onClick={() => setConfirming(true)}>
                 {t('bookings.detail.cancel')}
@@ -164,7 +205,7 @@ export default function BookingPage() {
         danger
         busy={cancel.isPending}
         title={t('bookings.detail.cancelTitle')}
-        body={t('bookings.detail.cancelBody')}
+        body={cancelBody}
         confirmLabel={t('bookings.detail.cancelConfirm')}
         cancelLabel={t('bookings.detail.cancelKeep')}
         onCancel={() => setConfirming(false)}

@@ -29,6 +29,23 @@ export function useHostBookings() {
   })
 }
 
+/** The driver always gets 100 % back when the host cancels. */
+export function useCancelHostBooking() {
+  const api = useApi()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (bookingId: string) =>
+      unwrap(
+        api.POST('/api/host/bookings/{bookingId}/cancel', { params: { path: { bookingId } } }),
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['host', 'bookings'] })
+      // The space is free again for drivers.
+      void queryClient.invalidateQueries({ queryKey: ['spaces'] })
+    },
+  })
+}
+
 export function useCreateHostSpace() {
   const api = useApi()
   const queryClient = useQueryClient()

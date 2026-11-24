@@ -71,7 +71,14 @@
     },
     "booking": {
       "verified": "Identidad verificada",
-      "price": "Tú ganas"
+      "price": "Tú ganas",
+      "cancel": "Cancelar reserva",
+      "cancelTitle": "¿Cancelar la reserva de {{name}}?",
+      "cancelBody": "Le devolvemos el 100 % de su pago. Cancelar seguido puede llevar a suspender tu cuenta.",
+      "cancelConfirm": "Sí, cancelar",
+      "cancelKeep": "Mantener",
+      "cancelledByHost": "Cancelaste esta reserva; el conductor recibió el 100 % de vuelta.",
+      "cancelledByDriver": "El conductor canceló esta reserva."
     },
     "location": {
       "title": "¿Dónde está tu cochera?",
