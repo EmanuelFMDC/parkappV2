@@ -302,5 +302,80 @@
       "photos": "Photos",
       "photosIntro": "Checks type and size; the first one is the cover."
     }
+  },
+  "incidents": {
+    "report": "Report a problem",
+    "title": "Report a problem",
+    "intro": "Tell us what happened. ParkApp mediates between driver and host; take photos if you can. In an emergency call 911.",
+    "categoryLabel": "Kind of problem",
+    "category": {
+      "damage": "Damage",
+      "access": "Access or spot taken",
+      "safety": "Safety",
+      "other": "Other"
+    },
+    "descriptionLabel": "What happened",
+    "descriptionHint": "Between 10 and 1000 characters.",
+    "send": "Send report",
+    "cancel": "Cancel",
+    "reported": "You reported: {{category}}, {{date}}.",
+    "status": {
+      "open": "Under review",
+      "resolved": "Resolved"
+    }
+  },
+  "errors": {
+    "code": {
+      "invalid_incident": "Pick the kind of problem and tell us what happened (at least 10 characters).",
+      "not_reportable": "Problems can no longer be reported for this booking."
+    }
+  },
+  "terms": {
+    "title": "Terms and conditions",
+    "link": "Terms and conditions",
+    "payNote": "By paying you accept the",
+    "provisional": "Provisional version: a lawyer must review these terms before launch.",
+    "sections": {
+      "object": {
+        "title": "Purpose",
+        "body": "ParkApp is a platform that connects owners of private parking spaces with drivers who want to rent them by the hour in the Guadalajara metropolitan area. ParkApp is only an intermediary: it does not own, operate, lease or keep custody of the spaces or the vehicles."
+      },
+      "registration": {
+        "title": "Registration",
+        "body": "To use ParkApp you must be of legal age, verify your phone by SMS and give truthful information. Drivers and hosts verify their identity with their INE. A host can list several identical spots in one listing."
+      },
+      "host": {
+        "title": "Host's obligations",
+        "body": "The host guarantees they have the right to rent the space (they own it, their lease allows it, or the building has given permission), that photos, measurements and access rules are real, and that the space will be free during the booked hours."
+      },
+      "driver": {
+        "title": "Driver's obligations",
+        "body": "The driver uses the space only during the booked hours, in one-hour blocks, follows the access rules and leaves no valuables. Extra time is charged as an additional hour."
+      },
+      "payments": {
+        "title": "Payments",
+        "body": "Payment is made in advance by card. The price includes the space's rate (by venue or by municipality, plus $50 within 3 km of a venue), ParkApp's 15% commission and 16% VAT on the commission. ParkApp makes the tax withholdings the law requires from hosts."
+      },
+      "cancellation": {
+        "title": "Cancellation",
+        "body": "Cancelling is free until 2 hours before the booking starts; after that a 20% penalty on the total applies. If the host cancels or the space is not available, the driver gets 100% back."
+      },
+      "liability": {
+        "title": "Liability",
+        "body": "ParkApp is not liable for theft, damage or loss of the vehicle or its contents. The parties document arrival and departure with photos and report incidents in the app so ParkApp can mediate."
+      },
+      "data": {
+        "title": "Personal data",
+        "body": "We handle your data according to the privacy notice and Mexico's Federal Law on the Protection of Personal Data Held by Private Parties. Your card details are processed by the payment provider; ParkApp does not store them."
+      },
+      "suspension": {
+        "title": "Suspension",
+        "body": "ParkApp may suspend or close accounts for false information, fraud, damage, non-payment or breaking these terms."
+      },
+      "law": {
+        "title": "Governing law",
+        "body": "These terms are governed by the laws of Mexico. Any dispute is settled before the courts of Guadalajara, Jalisco, without prejudice to your consumer rights before PROFECO."
+      }
+    }
   }
 }

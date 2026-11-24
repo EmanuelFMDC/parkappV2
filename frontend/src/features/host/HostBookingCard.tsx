@@ -9,13 +9,15 @@ import { formatDateTime } from '../../lib/time'
 import { useNow } from '../../lib/useNow'
 import { describeVehicle } from '../account/vehicleFit'
 import { StatusBadge } from '../bookings/StatusBadge'
-import { useCancelHostBooking } from './hooks'
+import { IncidentReport } from '../bookings/IncidentReport'
+import { useCancelHostBooking, useReportHostIncident } from './hooks'
 
 /** A booking on one of the host's spaces. Shows who is coming, never how to reach them. */
 export function HostBookingCard({ booking }: { booking: HostBooking }) {
   const { t, i18n } = useTranslation()
   const lang = i18n.language
   const cancel = useCancelHostBooking()
+  const incident = useReportHostIncident()
   const [confirming, setConfirming] = useState(false)
   const now = useNow()
   const when: Intl.DateTimeFormatOptions = {
@@ -86,6 +88,15 @@ export function HostBookingCard({ booking }: { booking: HostBooking }) {
           {t('host.booking.cancel')}
         </Button>
       )}
+      <IncidentReport
+        status={booking.status}
+        endsAt={booking.endsAt}
+        incidents={booking.incidents}
+        submit={(input) => incident.mutateAsync({ bookingId: booking.id, input })}
+        pending={incident.isPending}
+        error={incident.error}
+        reset={incident.reset}
+      />
       {cancel.error && (
         <p role="alert" className="text-caption font-medium text-danger-600">
           {errorMessage(t, cancel.error)}

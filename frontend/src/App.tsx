@@ -21,6 +21,7 @@ const BookingsPage = lazy(() => import('./pages/driver/BookingsPage'))
 const BookingPage = lazy(() => import('./pages/driver/BookingPage'))
 const ProfilePage = lazy(() => import('./pages/driver/ProfilePage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
+const TermsPage = lazy(() => import('./pages/TermsPage'))
 const StyleguidePage = lazy(() =>
   import('./styleguide/StyleguidePage').then((m) => ({ default: m.StyleguidePage })),
 )
@@ -56,6 +57,7 @@ export default function App() {
               </Route>
               <Route path="bookings/:bookingId" element={<BookingPage />} />
               <Route path="profile" element={<ProfilePage />} />
+              <Route path="terms" element={<TermsPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Routes>

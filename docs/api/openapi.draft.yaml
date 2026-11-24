@@ -491,6 +491,66 @@ paths:
               schema: { $ref: '#/components/schemas/Problem' }
         '422': { $ref: '#/components/responses/Invalid' }
 
+  /api/bookings/{bookingId}/incidents:
+    post:
+      operationId: reportIncident
+      summary: The driver reports an incident (damage, access, safety)
+      description: >
+        For mediation between the parties (ParkApp does not guard vehicles). Allowed on a confirmed,
+        in-use or completed booking, up to 7 days after it ends (409 not_reportable otherwise).
+      security: [{ bearer: [] }]
+      parameters:
+        - { name: bookingId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/IncidentCreate' }
+      responses:
+        '200':
+          description: The booking, with the reports this party made
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Booking' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: not_reportable
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Problem' }
+        '422': { $ref: '#/components/responses/Invalid' }
+
+  /api/host/bookings/{bookingId}/incidents:
+    post:
+      operationId: reportHostIncident
+      summary: The host reports an incident on a booking of their space
+      description: >
+        For mediation between the parties (ParkApp does not guard vehicles). Allowed on a confirmed,
+        in-use or completed booking, up to 7 days after it ends (409 not_reportable otherwise).
+      security: [{ bearer: [] }]
+      parameters:
+        - { name: bookingId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/IncidentCreate' }
+      responses:
+        '200':
+          description: The booking, with the reports this party made
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HostBooking' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: not_reportable
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Problem' }
+        '422': { $ref: '#/components/responses/Invalid' }
+
   /api/host/bookings/{bookingId}/cancel:
     post:
       operationId: cancelHostBooking
@@ -697,6 +757,25 @@ components:
           type: array
           description: Object keys from the signed-upload step; 2 to 4 photos of the car and the spot
           items: { type: string }
+    IncidentCategory:
+      type: string
+      enum: [damage, access, safety, other]
+    IncidentCreate:
+      type: object
+      required: [category, description]
+      properties:
+        category: { $ref: '#/components/schemas/IncidentCategory' }
+        description: { type: string, description: 10 to 1000 characters }
+    Incident:
+      type: object
+      required: [id, reportedBy, category, description, status, createdAt]
+      properties:
+        id: { type: string }
+        reportedBy: { type: string, enum: [driver, host] }
+        category: { $ref: '#/components/schemas/IncidentCategory' }
+        description: { type: string }
+        status: { type: string, enum: [open, resolved] }
+        createdAt: { type: string, format: date-time }
     CancelledBy:
       type: [string, 'null']
       enum: [driver, host, null]
@@ -706,7 +785,7 @@ components:
     Booking:
       type: object
       required:
-        [id, status, space, venueName, startsAt, endsAt, vehicle, rentCents, zoneSurchargeCents, subtotalCents, commissionCents, vatCents, totalCents, expiresAt, accessCode, freeCancelUntil, lateCancelFeeCents, cancelledBy, cancellationFeeCents, refundCents, checkInOpensAt, overtimeStartsAt, overtimeHourCents, checkedInAt, checkedOutAt, checkInPhotoCount, checkOutPhotoCount, overtimeHours, overtimeCents, createdAt]
+        [id, status, space, venueName, startsAt, endsAt, vehicle, rentCents, zoneSurchargeCents, subtotalCents, commissionCents, vatCents, totalCents, expiresAt, accessCode, freeCancelUntil, lateCancelFeeCents, cancelledBy, cancellationFeeCents, refundCents, checkInOpensAt, overtimeStartsAt, overtimeHourCents, checkedInAt, checkedOutAt, checkInPhotoCount, checkOutPhotoCount, overtimeHours, overtimeCents, incidents, createdAt]
       properties:
         id: { type: string }
         status: { $ref: '#/components/schemas/BookingStatus' }
@@ -772,6 +851,10 @@ components:
         checkOutPhotoCount: { type: integer }
         overtimeHours: { type: [integer, 'null'], description: Set at check-out }
         overtimeCents: { type: [integer, 'null'], description: Charged at check-out }
+        incidents:
+          type: array
+          description: The reports the driver made on this booking (never the host's)
+          items: { $ref: '#/components/schemas/Incident' }
         createdAt: { type: string, format: date-time }
     VehicleType:
       type: string
@@ -926,7 +1009,7 @@ components:
           description: When not after fromHour, the window runs overnight into the next morning
     HostBooking:
       type: object
-      required: [id, status, space, startsAt, endsAt, driver, subtotalCents, cancelledBy, checkedInAt, checkedOutAt, overtimeHours, createdAt]
+      required: [id, status, space, startsAt, endsAt, driver, subtotalCents, cancelledBy, checkedInAt, checkedOutAt, overtimeHours, incidents, createdAt]
       properties:
         id: { type: string }
         status: { $ref: '#/components/schemas/BookingStatus' }
@@ -950,4 +1033,8 @@ components:
         checkedInAt: { type: [string, 'null'], format: date-time }
         checkedOutAt: { type: [string, 'null'], format: date-time }
         overtimeHours: { type: [integer, 'null'] }
+        incidents:
+          type: array
+          description: The reports the host made on this booking (never the driver's)
+          items: { $ref: '#/components/schemas/Incident' }
         createdAt: { type: string, format: date-time }

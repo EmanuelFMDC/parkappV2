@@ -371,6 +371,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/bookings/{bookingId}/incidents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The driver reports an incident (damage, access, safety)
+         * @description For mediation between the parties (ParkApp does not guard vehicles). Allowed on a confirmed, in-use or completed booking, up to 7 days after it ends (409 not_reportable otherwise).
+         */
+        post: operations["reportIncident"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/host/bookings/{bookingId}/incidents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The host reports an incident on a booking of their space
+         * @description For mediation between the parties (ParkApp does not guard vehicles). Allowed on a confirmed, in-use or completed booking, up to 7 days after it ends (409 not_reportable otherwise).
+         */
+        post: operations["reportHostIncident"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/host/bookings/{bookingId}/cancel": {
         parameters: {
             query?: never;
@@ -522,6 +562,24 @@ export interface components {
             /** @description Object keys from the signed-upload step; 2 to 4 photos of the car and the spot */
             photoKeys: string[];
         };
+        /** @enum {string} */
+        IncidentCategory: "damage" | "access" | "safety" | "other";
+        IncidentCreate: {
+            category: components["schemas"]["IncidentCategory"];
+            /** @description 10 to 1000 characters */
+            description: string;
+        };
+        Incident: {
+            id: string;
+            /** @enum {string} */
+            reportedBy: "driver" | "host";
+            category: components["schemas"]["IncidentCategory"];
+            description: string;
+            /** @enum {string} */
+            status: "open" | "resolved";
+            /** Format: date-time */
+            createdAt: string;
+        };
         /** @enum {string|null} */
         CancelledBy: "driver" | "host" | null;
         /** @enum {string} */
@@ -594,6 +652,8 @@ export interface components {
             overtimeHours: number | null;
             /** @description Charged at check-out */
             overtimeCents: number | null;
+            /** @description The reports the driver made on this booking (never the host's) */
+            incidents: components["schemas"]["Incident"][];
             /** Format: date-time */
             createdAt: string;
         };
@@ -737,6 +797,8 @@ export interface components {
             /** Format: date-time */
             checkedOutAt: string | null;
             overtimeHours: number | null;
+            /** @description The reports the host made on this booking (never the driver's) */
+            incidents: components["schemas"]["Incident"][];
             /** Format: date-time */
             createdAt: string;
         };
@@ -1423,6 +1485,82 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
             /** @description Not checked in (not_checked_in) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            422: components["responses"]["Invalid"];
+        };
+    };
+    reportIncident: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                bookingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IncidentCreate"];
+            };
+        };
+        responses: {
+            /** @description The booking, with the reports this party made */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Booking"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            /** @description not_reportable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            422: components["responses"]["Invalid"];
+        };
+    };
+    reportHostIncident: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                bookingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IncidentCreate"];
+            };
+        };
+        responses: {
+            /** @description The booking, with the reports this party made */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HostBooking"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            /** @description not_reportable */
             409: {
                 headers: {
                     [name: string]: unknown;

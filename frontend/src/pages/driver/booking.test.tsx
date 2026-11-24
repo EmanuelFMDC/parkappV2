@@ -207,3 +207,26 @@ describe('arriving and leaving', () => {
     })
   })
 })
+
+describe('reporting a problem', () => {
+  it('sends a report for mediation and shows it on the booking', async () => {
+    const b = confirmedBooking(5)
+    await renderBooking(b.id)
+    await userEvent.click(await screen.findByRole('button', { name: /Reportar un problema/ }))
+    const dialog = screen.getByRole('dialog', { name: 'Reportar un problema' })
+
+    await userEvent.type(within(dialog).getByLabelText('Qué pasó'), 'Corto')
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Enviar reporte' }))
+    expect(await within(dialog).findByText(/al menos 10 caracteres/)).toBeInTheDocument()
+
+    await userEvent.selectOptions(within(dialog).getByLabelText('Tipo de problema'), 'access')
+    await userEvent.type(within(dialog).getByLabelText('Qué pasó'), ': el portón estaba cerrado.')
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Enviar reporte' }))
+
+    expect(await screen.findByText(/Reportaste: Acceso o lugar ocupado/)).toBeInTheDocument()
+    expect(screen.getByText('En revisión')).toBeInTheDocument()
+    expect(testDb().getBooking(DRIVER, b.id).incidents).toEqual([
+      expect.objectContaining({ category: 'access', status: 'open' }),
+    ])
+  })
+})

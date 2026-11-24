@@ -5,6 +5,8 @@ import type {
   HostSpace,
   HostSpaceCreate,
   HostSpaceUpdate,
+  Incident,
+  IncidentCreate,
   Me,
   ProfileInput,
   Quote,
@@ -65,8 +67,13 @@ interface StoredBooking {
   checkOutPhotoKeys: string[]
   overtimeHours: number | null
   overtimeCents: number | null
+  incidents?: Incident[]
   createdAt: string
 }
+
+const INCIDENT_CATEGORIES: IncidentCreate['category'][] = ['damage', 'access', 'safety', 'other']
+/** Reports are taken up to a week after the booking ends. */
+const REPORT_WINDOW_MS = 7 * 24 * 3_600_000
 
 interface DbOptions {
   now?: () => number
@@ -262,8 +269,39 @@ export function createDb({
       checkOutPhotoCount: b.checkOutPhotoKeys.length,
       overtimeHours: b.overtimeHours,
       overtimeCents: b.overtimeCents,
+      incidents: (b.incidents ?? []).filter((i) => i.reportedBy === 'driver'),
       createdAt: b.createdAt,
     }
+  }
+
+  /** Damage, access or safety problems, for ParkApp to mediate between driver and host. */
+  function addIncident(b: StoredBooking, by: Incident['reportedBy'], input: IncidentCreate) {
+    if (!['confirmed', 'in_use', 'completed'].includes(b.status)) {
+      throw new ApiError(409, 'not_reportable', 'Only confirmed or finished bookings')
+    }
+    if (now() > Date.parse(b.endsAt) + REPORT_WINDOW_MS) {
+      throw new ApiError(409, 'not_reportable', 'Reports are taken up to 7 days after the end')
+    }
+    const description = typeof input.description === 'string' ? input.description.trim() : ''
+    if (
+      !INCIDENT_CATEGORIES.includes(input.category) ||
+      description.length < 10 ||
+      description.length > 1000
+    ) {
+      throw new ApiError(422, 'invalid_incident', 'Pick a category and describe what happened')
+    }
+    b.incidents = [
+      ...(b.incidents ?? []),
+      {
+        id: `inc_${b.id}_${(b.incidents ?? []).length + 1}`,
+        reportedBy: by,
+        category: input.category,
+        description,
+        status: 'open',
+        createdAt: new Date(now()).toISOString(),
+      },
+    ]
+    save()
   }
 
   /** Extra hours: the space's hourly rate with commission and VAT, without the zone charge. */
@@ -317,6 +355,7 @@ export function createDb({
       checkedInAt: b.checkedInAt,
       checkedOutAt: b.checkedOutAt,
       overtimeHours: b.overtimeHours,
+      incidents: (b.incidents ?? []).filter((i) => i.reportedBy === 'host'),
       createdAt: b.createdAt,
     }
   }
@@ -506,6 +545,20 @@ export function createDb({
       b.status = 'completed'
       save()
       return toBooking(b)
+    },
+
+    reportIncident(userId: string | null, id: string, input: IncidentCreate): Booking {
+      const b = ownBooking(requireUser(userId), id)
+      addIncident(b, 'driver', input)
+      return toBooking(b)
+    },
+
+    reportHostIncident(userId: string | null, id: string, input: IncidentCreate): HostBooking {
+      const mine = new Set(store.idsFor(requireUser(userId)))
+      const b = bookings.find((x) => x.id === id && mine.has(x.spaceId))
+      if (!b) throw notFound('Booking')
+      addIncident(b, 'host', input)
+      return toHostBooking(b)
     },
 
     /** The host cancels a booking on one of their spaces: the driver always gets 100 % back. */

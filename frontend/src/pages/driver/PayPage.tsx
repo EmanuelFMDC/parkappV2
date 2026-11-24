@@ -92,6 +92,12 @@ export default function PayPage() {
           )}
           {quote.data && <PriceBreakdown price={quote.data} />}
           <p className="text-caption text-ink-muted">{t('driver.pay.addressNote')}</p>
+          <p className="text-caption text-ink-muted">
+            {t('terms.payNote')}{' '}
+            <Link to="/terms" className="font-semibold text-primary underline underline-offset-4">
+              {t('terms.link')}
+            </Link>
+          </p>
         </section>
 
         <section aria-labelledby="method-title" className="space-y-3">

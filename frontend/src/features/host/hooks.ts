@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi } from '../../api/context'
-import type { HostSpaceCreate, HostSpaceUpdate } from '../../api/types'
+import type { HostSpaceCreate, HostSpaceUpdate, IncidentCreate } from '../../api/types'
 import { unwrap } from '../../api/unwrap'
 import { useAuth } from '../auth/context'
 
@@ -43,6 +43,21 @@ export function useCancelHostBooking() {
       // The space is free again for drivers.
       void queryClient.invalidateQueries({ queryKey: ['spaces'] })
     },
+  })
+}
+
+export function useReportHostIncident() {
+  const api = useApi()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ bookingId, input }: { bookingId: string; input: IncidentCreate }) =>
+      unwrap(
+        api.POST('/api/host/bookings/{bookingId}/incidents', {
+          params: { path: { bookingId } },
+          body: input,
+        }),
+      ),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['host', 'bookings'] }),
   })
 }
 

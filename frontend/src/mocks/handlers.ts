@@ -3,6 +3,7 @@ import type {
   BookingCreate,
   HostSpaceCreate,
   HostSpaceUpdate,
+  IncidentCreate,
   Me,
   ProfileInput,
   VehicleInput,
@@ -124,6 +125,19 @@ export function createHandlers(db: MockDb, latencyMs = 0): HttpHandler[] {
       const body = (await request.clone().json()) as { photoKeys: unknown }
       return route((c) =>
         db.checkOut(userIdFrom(c.request), param(c, 'bookingId'), body.photoKeys),
+      )({ request, params })
+    }),
+    http.post(url('/api/bookings/:bookingId/incidents'), async ({ request, params }) => {
+      const body = (await request.clone().json()) as IncidentCreate
+      return route((c) => db.reportIncident(userIdFrom(c.request), param(c, 'bookingId'), body))({
+        request,
+        params,
+      })
+    }),
+    http.post(url('/api/host/bookings/:bookingId/incidents'), async ({ request, params }) => {
+      const body = (await request.clone().json()) as IncidentCreate
+      return route((c) =>
+        db.reportHostIncident(userIdFrom(c.request), param(c, 'bookingId'), body),
       )({ request, params })
     }),
     http.post(

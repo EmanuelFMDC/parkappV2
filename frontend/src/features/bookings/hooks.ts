@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi } from '../../api/context'
-import type { BookingCreate } from '../../api/types'
+import type { BookingCreate, IncidentCreate } from '../../api/types'
 import { unwrap } from '../../api/unwrap'
 import { useAuth } from '../auth/context'
 
@@ -82,6 +82,21 @@ export function useCheckInOut() {
               params: { path: { bookingId } },
               body: { photoKeys },
             }),
+      ),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bookings'] }),
+  })
+}
+
+export function useReportIncident() {
+  const api = useApi()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ bookingId, input }: { bookingId: string; input: IncidentCreate }) =>
+      unwrap(
+        api.POST('/api/bookings/{bookingId}/incidents', {
+          params: { path: { bookingId } },
+          body: input,
+        }),
       ),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bookings'] }),
   })

@@ -150,6 +150,13 @@ export default function PriceStep() {
         onChange={(e) => change({ acceptTerms: e.target.checked })}
       />
 
+      <Link
+        to="/terms"
+        className="-mt-2 inline-flex h-touch items-center text-caption font-semibold text-primary underline underline-offset-4"
+      >
+        {t('terms.link')}
+      </Link>
+
       {create.error && (
         <div role="alert" className="space-y-2 rounded-control bg-danger-50 p-4 text-danger-600">
           <p className="font-medium">{errorMessage(t, create.error)}</p>

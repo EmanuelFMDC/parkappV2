@@ -91,8 +91,14 @@ Fuente: presentación final del proyecto (modelo de negocio).
 ## Backend
 
 
+## Legal y confianza
+
+- **Mayoría de edad:** el registro pide fecha de nacimiento y el servidor rechaza a menores de 18 (422 `underage`). Ya existía.
+- **Incidencias:** conductor y anfitrión pueden reportar un problema (daño, acceso o lugar ocupado, seguridad, otro) en una reserva confirmada, en uso o terminada, hasta 7 días después del fin. Cada parte ve solo sus reportes; ParkApp media. Quedan "En revisión" hasta que el back-office los resuelva (aún no existe).
+- **Términos y condiciones** en `/terms`, en español e inglés, con los 10 puntos de la presentación final. Enlazados desde el Perfil, el pago y la publicación. Texto provisional.
+
 ## Pendientes
 
-- **Legal:** aviso de privacidad, consentimiento para INE y selfie, y reglas para anfitriones son textos provisionales; los debe revisar un abogado. Las imágenes de identidad deben quedarse con el proveedor.
+- **Legal:** aviso de privacidad, consentimiento para INE y selfie, reglas para anfitriones, declaración de derecho a rentar y términos y condiciones son textos provisionales; los debe revisar un abogado. Las imágenes de identidad deben quedarse con el proveedor.
 - Verificar condiciones vigentes de Stripe Connect para México antes de implementar pagos.
 - Verificar la región `northamerica-south1` en Cloud Run.

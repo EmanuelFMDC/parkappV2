@@ -1,7 +1,7 @@
 import { BadgeCheck, CarFront, Trash2, Warehouse } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Page } from '../../components/layout/Page'
 import { Badge, Button, IconButton, Segmented, TopBar } from '../../components/ui'
 import { useAccount, useRemoveVehicle } from '../../features/account/hooks'
@@ -149,6 +149,13 @@ export default function ProfilePage() {
             )}
           </section>
         )}
+
+        <Link
+          to="/terms"
+          className="inline-flex h-touch items-center font-semibold text-primary underline underline-offset-4"
+        >
+          {t('terms.link')}
+        </Link>
       </Page>
     </>
   )

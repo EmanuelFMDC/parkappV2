@@ -14,7 +14,8 @@ import {
 } from '../../components/ui'
 import { useAuth } from '../../features/auth/context'
 import { formatPlate } from '../../features/account/vehicleFit'
-import { useBooking, useCancelBooking } from '../../features/bookings/hooks'
+import { useBooking, useCancelBooking, useReportIncident } from '../../features/bookings/hooks'
+import { IncidentReport } from '../../features/bookings/IncidentReport'
 import { ArrivalPanel } from '../../features/bookings/ArrivalPanel'
 import { PriceBreakdown } from '../../features/bookings/PriceBreakdown'
 import { StatusBadge } from '../../features/bookings/StatusBadge'
@@ -34,6 +35,7 @@ export default function BookingPage() {
   const { user } = useAuth()
   const booking = useBooking(bookingId)
   const cancel = useCancelBooking()
+  const incident = useReportIncident()
   const [confirming, setConfirming] = useState(false)
   const now = useNow()
   const { maps } = useServices()
@@ -188,6 +190,16 @@ export default function BookingPage() {
                 )}
               </section>
             )}
+
+            <IncidentReport
+              status={b.status}
+              endsAt={b.endsAt}
+              incidents={b.incidents}
+              submit={(input) => incident.mutateAsync({ bookingId: b.id, input })}
+              pending={incident.isPending}
+              error={incident.error}
+              reset={incident.reset}
+            />
 
             {cancel.error && (
               <p

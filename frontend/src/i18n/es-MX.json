@@ -302,5 +302,80 @@
       "photos": "Fotos",
       "photosIntro": "Revisa tipo y tamaño; la primera es la portada."
     }
+  },
+  "incidents": {
+    "report": "Reportar un problema",
+    "title": "Reportar un problema",
+    "intro": "Cuéntanos qué pasó. ParkApp media entre conductor y anfitrión; toma fotos si puedes. En una emergencia llama al 911.",
+    "categoryLabel": "Tipo de problema",
+    "category": {
+      "damage": "Daño",
+      "access": "Acceso o lugar ocupado",
+      "safety": "Seguridad",
+      "other": "Otro"
+    },
+    "descriptionLabel": "Qué pasó",
+    "descriptionHint": "Entre 10 y 1000 caracteres.",
+    "send": "Enviar reporte",
+    "cancel": "Cancelar",
+    "reported": "Reportaste: {{category}}, {{date}}.",
+    "status": {
+      "open": "En revisión",
+      "resolved": "Resuelto"
+    }
+  },
+  "errors": {
+    "code": {
+      "invalid_incident": "Elige el tipo de problema y cuéntanos qué pasó (al menos 10 caracteres).",
+      "not_reportable": "Ya no se pueden reportar problemas de esta reserva."
+    }
+  },
+  "terms": {
+    "title": "Términos y condiciones",
+    "link": "Términos y condiciones",
+    "payNote": "Al pagar aceptas los",
+    "provisional": "Versión provisional: un abogado debe revisar estos términos antes del lanzamiento.",
+    "sections": {
+      "object": {
+        "title": "Objeto",
+        "body": "ParkApp es una plataforma que conecta a propietarios de espacios de estacionamiento privados con conductores que quieren rentarlos por horas en la Zona Metropolitana de Guadalajara. ParkApp solo es intermediario: no es propietario, operador, arrendador ni depositario de los espacios ni de los vehículos."
+      },
+      "registration": {
+        "title": "Registro",
+        "body": "Para usar ParkApp debes ser mayor de edad, verificar tu celular por SMS y dar información verdadera. Conductores y anfitriones validan su identidad con su INE. Un anfitrión puede registrar varios cajones iguales en un solo anuncio."
+      },
+      "host": {
+        "title": "Obligaciones del anfitrión",
+        "body": "El anfitrión garantiza que tiene derecho a rentar el espacio (es dueño, su contrato lo permite o tiene autorización del condominio), que las fotos, medidas y reglas de acceso son reales y que el espacio estará libre durante el horario reservado."
+      },
+      "driver": {
+        "title": "Obligaciones del conductor",
+        "body": "El conductor usa el espacio solo en el horario reservado, en bloques de una hora, respeta las reglas de acceso y no deja objetos de valor. El tiempo excedente se cobra como hora adicional."
+      },
+      "payments": {
+        "title": "Pagos",
+        "body": "El pago es anticipado con tarjeta. El precio incluye la tarifa del espacio (por recinto o por municipio, más $50 dentro de 3 km de un recinto), la comisión de ParkApp del 15 % y el IVA del 16 % sobre la comisión. ParkApp hace las retenciones fiscales que marque la ley a los anfitriones."
+      },
+      "cancellation": {
+        "title": "Cancelación",
+        "body": "Cancelar es gratis hasta 2 horas antes del inicio de la reserva; después se cobra una penalización del 20 % del total. Si el anfitrión cancela o el espacio no está disponible, el conductor recibe el 100 % de vuelta."
+      },
+      "liability": {
+        "title": "Responsabilidad",
+        "body": "ParkApp no responde por robo, daños o pérdidas del vehículo o de lo que haya dentro. Las partes documentan con fotos la llegada y la salida, y reportan las incidencias en la app para que ParkApp medie."
+      },
+      "data": {
+        "title": "Datos personales",
+        "body": "Tratamos tus datos conforme al aviso de privacidad y a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares. Los datos de tu tarjeta los procesa el proveedor de pagos; ParkApp no los guarda."
+      },
+      "suspension": {
+        "title": "Suspensión",
+        "body": "ParkApp puede suspender o cancelar cuentas por información falsa, fraude, daños, falta de pago o incumplimiento de estos términos."
+      },
+      "law": {
+        "title": "Legislación aplicable",
+        "body": "Estos términos se rigen por las leyes de México. Cualquier controversia se resuelve ante los tribunales de Guadalajara, Jalisco, sin perjuicio de tus derechos como consumidor ante la PROFECO."
+      }
+    }
   }
 }

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { expectAccessible } from './helpers'
 
 test('home renders in Spanish by default and is installable as a PWA', async ({ page }) => {
   await page.goto('/')
@@ -40,4 +41,16 @@ test.describe('browser in English', () => {
     )
     await expect(page.locator('html')).toHaveAttribute('lang', 'en')
   })
+})
+
+test('the terms and conditions are reachable from the profile, provisional and accessible', async ({
+  page,
+}) => {
+  await page.goto('/profile')
+  await page.getByRole('link', { name: 'Términos y condiciones' }).click()
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Términos y condiciones')
+  await expect(page.getByText(/Versión provisional/)).toBeVisible()
+  await expect(page.getByRole('heading', { level: 2 })).toHaveCount(10)
+  await expect(page.getByRole('heading', { name: '6. Cancelación' })).toBeVisible()
+  await expectAccessible(page)
 })
