@@ -14,10 +14,10 @@ import {
 import { useAuth } from '../../features/auth/context'
 import { formatPlate } from '../../features/account/vehicleFit'
 import { useBooking, useCancelBooking } from '../../features/bookings/hooks'
+import { PriceBreakdown } from '../../features/bookings/PriceBreakdown'
 import { StatusBadge } from '../../features/bookings/StatusBadge'
 import { WindowSummary } from '../../features/bookings/WindowSummary'
 import { errorMessage } from '../../lib/errors'
-import { formatCents } from '../../lib/money'
 import { formatDateTime } from '../../lib/time'
 
 /** One booking. Confirmed bookings show the event ticket; the others explain their state. */
@@ -99,12 +99,8 @@ export default function BookingPage() {
               </p>
             )}
 
-            <div className="flex items-center justify-between gap-3">
-              <StatusBadge status={b.status} />
-              <span className="font-display text-title font-bold tabular-nums">
-                {formatCents(b.totalCents, lang)}
-              </span>
-            </div>
+            <StatusBadge status={b.status} />
+            <PriceBreakdown price={b} />
 
             {b.status === 'confirmed' || b.status === 'completed' ? (
               <TicketStub

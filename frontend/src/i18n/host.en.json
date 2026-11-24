@@ -22,7 +22,6 @@
       "invalid_description": "The description can have up to 500 characters.",
       "photos_required": "Add at least 3 photos.",
       "too_many_photos": "You can add up to 8 photos.",
-      "invalid_price": "The price per hour must be between $20 and $500.",
       "terms_required": "To publish you must accept the host rules.",
       "duplicate_space": "You already listed a garage at this address.",
       "not_editable": "A garage under review or rejected can't be paused or resumed.",
@@ -66,16 +65,13 @@
       "rejectedNote": "We couldn't publish it. {{note}}",
       "pause": "Pause",
       "resume": "Resume",
-      "changePrice": "Change price",
-      "priceTitle": "Change the price per hour",
-      "priceLabel": "Price per hour (pesos)",
-      "priceSave": "Save price",
-      "cancel": "Cancel",
-      "republish": "List again"
+      "republish": "List again",
+      "earnPerHour": "You earn {{amount}} per hour",
+      "surchargeNote": "+ {{amount}} per booking in a venue zone"
     },
     "booking": {
       "verified": "Identity verified",
-      "price": "Booking price"
+      "price": "You earn"
     },
     "location": {
       "title": "Where is your garage?",
@@ -132,11 +128,14 @@
     },
     "price": {
       "title": "Price",
-      "intro": "Choose what you charge per hour. You can change it any time.",
-      "label": "Price per hour (pesos)",
-      "hint": "Between {{min}} and {{max}}.",
-      "example": "For 4 hours: {{total}}",
-      "feeNote": "Drivers also pay a ParkApp service fee.",
+      "intro": "ParkApp sets the price by zone, so it's fair and easy to compare. You get the full rent.",
+      "earnTitle": "What you earn",
+      "perHour": "{{amount}} per hour",
+      "zoneVenue": "{{venue}} zone: venue rate plus {{surcharge}} extra on every booking.",
+      "zoneMunicipality": "Outside a venue zone: {{municipality}} rate.",
+      "example": "A 4-hour booking pays you {{total}}.",
+      "feeNote": "ParkApp's commission (15%) and its VAT are paid by the driver; they don't come out of your earnings.",
+      "provisional": "Trial rates: they may change before launch.",
       "summary": "Summary",
       "sizeLine": "{{length}} × {{width}} cm, entrance height {{height}} cm",
       "photosLine_one": "{{count}} photo",

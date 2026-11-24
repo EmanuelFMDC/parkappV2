@@ -1,3 +1,4 @@
+import { ceilToHour, floorToHour } from '../../lib/time'
 import type { MockDb } from './db'
 
 /**
@@ -8,8 +9,9 @@ export function seedDemoBookings(db: MockDb) {
   for (const venue of db.listVenues()) {
     const first = db.listEvents(venue.id)[0]
     if (!first) continue
-    const startsAt = new Date(Date.parse(first.startsAt) - 3 * 3_600_000).toISOString()
-    const endsAt = new Date(Date.parse(first.endsAt) + 3_600_000).toISOString()
+    // Bookings are whole hours, like the ones drivers make.
+    const startsAt = floorToHour(new Date(Date.parse(first.startsAt) - 3 * 3_600_000).toISOString())
+    const endsAt = ceilToHour(new Date(Date.parse(first.endsAt) + 3_600_000).toISOString())
     for (const n of [1, 4]) {
       const id = `${venue.id}-${n}`
       const taken = db

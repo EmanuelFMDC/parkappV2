@@ -7,7 +7,7 @@ import { Button, Logo, RadioCard, Skeleton, StepIndicator } from '../../componen
 import { HostPitch } from '../../features/host/HostPitch'
 import { tripSearch } from '../../features/trip/useTrip'
 import { useVenueEvents, useVenues } from '../../features/venues/hooks'
-import { formatDateTime } from '../../lib/time'
+import { ceilToHour, floorToHour, formatDateTime } from '../../lib/time'
 
 /** Arrive two hours before the event starts and stay up to one hour after it ends. */
 const LEAD_MS = 2 * 3_600_000
@@ -30,8 +30,9 @@ export default function VenuePage() {
     navigate(
       `/venues/${venue.id}/spaces${tripSearch({
         venueId: venue.id,
-        startsAt: new Date(Date.parse(event.startsAt) - LEAD_MS).toISOString(),
-        endsAt: new Date(Date.parse(event.endsAt) + TAIL_MS).toISOString(),
+        // Bookings are whole hours: widen the window to the hour on both ends.
+        startsAt: floorToHour(new Date(Date.parse(event.startsAt) - LEAD_MS).toISOString()),
+        endsAt: ceilToHour(new Date(Date.parse(event.endsAt) + TAIL_MS).toISOString()),
       })}`,
     )
   }

@@ -19,7 +19,7 @@ import type {
 import { createAccounts } from './accounts'
 import { ApiError, notFound } from './errors'
 import { distanceM } from './geo'
-import { quoteWindow } from './pricing'
+import { quoteWindow, validateWindow } from './pricing'
 import { buildEvents, buildReviews, venues } from './seed'
 import { createSpaceStore } from './spaces'
 
@@ -36,8 +36,11 @@ interface StoredBooking {
   startsAt: string
   endsAt: string
   vehicle: Vehicle
+  rentCents: number
+  zoneSurchargeCents: number
   subtotalCents: number
-  serviceFeeCents: number
+  commissionCents: number
+  vatCents: number
   totalCents: number
   expiresAt: string | null
   accessCode: string | null
@@ -92,9 +95,21 @@ export function createDb({
   function load(): StoredBooking[] {
     try {
       const raw = storage?.getItem(STORAGE_KEY)
-      return raw ? (JSON.parse(raw) as StoredBooking[]) : []
+      return raw ? (JSON.parse(raw) as StoredBooking[]).map(upgrade) : []
     } catch {
       return []
+    }
+  }
+  /** Bookings saved before the commission model kept a single service fee. */
+  function upgrade(b: StoredBooking & { serviceFeeCents?: number }): StoredBooking {
+    if (b.commissionCents !== undefined) return b
+    const { serviceFeeCents = 0, ...rest } = b
+    return {
+      ...rest,
+      rentCents: b.subtotalCents,
+      zoneSurchargeCents: 0,
+      commissionCents: serviceFeeCents,
+      vatCents: 0,
     }
   }
   function save() {
@@ -180,8 +195,11 @@ export function createDb({
       startsAt: b.startsAt,
       endsAt: b.endsAt,
       vehicle: b.vehicle,
+      rentCents: b.rentCents,
+      zoneSurchargeCents: b.zoneSurchargeCents,
       subtotalCents: b.subtotalCents,
-      serviceFeeCents: b.serviceFeeCents,
+      commissionCents: b.commissionCents,
+      vatCents: b.vatCents,
       totalCents: b.totalCents,
       expiresAt: b.status === 'pending_payment' ? b.expiresAt : null,
       accessCode: revealed ? b.accessCode : null,
@@ -212,7 +230,7 @@ export function createDb({
 
     searchSpaces(venueId: string, startsAt: string, endsAt: string): SpaceSummary[] {
       const venue = requireVenue(venueId)
-      quoteWindow(1, startsAt, endsAt) // validates the window
+      validateWindow(startsAt, endsAt)
       expireStale()
       return store
         .active()
@@ -232,7 +250,8 @@ export function createDb({
       return reviews.get(spaceId) ?? []
     },
     quote(spaceId: string, startsAt: string, endsAt: string): Quote {
-      return quoteWindow(requireActiveSpace(spaceId).priceCentsPerHour, startsAt, endsAt)
+      requireActiveSpace(spaceId)
+      return quoteWindow(store.tariff(spaceId), startsAt, endsAt)
     },
 
     createBooking(userId: string | null, input: BookingCreate): Booking {
@@ -249,7 +268,7 @@ export function createDb({
       if (!space.vehicleTypes.includes(vehicle.type)) {
         throw new ApiError(422, 'vehicle_not_supported', 'Your vehicle does not fit this space')
       }
-      const q = quoteWindow(space.priceCentsPerHour, input.startsAt, input.endsAt)
+      const q = quoteWindow(store.tariff(space.id), input.startsAt, input.endsAt)
       if (Date.parse(input.startsAt) < now() - 5 * 60_000) {
         throw new ApiError(422, 'in_the_past', 'The booking cannot start in the past')
       }
@@ -271,8 +290,11 @@ export function createDb({
         startsAt: input.startsAt,
         endsAt: input.endsAt,
         vehicle,
+        rentCents: q.rentCents,
+        zoneSurchargeCents: q.zoneSurchargeCents,
         subtotalCents: q.subtotalCents,
-        serviceFeeCents: q.serviceFeeCents,
+        commissionCents: q.commissionCents,
+        vatCents: q.vatCents,
         totalCents: q.totalCents,
         expiresAt: new Date(now() + PRE_BOOKING_MS).toISOString(),
         accessCode: null,
@@ -395,8 +417,11 @@ export function createDb({
           color: 'Negro',
           type: 'sedan',
         },
+        rentCents: 0,
+        zoneSurchargeCents: 0,
         subtotalCents: 0,
-        serviceFeeCents: 0,
+        commissionCents: 0,
+        vatCents: 0,
         totalCents: 0,
         expiresAt: null,
         accessCode: 'FOREIG',

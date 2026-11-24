@@ -1,8 +1,6 @@
 import type { Dimensions, Municipality, VehicleType } from '../api/types'
 
 /** Limits for publishing a space. The form uses them as hints; the server enforces them. */
-export const PRICE_MIN_CENTS = 2000
-export const PRICE_MAX_CENTS = 50000
 export const PHOTOS_MIN = 3
 export const PHOTOS_MAX = 8
 export const PHOTO_MAX_BYTES = 10 * 1024 * 1024

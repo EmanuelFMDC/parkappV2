@@ -8,6 +8,7 @@ import { WizardHeader } from '../../components/layout/WizardHeader'
 import { Badge, Button, DateTimeField, RadioCard } from '../../components/ui'
 import { useAccount } from '../../features/account/hooks'
 import { describeVehicle, fits, pickVehicle } from '../../features/account/vehicleFit'
+import { PriceBreakdown } from '../../features/bookings/PriceBreakdown'
 import { WindowSummary } from '../../features/bookings/WindowSummary'
 import { useQuote, useSpace, useSpaces } from '../../features/spaces/hooks'
 import { tripSearch, useTrip } from '../../features/trip/useTrip'
@@ -136,24 +137,7 @@ export default function TimePage() {
             className="space-y-3 rounded-surface bg-surface p-5 ring-1 ring-line"
           >
             <WindowSummary window={validWindow} />
-            {quote.data && (
-              <dl className="space-y-1.5 border-t border-line pt-3 text-ink-muted">
-                <div className="flex justify-between">
-                  <dt>{t('driver.time.subtotal')}</dt>
-                  <dd className="tabular-nums">{formatCents(quote.data.subtotalCents, lang)}</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt>{t('driver.time.fee')}</dt>
-                  <dd className="tabular-nums">{formatCents(quote.data.serviceFeeCents, lang)}</dd>
-                </div>
-                <div className="flex items-baseline justify-between text-ink">
-                  <dt className="font-semibold">{t('driver.time.total')}</dt>
-                  <dd className="font-display text-title font-bold tabular-nums">
-                    {formatCents(quote.data.totalCents, lang)}
-                  </dd>
-                </div>
-              </dl>
-            )}
+            {quote.data && <PriceBreakdown price={quote.data} />}
           </section>
         )}
       </Page>

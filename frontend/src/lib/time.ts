@@ -64,3 +64,17 @@ export function utcToLocalParts(utcIso: string): { date: string; time: string } 
   }).format(instant)
   return { date, time }
 }
+
+const HOUR_MS = 3_600_000
+
+/**
+ * Bookings are whole hours. Mexico City is a whole number of hours from UTC, so rounding the UTC
+ * instant to the hour also lands on the hour in local time.
+ */
+export function floorToHour(utcIso: string): string {
+  return new Date(Math.floor(Date.parse(utcIso) / HOUR_MS) * HOUR_MS).toISOString()
+}
+
+export function ceilToHour(utcIso: string): string {
+  return new Date(Math.ceil(Date.parse(utcIso) / HOUR_MS) * HOUR_MS).toISOString()
+}

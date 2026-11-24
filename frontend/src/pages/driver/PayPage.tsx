@@ -8,6 +8,7 @@ import { Button, SpaceImage } from '../../components/ui'
 import { useAccount } from '../../features/account/hooks'
 import { describeVehicle, pickVehicle } from '../../features/account/vehicleFit'
 import { PaymentFailed, usePayAndReserve } from '../../features/bookings/usePayAndReserve'
+import { PriceBreakdown } from '../../features/bookings/PriceBreakdown'
 import { WindowSummary } from '../../features/bookings/WindowSummary'
 import { useQuote, useSpace } from '../../features/spaces/hooks'
 import { useTrip } from '../../features/trip/useTrip'
@@ -89,24 +90,7 @@ export default function PayPage() {
               {describeVehicle(vehicle)}
             </p>
           )}
-          {quote.data && (
-            <dl className="space-y-1.5 border-t border-line pt-3 text-ink-muted">
-              <div className="flex justify-between">
-                <dt>{t('driver.time.subtotal')}</dt>
-                <dd className="tabular-nums">{formatCents(quote.data.subtotalCents, lang)}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt>{t('driver.time.fee')}</dt>
-                <dd className="tabular-nums">{formatCents(quote.data.serviceFeeCents, lang)}</dd>
-              </div>
-              <div className="flex items-baseline justify-between text-ink">
-                <dt className="font-semibold">{t('driver.time.total')}</dt>
-                <dd className="font-display text-title font-bold tabular-nums">
-                  {formatCents(quote.data.totalCents, lang)}
-                </dd>
-              </div>
-            </dl>
-          )}
+          {quote.data && <PriceBreakdown price={quote.data} />}
           <p className="text-caption text-ink-muted">{t('driver.pay.addressNote')}</p>
         </section>
 

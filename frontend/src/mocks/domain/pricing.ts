@@ -1,13 +1,14 @@
 import type { Quote } from '../../api/types'
+import { priceBooking, type Tariff } from '../../lib/tariffs'
 import { ApiError } from './errors'
 
 export const MIN_MINUTES = 60
 export const MAX_MINUTES = 24 * 60
-/** Service fee in basis points of the subtotal (10%). Integer math only. */
-export const SERVICE_FEE_BPS = 1000
+/** Bookings are sold in whole hours (60-minute blocks). */
+export const BLOCK_MINUTES = 60
 
-/** Validates a window and prices it. Money is integer cents; never floats. */
-export function quoteWindow(priceCentsPerHour: number, startsAt: string, endsAt: string): Quote {
+/** Checks a window and returns its length in minutes. */
+export function validateWindow(startsAt: string, endsAt: string): number {
   const start = Date.parse(startsAt)
   const end = Date.parse(endsAt)
   if (Number.isNaN(start) || Number.isNaN(end)) {
@@ -20,7 +21,22 @@ export function quoteWindow(priceCentsPerHour: number, startsAt: string, endsAt:
   if (minutes > MAX_MINUTES) {
     throw new ApiError(422, 'too_long', 'The maximum booking is 24 hours')
   }
-  const subtotalCents = Math.round((priceCentsPerHour * minutes) / 60)
-  const serviceFeeCents = Math.round((subtotalCents * SERVICE_FEE_BPS) / 10_000)
-  return { minutes, subtotalCents, serviceFeeCents, totalCents: subtotalCents + serviceFeeCents }
+  if (minutes % BLOCK_MINUTES !== 0) {
+    throw new ApiError(422, 'invalid_block', 'Bookings are made in whole hours')
+  }
+  return minutes
+}
+
+/** Validates a window and prices it with the space's tariff. Money is integer cents; never floats. */
+export function quoteWindow(
+  tariff: Pick<Tariff, 'hourlyCents' | 'zoneSurchargeCents'>,
+  startsAt: string,
+  endsAt: string,
+): Quote {
+  const minutes = validateWindow(startsAt, endsAt)
+  return {
+    minutes,
+    hourlyCents: tariff.hourlyCents,
+    ...priceBooking(tariff, minutes / BLOCK_MINUTES),
+  }
 }

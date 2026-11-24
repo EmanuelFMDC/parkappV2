@@ -66,8 +66,7 @@ test('host flow screenshots', async ({ page }, testInfo) => {
   await shot('4-photos')
   await page.getByRole('button', { name: 'Continuar' }).click()
 
-  // Step 4: price
-  await page.getByLabel('Precio por hora (pesos)').fill('60')
+  // Step 4: what the host earns (ParkApp sets the price)
   await page.getByLabel(/Acepto las reglas para anfitriones/).check()
   await shot('5-price')
   await page.getByRole('button', { name: 'Publicar cochera' }).click()

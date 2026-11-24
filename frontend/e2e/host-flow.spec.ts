@@ -96,11 +96,11 @@ test.describe('host lists a garage in four steps', () => {
     await expectAccessible(page)
     await page.getByRole('button', { name: 'Continuar' }).click()
 
-    // Step 4 of 4: price and publish
+    // Step 4 of 4: ParkApp's price, what the host earns, and publish
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Precio')
     await expect(page.getByText('Paso 4 de 4')).toBeVisible()
-    await page.getByLabel('Precio por hora (pesos)').fill('60')
-    await expect(page.getByText('Por 4 horas: $240')).toBeVisible()
+    await expect(page.getByText('$60 por hora')).toBeVisible()
+    await expect(page.getByText('Una reserva de 4 horas te deja $290.')).toBeVisible()
     await expect(page.getByText(TITLE)).toBeVisible()
     await page.getByLabel(/Acepto las reglas para anfitriones/).check()
     await expectAccessible(page)
@@ -207,9 +207,7 @@ test.describe('host lists a garage in four steps', () => {
     await expect(page.getByRole('link', { name: 'Publicar de nuevo' })).toBeVisible()
   })
 
-  test('pausing hides the garage from drivers and resuming brings it back; the price can change', async ({
-    page,
-  }) => {
+  test('pausing hides the garage from drivers and resuming brings it back', async ({ page }) => {
     test.setTimeout(90_000)
     await signInAsSeeded(page, HOST_ID, HOST_PHONE)
     await seedDraft(page)
@@ -220,15 +218,9 @@ test.describe('host lists a garage in four steps', () => {
     await page.goto('/host')
     await expect(page.getByText('Publicada')).toBeVisible()
 
-    // Change the price
-    await page.getByRole('button', { name: 'Cambiar precio' }).click()
-    const dialog = page.getByRole('dialog', { name: 'Cambiar el precio por hora' })
-    await dialog.getByLabel('Precio por hora (pesos)').fill('5')
-    await dialog.getByRole('button', { name: 'Guardar precio' }).click()
-    await expect(dialog.getByText('El precio por hora debe estar entre $20 y $500.')).toBeVisible()
-    await dialog.getByLabel('Precio por hora (pesos)').fill('75.50')
-    await dialog.getByRole('button', { name: 'Guardar precio' }).click()
-    await expect(page.getByText('$75.50')).toBeVisible()
+    // ParkApp's price, not one the host typed
+    await expect(page.getByText('Ganas $60 por hora')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Cambiar precio' })).toHaveCount(0)
 
     // Pause: drivers stop seeing it
     await page.getByRole('button', { name: 'Pausar' }).click()
@@ -237,13 +229,13 @@ test.describe('host lists a garage in four steps', () => {
     await pickAkronFirstEvent(page)
     await expect(page.getByRole('button', { name: TITLE, exact: true })).toHaveCount(0)
 
-    // Resume: they see it again, at the new price
+    // Resume: they see it again, at the zone price
     await page.goto('/host')
     await page.getByRole('button', { name: 'Reactivar' }).click()
     await expect(page.getByText('Publicada')).toBeVisible()
     await pickAkronFirstEvent(page)
     await expect(page.getByRole('button', { name: TITLE, exact: true })).toBeVisible()
-    await expect(page.getByText('$75.50').first()).toBeVisible()
+    await expect(page.getByText('$60').first()).toBeVisible()
   })
 
   test('the host sees who booked, with first name, badge and car, and never a phone or email', async ({

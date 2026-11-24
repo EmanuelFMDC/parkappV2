@@ -22,7 +22,7 @@ export function FormsSection() {
   const [agree, setAgree] = useState(false)
   const [note, setNote] = useState('')
   const [vehicle, setVehicle] = useState<string>('car')
-  const [start, setStart] = useState(() => localToUtcIso('2026-10-17', '17:30'))
+  const [start, setStart] = useState(() => localToUtcIso('2026-10-17', '17:00'))
   const [dialog, setDialog] = useState<'none' | 'plain' | 'danger'>('none')
   const [result, setResult] = useState('')
 

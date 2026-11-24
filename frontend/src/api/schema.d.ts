@@ -116,7 +116,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Price for a time window (computed by the server, never by the client) */
+        /**
+         * Price for a time window (computed by the server, never by the client)
+         * @description Bookings are whole hours (60-minute blocks); any other length is 422 invalid_block. Total = hourly tariff × hours + zone charge + 15 % commission + 16 % VAT on the commission.
+         */
         get: operations["quoteSpace"];
         put?: never;
         post?: never;
@@ -390,6 +393,7 @@ export interface components {
             location: components["schemas"]["LatLng"];
             /** @description Meters to the requested venue */
             distanceM: number;
+            /** @description Set by ParkApp from the venue or municipality tariff, never by the host */
             priceCentsPerHour: number;
             rating: number;
             reviewCount: number;
@@ -406,6 +410,8 @@ export interface components {
         };
         Space: components["schemas"]["SpaceSummary"] & {
             description: string;
+            /** @description Charged once per booking when the space is within a venue zone (3 km); 0 otherwise */
+            zoneSurchargeCents: number;
             dimensions: components["schemas"]["Dimensions"];
             vehicleTypes: ("compact" | "sedan" | "suv" | "pickup")[];
             host: {
@@ -423,11 +429,25 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
-        Quote: {
-            minutes: number;
+        /** @description Integer cents. subtotal = rent + zoneSurcharge; total = subtotal + commission + vat. */
+        PriceBreakdown: {
+            /** @description Hourly tariff × hours */
+            rentCents: number;
+            /** @description Once per booking inside a venue zone */
+            zoneSurchargeCents: number;
+            /** @description What the host is paid */
             subtotalCents: number;
-            serviceFeeCents: number;
+            /** @description ParkApp commission */
+            commissionCents: number;
+            /** @description VAT */
+            vatCents: number;
+            /** @description What the driver pays */
             totalCents: number;
+        };
+        Quote: components["schemas"]["PriceBreakdown"] & {
+            /** @description A multiple of 60 */
+            minutes: number;
+            hourlyCents: number;
         };
         BookingCreate: {
             spaceId: string;
@@ -459,8 +479,11 @@ export interface components {
             /** Format: date-time */
             endsAt: string;
             vehicle: components["schemas"]["Vehicle"];
+            rentCents: number;
+            zoneSurchargeCents: number;
             subtotalCents: number;
-            serviceFeeCents: number;
+            commissionCents: number;
+            vatCents: number;
             totalCents: number;
             /**
              * Format: date-time
@@ -543,7 +566,9 @@ export interface components {
             dimensions: components["schemas"]["Dimensions"];
             vehicleTypes: components["schemas"]["VehicleType"][];
             features: components["schemas"]["SpaceFeature"][];
+            /** @description Set by ParkApp from the tariff */
             priceCentsPerHour: number;
+            zoneSurchargeCents: number;
             photoUrls: string[];
             /** @description Why back-office rejected the space, when it did */
             reviewNote: string | null;
@@ -566,15 +591,12 @@ export interface components {
             description: string;
             /** @description Object keys returned by the signed-upload step; 3 to 8 photos */
             photoKeys: string[];
-            /** @description Between 2000 and 50000 cents */
-            priceCentsPerHour: number;
             /** @description Must be true */
             acceptHostTerms: boolean;
         };
         HostSpaceUpdate: {
             /** @enum {string} */
             status?: "active" | "paused";
-            priceCentsPerHour?: number;
         };
         HostBooking: {
             id: string;
@@ -592,7 +614,7 @@ export interface components {
                 identityVerified: boolean;
                 vehicle: components["schemas"]["Vehicle"];
             };
-            /** @description The price of the booking before the service fee */
+            /** @description What the host is paid (rent + zone charge) */
             subtotalCents: number;
             /** Format: date-time */
             createdAt: string;

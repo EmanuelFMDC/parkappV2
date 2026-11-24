@@ -3,10 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { localToUtcIso, utcToLocalParts } from '../../lib/time'
 import { Input } from './Input'
 
-const HALF_HOURS = Array.from({ length: 48 }, (_, i) => {
-  const h = String(Math.floor(i / 2)).padStart(2, '0')
-  return `${h}:${i % 2 ? '30' : '00'}`
-})
+/** Bookings are sold in whole hours, so times start on the hour. */
+const HOURS = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, '0')}:00`)
 
 interface DateTimeFieldProps {
   label: string
@@ -15,12 +13,12 @@ interface DateTimeFieldProps {
   onChange: (utcIso: string) => void
 }
 
-/** Date + half-hour time, edited in Mexico City wall time and reported as a UTC instant. */
+/** Date + hour, edited in Mexico City wall time and reported as a UTC instant. */
 export function DateTimeField({ label, valueUtc, onChange }: DateTimeFieldProps) {
   const { t, i18n } = useTranslation()
   const timeId = useId()
   const { date, time } = utcToLocalParts(valueUtc)
-  const options = HALF_HOURS.includes(time) ? HALF_HOURS : [...HALF_HOURS, time].sort()
+  const options = HOURS.includes(time) ? HOURS : [...HOURS, time].sort()
 
   const label12 = (hhmm: string) =>
     new Intl.DateTimeFormat(i18n.language, {

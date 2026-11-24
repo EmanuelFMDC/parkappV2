@@ -22,7 +22,6 @@
       "invalid_description": "La descripción puede tener hasta 500 caracteres.",
       "photos_required": "Agrega al menos 3 fotos.",
       "too_many_photos": "Puedes agregar hasta 8 fotos.",
-      "invalid_price": "El precio por hora debe estar entre $20 y $500.",
       "terms_required": "Para publicar debes aceptar las reglas para anfitriones.",
       "duplicate_space": "Ya publicaste una cochera en esta dirección.",
       "not_editable": "Una cochera en revisión o rechazada no se puede pausar ni reactivar.",
@@ -66,16 +65,13 @@
       "rejectedNote": "No pudimos publicarla. {{note}}",
       "pause": "Pausar",
       "resume": "Reactivar",
-      "changePrice": "Cambiar precio",
-      "priceTitle": "Cambiar el precio por hora",
-      "priceLabel": "Precio por hora (pesos)",
-      "priceSave": "Guardar precio",
-      "cancel": "Cancelar",
-      "republish": "Publicar de nuevo"
+      "republish": "Publicar de nuevo",
+      "earnPerHour": "Ganas {{amount}} por hora",
+      "surchargeNote": "+ {{amount}} por reserva en zona de recinto"
     },
     "booking": {
       "verified": "Identidad verificada",
-      "price": "Precio de la reserva"
+      "price": "Tú ganas"
     },
     "location": {
       "title": "¿Dónde está tu cochera?",
@@ -132,11 +128,14 @@
     },
     "price": {
       "title": "Precio",
-      "intro": "Elige cuánto cobras por hora. Puedes cambiarlo cuando quieras.",
-      "label": "Precio por hora (pesos)",
-      "hint": "Entre {{min}} y {{max}}.",
-      "example": "Por 4 horas: {{total}}",
-      "feeNote": "Los conductores pagan además un cargo por servicio de ParkApp.",
+      "intro": "ParkApp fija el precio según la zona, para que sea parejo y fácil de comparar. Tú recibes la renta completa.",
+      "earnTitle": "Lo que ganas",
+      "perHour": "{{amount}} por hora",
+      "zoneVenue": "Zona {{venue}}: tarifa del recinto y {{surcharge}} extra por cada reserva.",
+      "zoneMunicipality": "Fuera de la zona de un recinto: tarifa de {{municipality}}.",
+      "example": "Una reserva de 4 horas te deja {{total}}.",
+      "feeNote": "La comisión de ParkApp (15 %) y su IVA los paga el conductor; no se descuentan de lo que ganas.",
+      "provisional": "Tarifas de prueba: pueden cambiar antes del lanzamiento.",
       "summary": "Resumen",
       "sizeLine": "{{length}} × {{width}} cm, altura de entrada {{height}} cm",
       "photosLine_one": "{{count}} foto",

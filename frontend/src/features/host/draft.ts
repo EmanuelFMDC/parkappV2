@@ -25,7 +25,6 @@ export interface HostDraft {
   photos: DraftPhoto[]
   title: string
   description: string
-  price: string
   acceptTerms: boolean
 }
 
@@ -45,7 +44,6 @@ export const EMPTY_DRAFT: HostDraft = {
   photos: [],
   title: '',
   description: '',
-  price: '',
   acceptTerms: false,
 }
 

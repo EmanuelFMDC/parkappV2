@@ -22,6 +22,13 @@ export const venues: Venue[] = [
     radiusM: 3000,
   },
   {
+    id: '3-de-marzo',
+    name: 'Estadio 3 de Marzo',
+    area: 'Zapopan',
+    location: { lat: 20.7085, lng: -103.4135 },
+    radiusM: 3000,
+  },
+  {
     id: 'telmex',
     name: 'Auditorio Telmex',
     area: 'Zapopan',
@@ -108,7 +115,6 @@ const templates: SpaceTemplate[] = [
 const hosts = ['Marisol R.', 'Héctor V.', 'Alejandra P.', 'Jorge T.', 'Daniela C.', 'Luis M.']
 const distances = [320, 480, 760, 1150, 1700, 2400]
 const bearings = [20, 95, 160, 230, 300, 340]
-const prices = [7500, 5000, 9000, 4500, 6500, 8500]
 const ratings = [4.9, 4.7, 4.8, 4.5, 4.6, 4.9]
 const reviewCounts = [128, 64, 31, 12, 47, 22]
 
@@ -123,7 +129,9 @@ export function buildSpaces(): Space[] {
         location: offsetPoint(venue.location, dist, (bearings[i]! + v * 37) % 360),
         // Recomputed from coordinates at request time; kept only to satisfy the type.
         distanceM: dist,
-        priceCentsPerHour: prices[(i + v) % prices.length]!,
+        // ParkApp sets the price from the venue tariff; the space store fills these on read.
+        priceCentsPerHour: 0,
+        zoneSurchargeCents: 0,
         rating: ratings[(i + v) % ratings.length]!,
         reviewCount: reviewCounts[(i + v) % reviewCounts.length]!,
         features: t.features,

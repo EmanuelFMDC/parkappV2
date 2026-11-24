@@ -37,7 +37,6 @@ const complete: HostDraft = {
     { key: 'c', name: 'c.jpg' },
   ],
   title: 'Cochera techada junto al estadio',
-  price: '60',
   acceptTerms: true,
 }
 
@@ -112,17 +111,8 @@ describe('validatePhotos', () => {
 })
 
 describe('validatePrice', () => {
-  it.each([
-    ['60', null],
-    ['60.50', null],
-    ['20', null],
-    ['500', null],
-    ['19.99', 'invalid_price'],
-    ['501', 'invalid_price'],
-    ['', 'invalid_price'],
-    ['sesenta', 'invalid_price'],
-  ])('price %j -> %j', (price, expected) => {
-    expect(code(validatePrice({ ...complete, price }))).toBe(expected)
+  it('passes once the host rules are accepted (ParkApp sets the price)', () => {
+    expect(validatePrice(complete)).toBeNull()
   })
 
   it('needs the host rules accepted', () => {
@@ -139,21 +129,21 @@ describe('firstIncompleteStep', () => {
     expect(firstIncompleteStep(EMPTY_DRAFT, venue)).toBe('location')
     expect(firstIncompleteStep({ ...complete, lengthCm: '' }, venue)).toBe('size')
     expect(firstIncompleteStep({ ...complete, photos: [] }, venue)).toBe('photos')
-    expect(firstIncompleteStep({ ...complete, price: '' }, venue)).toBe('price')
+    expect(firstIncompleteStep({ ...complete, acceptTerms: false }, venue)).toBe('price')
   })
 })
 
 describe('buildCreateInput', () => {
-  it('builds the request in integer cents and centimeters', () => {
-    const input = buildCreateInput({ ...complete, price: '60.5' })!
-    expect(input.priceCentsPerHour).toBe(6050)
+  it('builds the request in centimeters, without a price', () => {
+    const input = buildCreateInput(complete)!
+    expect(input).not.toHaveProperty('priceCentsPerHour')
     expect(input.dimensions).toEqual({ lengthCm: 520, widthCm: 300, heightCm: 230 })
     expect(input.photoKeys).toEqual(['a', 'b', 'c'])
     expect(input.acceptHostTerms).toBe(true)
   })
 
-  it('returns null when the price does not parse', () => {
-    expect(buildCreateInput({ ...complete, price: 'abc' })).toBeNull()
+  it('returns null without a pin', () => {
+    expect(buildCreateInput({ ...complete, location: null })).toBeNull()
   })
 })
 
@@ -163,7 +153,6 @@ describe('stepForErrorCode', () => {
     ['duplicate_space', 'location'],
     ['invalid_dimensions', 'size'],
     ['photos_required', 'photos'],
-    ['invalid_price', 'price'],
     ['unknown_thing', null],
   ])('%s belongs to %s', (errorCode, step) => {
     expect(stepForErrorCode(errorCode)).toBe(step)

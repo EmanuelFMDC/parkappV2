@@ -11,8 +11,6 @@ import {
   DESCRIPTION_MAX,
   PHOTOS_MAX,
   PHOTOS_MIN,
-  PRICE_MAX_CENTS,
-  PRICE_MIN_CENTS,
   STREET_MIN,
   TITLE_MAX,
   TITLE_MIN,
@@ -20,6 +18,7 @@ import {
   VEHICLE_TYPES,
   dimensionsInRange,
 } from '../../lib/hostRules'
+import { tariffFor, type Tariff } from '../../lib/tariffs'
 import { ApiError, notFound } from './errors'
 import { distanceM } from './geo'
 import { buildSpaces, venues } from './seed'
@@ -121,9 +120,26 @@ export function createSpaceStore({ now, storage, reviewDelayMs = 5000 }: Options
     if (changed) save()
   }
 
+  /** ParkApp sets the price from where the space is; the host never does. */
+  function tariffOf({ space, meta }: Stored): Tariff {
+    const venue = venueById(meta.venueId)
+    return tariffFor({
+      venueId: venue.id,
+      distanceM: distanceM(space.location, venue.location),
+      radiusM: venue.radiusM,
+      municipality: meta.municipality,
+    })
+  }
+  function applyTariff(e: Stored): Stored {
+    const t = tariffOf(e)
+    e.space.priceCentsPerHour = t.hourlyCents
+    e.space.zoneSurchargeCents = t.zoneSurchargeCents
+    return e
+  }
+
   const everything = (): Stored[] => {
     settle()
-    return [...seeded, ...hosted]
+    return [...seeded, ...hosted].map(applyTariff)
   }
   const entry = (id: string) => everything().find((e) => e.space.id === id)
   const venueById = (id: string): Venue => venues.find((v) => v.id === id)!
@@ -146,6 +162,7 @@ export function createSpaceStore({ now, storage, reviewDelayMs = 5000 }: Options
       vehicleTypes: space.vehicleTypes,
       features: space.features,
       priceCentsPerHour: space.priceCentsPerHour,
+      zoneSurchargeCents: space.zoneSurchargeCents,
       photoUrls: space.photoUrls,
       reviewNote: meta.reviewNote,
       createdAt: meta.createdAt,
@@ -190,13 +207,6 @@ export function createSpaceStore({ now, storage, reviewDelayMs = 5000 }: Options
     if (input.photoKeys.length > PHOTOS_MAX) {
       throw invalid('too_many_photos', `Add at most ${PHOTOS_MAX} photos`)
     }
-    if (
-      !Number.isInteger(input.priceCentsPerHour) ||
-      input.priceCentsPerHour < PRICE_MIN_CENTS ||
-      input.priceCentsPerHour > PRICE_MAX_CENTS
-    ) {
-      throw invalid('invalid_price', 'The price per hour is out of range')
-    }
     if (input.acceptHostTerms !== true) {
       throw invalid('terms_required', 'You must accept the host rules')
     }
@@ -215,6 +225,11 @@ export function createSpaceStore({ now, storage, reviewDelayMs = 5000 }: Options
         .filter((e) => e.meta.status === 'active')
         .map((e) => e.space),
     isActive: (id: string): boolean => entry(id)?.meta.status === 'active',
+    tariff(id: string): Tariff {
+      const e = entry(id)
+      if (!e) throw notFound('Space')
+      return tariffOf(e)
+    },
     venueIdOf: (id: string): string => entry(id)!.meta.venueId,
     hostIdOf: (id: string): string | null => entry(id)?.meta.hostId ?? null,
     addressOf(id: string): string {
@@ -255,7 +270,9 @@ export function createSpaceStore({ now, storage, reviewDelayMs = 5000 }: Options
         neighborhood: input.neighborhood.trim(),
         location: input.location,
         distanceM: distanceM(input.location, venue.location),
-        priceCentsPerHour: input.priceCentsPerHour,
+        // Set from the tariff on every read (applyTariff).
+        priceCentsPerHour: 0,
+        zoneSurchargeCents: 0,
         rating: 0,
         reviewCount: 0,
         features: input.features,
@@ -283,18 +300,12 @@ export function createSpaceStore({ now, storage, reviewDelayMs = 5000 }: Options
       }
       hosted.push(stored)
       save()
-      return toHostSpace(stored)
+      return toHostSpace(applyTariff(stored))
     },
 
     update(userId: string, id: string, patch: HostSpaceUpdate): HostSpace {
       const e = everything().find((x) => x.space.id === id && x.meta.hostId === userId)
       if (!e) throw notFound('Space')
-      if (patch.priceCentsPerHour !== undefined) {
-        const p = patch.priceCentsPerHour
-        if (!Number.isInteger(p) || p < PRICE_MIN_CENTS || p > PRICE_MAX_CENTS) {
-          throw invalid('invalid_price', 'The price per hour is out of range')
-        }
-      }
       if (patch.status !== undefined) {
         if (e.meta.status !== 'active' && e.meta.status !== 'paused') {
           throw new ApiError(
@@ -305,7 +316,6 @@ export function createSpaceStore({ now, storage, reviewDelayMs = 5000 }: Options
         }
         e.meta.status = patch.status
       }
-      if (patch.priceCentsPerHour !== undefined) e.space.priceCentsPerHour = patch.priceCentsPerHour
       save()
       return toHostSpace(e)
     },

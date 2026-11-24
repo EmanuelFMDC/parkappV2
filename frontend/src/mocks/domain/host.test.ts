@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
+import { VENUE_HOURLY_CENTS, ZONE_SURCHARGE_CENTS } from '../../lib/tariffs'
 import type { HostSpaceCreate } from '../../api/types'
 import { createDb, type MockDb } from './db'
 import { ApiError } from './errors'
@@ -28,7 +29,6 @@ const valid = (over: Partial<HostSpaceCreate> = {}): HostSpaceCreate => ({
   title: 'Cochera techada junto al estadio',
   description: 'Entrada amplia y portón eléctrico.',
   photoKeys: ['mock/a.jpg', 'mock/b.jpg', 'mock/c.jpg'],
-  priceCentsPerHour: 6000,
   acceptHostTerms: true,
   ...over,
 })
@@ -154,9 +154,6 @@ describe('what a host may publish', () => {
     ['a long description', { description: 'x'.repeat(501) }, 'invalid_description'],
     ['two photos', { photoKeys: ['a', 'b'] }, 'photos_required'],
     ['nine photos', { photoKeys: Array.from({ length: 9 }, (_, i) => `p${i}`) }, 'too_many_photos'],
-    ['a price under the minimum', { priceCentsPerHour: 1999 }, 'invalid_price'],
-    ['a price over the maximum', { priceCentsPerHour: 50001 }, 'invalid_price'],
-    ['a fractional price', { priceCentsPerHour: 6000.5 }, 'invalid_price'],
     ['unaccepted host rules', { acceptHostTerms: false }, 'terms_required'],
   ] as const)('rejects %s', (_name, over, code) => {
     expectApiError(
@@ -175,15 +172,12 @@ describe('what a host may publish', () => {
   })
 
   it('accepts the edges of the allowed ranges', () => {
-    expect(() =>
-      db.createHostSpace(HOST, valid({ priceCentsPerHour: 2000, photoKeys: ['a', 'b', 'c'] })),
-    ).not.toThrow()
+    expect(() => db.createHostSpace(HOST, valid({ photoKeys: ['a', 'b', 'c'] }))).not.toThrow()
     expect(() =>
       db.createHostSpace(
         HOST,
         valid({
           street: 'Calle Otra 99',
-          priceCentsPerHour: 50000,
           photoKeys: Array.from({ length: 8 }, (_, i) => `p${i}`),
         }),
       ),
@@ -215,16 +209,15 @@ describe('managing a published space', () => {
     expect(search().some((s) => s.id === space.id)).toBe(true)
   })
 
-  it('changes the price in integer cents', () => {
+  it('gets its price from the venue tariff, not from the host', () => {
     const space = publishAndApprove()
-    expect(db.updateHostSpace(HOST, space.id, { priceCentsPerHour: 7500 }).priceCentsPerHour).toBe(
-      7500,
-    )
-    expect(db.quote(space.id, window.startsAt, window.endsAt).subtotalCents).toBe(30000)
-    expectApiError(
-      () => db.updateHostSpace(HOST, space.id, { priceCentsPerHour: 10 }),
-      422,
-      'invalid_price',
+    expect(space).toMatchObject({
+      priceCentsPerHour: VENUE_HOURLY_CENTS.akron,
+      zoneSurchargeCents: ZONE_SURCHARGE_CENTS,
+    })
+    // 4 hours at the Akron rate plus the zone charge
+    expect(db.quote(space.id, window.startsAt, window.endsAt).subtotalCents).toBe(
+      VENUE_HOURLY_CENTS.akron! * 4 + ZONE_SURCHARGE_CENTS,
     )
   })
 
@@ -297,7 +290,7 @@ describe('drivers and hosts', () => {
       status: 'confirmed',
       space: { id: spaceId },
       driver: { firstName: 'Prueba', identityVerified: true },
-      subtotalCents: 24000,
+      subtotalCents: VENUE_HOURLY_CENTS.akron! * 4 + ZONE_SURCHARGE_CENTS,
     })
     expect(received!.driver.vehicle.plate).toBe('JAL482A')
 

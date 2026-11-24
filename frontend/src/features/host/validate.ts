@@ -6,14 +6,11 @@ import {
   MUNICIPALITIES,
   PHOTOS_MAX,
   PHOTOS_MIN,
-  PRICE_MAX_CENTS,
-  PRICE_MIN_CENTS,
   STREET_MIN,
   TITLE_MAX,
   TITLE_MIN,
   dimensionsInRange,
 } from '../../lib/hostRules'
-import { parsePesosToCents } from '../../lib/money'
 import type { HostDraft } from './draft'
 
 export type HostStep = 'location' | 'size' | 'photos' | 'price'
@@ -79,11 +76,8 @@ export function validatePhotos(draft: HostDraft): FieldProblem | null {
   return null
 }
 
+/** The price is set by ParkApp from the zone, so the last step only needs the host rules. */
 export function validatePrice(draft: HostDraft): FieldProblem | null {
-  const cents = parsePesosToCents(draft.price)
-  if (cents === null || cents < PRICE_MIN_CENTS || cents > PRICE_MAX_CENTS) {
-    return { field: 'price', code: 'invalid_price' }
-  }
   if (!draft.acceptTerms) return { field: 'terms', code: 'terms_required' }
   return null
 }
@@ -110,11 +104,10 @@ export function firstIncompleteStep(draft: HostDraft, venue: Venue | undefined):
   return HOST_STEPS.find((s) => validateStep(s, draft, venue) !== null) ?? null
 }
 
-/** Turns a complete draft into the request body, or null if any number does not parse. */
+/** Turns a complete draft into the request body, or null if something required is missing. */
 export function buildCreateInput(draft: HostDraft): HostSpaceCreate | null {
-  const priceCentsPerHour = parsePesosToCents(draft.price)
   const dimensions = dimensionsOf(draft)
-  if (priceCentsPerHour === null || !draft.location || !draft.municipality) return null
+  if (!draft.location || !draft.municipality) return null
   return {
     venueId: draft.venueId,
     street: draft.street.trim(),
@@ -128,7 +121,6 @@ export function buildCreateInput(draft: HostDraft): HostSpaceCreate | null {
     title: draft.title.trim(),
     description: draft.description.trim(),
     photoKeys: draft.photos.map((p) => p.key),
-    priceCentsPerHour,
     acceptHostTerms: draft.acceptTerms,
   }
 }
@@ -145,7 +137,6 @@ const STEP_OF_CODE: Record<string, HostStep> = {
   invalid_description: 'photos',
   photos_required: 'photos',
   too_many_photos: 'photos',
-  invalid_price: 'price',
   terms_required: 'price',
 }
 

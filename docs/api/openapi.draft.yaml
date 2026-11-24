@@ -118,6 +118,9 @@ paths:
     get:
       operationId: quoteSpace
       summary: Price for a time window (computed by the server, never by the client)
+      description: >
+        Bookings are whole hours (60-minute blocks); any other length is 422 invalid_block.
+        Total = hourly tariff × hours + zone charge + 15 % commission + 16 % VAT on the commission.
       parameters:
         - { name: spaceId, in: path, required: true, schema: { type: string } }
         - { name: startsAt, in: query, required: true, schema: { type: string, format: date-time } }
@@ -522,7 +525,9 @@ components:
         neighborhood: { type: string }
         location: { $ref: '#/components/schemas/LatLng' }
         distanceM: { type: integer, description: Meters to the requested venue }
-        priceCentsPerHour: { type: integer }
+        priceCentsPerHour:
+          type: integer
+          description: Set by ParkApp from the venue or municipality tariff, never by the host
         rating: { type: number }
         reviewCount: { type: integer }
         features:
@@ -545,9 +550,12 @@ components:
       allOf:
         - $ref: '#/components/schemas/SpaceSummary'
         - type: object
-          required: [description, dimensions, host, vehicleTypes]
+          required: [description, dimensions, host, vehicleTypes, zoneSurchargeCents]
           properties:
             description: { type: string }
+            zoneSurchargeCents:
+              type: integer
+              description: Charged once per booking when the space is within a venue zone (3 km); 0 otherwise
             dimensions: { $ref: '#/components/schemas/Dimensions' }
             vehicleTypes:
               type: array
@@ -568,14 +576,25 @@ components:
         rating: { type: integer, minimum: 1, maximum: 5 }
         comment: { type: string }
         createdAt: { type: string, format: date-time }
-    Quote:
+    PriceBreakdown:
       type: object
-      required: [subtotalCents, serviceFeeCents, totalCents, minutes]
+      description: Integer cents. subtotal = rent + zoneSurcharge; total = subtotal + commission + vat.
+      required: [rentCents, zoneSurchargeCents, subtotalCents, commissionCents, vatCents, totalCents]
       properties:
-        minutes: { type: integer }
-        subtotalCents: { type: integer }
-        serviceFeeCents: { type: integer }
-        totalCents: { type: integer }
+        rentCents: { type: integer, description: Hourly tariff × hours }
+        zoneSurchargeCents: { type: integer, description: Once per booking inside a venue zone }
+        subtotalCents: { type: integer, description: What the host is paid }
+        commissionCents: { type: integer, description: ParkApp commission, 15 % of the subtotal }
+        vatCents: { type: integer, description: VAT, 16 % of the commission }
+        totalCents: { type: integer, description: What the driver pays }
+    Quote:
+      allOf:
+        - $ref: '#/components/schemas/PriceBreakdown'
+        - type: object
+          required: [minutes, hourlyCents]
+          properties:
+            minutes: { type: integer, description: A multiple of 60 }
+            hourlyCents: { type: integer }
     BookingCreate:
       type: object
       required: [spaceId, startsAt, endsAt, vehicleId]
@@ -590,7 +609,7 @@ components:
     Booking:
       type: object
       required:
-        [id, status, space, venueName, startsAt, endsAt, vehicle, subtotalCents, serviceFeeCents, totalCents, expiresAt, accessCode, createdAt]
+        [id, status, space, venueName, startsAt, endsAt, vehicle, rentCents, zoneSurchargeCents, subtotalCents, commissionCents, vatCents, totalCents, expiresAt, accessCode, createdAt]
       properties:
         id: { type: string }
         status: { $ref: '#/components/schemas/BookingStatus' }
@@ -612,8 +631,11 @@ components:
         startsAt: { type: string, format: date-time }
         endsAt: { type: string, format: date-time }
         vehicle: { $ref: '#/components/schemas/Vehicle' }
+        rentCents: { type: integer }
+        zoneSurchargeCents: { type: integer }
         subtotalCents: { type: integer }
-        serviceFeeCents: { type: integer }
+        commissionCents: { type: integer }
+        vatCents: { type: integer }
         totalCents: { type: integer }
         expiresAt:
           type: [string, 'null']
@@ -685,7 +707,7 @@ components:
     HostSpace:
       type: object
       required:
-        [id, status, title, description, venue, street, neighborhood, municipality, references, location, distanceM, dimensions, vehicleTypes, features, priceCentsPerHour, photoUrls, reviewNote, createdAt]
+        [id, status, title, description, venue, street, neighborhood, municipality, references, location, distanceM, dimensions, vehicleTypes, features, priceCentsPerHour, zoneSurchargeCents, photoUrls, reviewNote, createdAt]
       properties:
         id: { type: string }
         status: { $ref: '#/components/schemas/SpaceStatus' }
@@ -710,7 +732,8 @@ components:
         features:
           type: array
           items: { $ref: '#/components/schemas/SpaceFeature' }
-        priceCentsPerHour: { type: integer }
+        priceCentsPerHour: { type: integer, description: Set by ParkApp from the tariff }
+        zoneSurchargeCents: { type: integer }
         photoUrls:
           type: array
           items: { type: string }
@@ -721,7 +744,7 @@ components:
     HostSpaceCreate:
       type: object
       required:
-        [venueId, street, neighborhood, municipality, location, dimensions, vehicleTypes, features, title, description, photoKeys, priceCentsPerHour, acceptHostTerms]
+        [venueId, street, neighborhood, municipality, location, dimensions, vehicleTypes, features, title, description, photoKeys, acceptHostTerms]
       properties:
         venueId: { type: string }
         street: { type: string }
@@ -742,13 +765,11 @@ components:
           type: array
           description: Object keys returned by the signed-upload step; 3 to 8 photos
           items: { type: string }
-        priceCentsPerHour: { type: integer, description: Between 2000 and 50000 cents }
         acceptHostTerms: { type: boolean, description: Must be true }
     HostSpaceUpdate:
       type: object
       properties:
         status: { type: string, enum: [active, paused] }
-        priceCentsPerHour: { type: integer }
     HostBooking:
       type: object
       required: [id, status, space, startsAt, endsAt, driver, subtotalCents, createdAt]
@@ -770,5 +791,5 @@ components:
             firstName: { type: string }
             identityVerified: { type: boolean }
             vehicle: { $ref: '#/components/schemas/Vehicle' }
-        subtotalCents: { type: integer, description: The price of the booking before the service fee }
+        subtotalCents: { type: integer, description: What the host is paid (rent + zone charge), before commission and VAT }
         createdAt: { type: string, format: date-time }

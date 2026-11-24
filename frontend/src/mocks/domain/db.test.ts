@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { createDb, type MockDb } from './db'
 import { ApiError } from './errors'
+import { VENUE_HOURLY_CENTS, ZONE_SURCHARGE_CENTS } from '../../lib/tariffs'
+import { seedDemoBookings } from './demo'
 import { quoteWindow } from './pricing'
 
 const T0 = Date.parse('2026-10-10T12:00:00.000Z')
@@ -43,28 +45,35 @@ function expectApiError(fn: () => unknown, status: number, code: string) {
 }
 
 describe('pricing', () => {
-  it('uses integer cents and a 10% service fee', () => {
-    const q = quoteWindow(7500, iso(T0), iso(T0 + hours(2)))
+  const venueZone = { hourlyCents: 6000, zoneSurchargeCents: 5000 }
+
+  it('prices rate × hours + $50 zone charge + 15 % commission + 16 % VAT on it', () => {
+    const q = quoteWindow(venueZone, iso(T0), iso(T0 + hours(2)))
     expect(q).toEqual({
       minutes: 120,
-      subtotalCents: 15000,
-      serviceFeeCents: 1500,
-      totalCents: 16500,
+      hourlyCents: 6000,
+      rentCents: 12000,
+      zoneSurchargeCents: 5000,
+      subtotalCents: 17000,
+      commissionCents: 2550,
+      vatCents: 408,
+      totalCents: 19958,
     })
-  })
-
-  it('never produces fractional cents', () => {
-    const q = quoteWindow(4533, iso(T0), iso(T0 + hours(1) + 7 * 60_000))
-    for (const v of [q.subtotalCents, q.serviceFeeCents, q.totalCents]) {
-      expect(Number.isInteger(v)).toBe(true)
-    }
   })
 
   it.each([
     [30, 'too_short'],
     [25 * 60, 'too_long'],
+    [90, 'invalid_block'],
+    [67, 'invalid_block'],
   ])('rejects a %i minute window (%s)', (minutes, code) => {
-    expectApiError(() => quoteWindow(5000, iso(T0), iso(T0 + minutes * 60_000)), 422, code)
+    expectApiError(() => quoteWindow(venueZone, iso(T0), iso(T0 + minutes * 60_000)), 422, code)
+  })
+
+  it('quotes a seeded space with its venue tariff', () => {
+    const q = db.quote('akron-1', iso(T0 + hours(1)), iso(T0 + hours(3)))
+    expect(q.hourlyCents).toBe(VENUE_HOURLY_CENTS.akron)
+    expect(q.zoneSurchargeCents).toBe(ZONE_SURCHARGE_CENTS)
   })
 })
 
@@ -168,7 +177,7 @@ describe('booking lifecycle', () => {
     const soon = db.createBooking(USER, {
       spaceId: 'akron-2',
       startsAt: iso(T0 + 5 * 60_000),
-      endsAt: iso(T0 + hours(2)),
+      endsAt: iso(T0 + 5 * 60_000 + hours(2)),
       vehicleId,
     })
     expectApiError(() => db.cancelBooking(USER, soon.id), 409, 'too_late')
@@ -271,5 +280,11 @@ describe('persistence', () => {
     expect(second.getBooking(USER, b.id).id).toBe(b.id)
     expect(second.getMe(USER).identityStatus).toBe('verified')
     expect(second.getMe(USER).vehicles).toHaveLength(1)
+  })
+})
+
+describe('demo data', () => {
+  it('seeds taken spaces for every venue without breaking the booking rules', () => {
+    expect(() => seedDemoBookings(db)).not.toThrow()
   })
 })

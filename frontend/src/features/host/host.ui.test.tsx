@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
@@ -84,7 +84,6 @@ const readyDraft = (over: Partial<HostDraft> = {}): HostDraft => ({
     { key: 'mock/c.jpg', name: 'c.jpg' },
   ],
   title: 'Cochera techada junto al estadio',
-  price: '60',
   acceptTerms: true,
   ...over,
 })
@@ -296,22 +295,19 @@ describe('publishing', () => {
     const [space] = testDb().listHostSpaces(USER)
     expect(space).toMatchObject({
       title: 'Cochera techada junto al estadio',
-      priceCentsPerHour: 6000,
+      priceCentsPerHour: 6000, // the Akron tariff
       street: 'Av. Patria 1234',
     })
     expect(sessionStorage.getItem('parkapp.host.draft')).toBeNull()
   })
 
-  it('shows the price for four hours', async () => {
+  it('shows what the host earns from the zone tariff, with no price to type', async () => {
     await renderPrice()
-    expect(screen.getByText(/Por 4 horas: \$240/)).toBeInTheDocument()
-  })
-
-  it('refuses a price out of range and an unaccepted rule set', async () => {
-    await renderPrice({ price: '10', acceptTerms: false })
-    await userEvent.click(screen.getByRole('button', { name: 'Publicar cochera' }))
-    expect(await screen.findByText(/entre \$20 y \$500/)).toBeInTheDocument()
-    expect(testDb().listHostSpaces(USER)).toEqual([])
+    expect(await screen.findByText('$60 por hora')).toBeInTheDocument()
+    expect(screen.getByText(/Zona Estadio Akron/)).toHaveTextContent('$50 extra')
+    // 4 h × $60 + $50
+    expect(screen.getByText(/Una reserva de 4 horas te deja \$290/)).toBeInTheDocument()
+    expect(screen.queryByRole('textbox', { name: /precio/i })).not.toBeInTheDocument()
   })
 
   it('needs the host rules accepted', async () => {
@@ -334,7 +330,6 @@ describe('publishing', () => {
       title: 'Ya publicada antes',
       description: '',
       photoKeys: ['a', 'b', 'c'],
-      priceCentsPerHour: 5000,
       acceptHostTerms: true,
     })
     await userEvent.click(screen.getByRole('button', { name: 'Publicar cochera' }))
@@ -391,7 +386,6 @@ describe('host home', () => {
       title: 'Cochera para pausar',
       description: '',
       photoKeys: ['a', 'b', 'c'],
-      priceCentsPerHour: 5000,
       acceptHostTerms: true,
     })
     testDb().approveAllSpacesNow()
@@ -404,7 +398,7 @@ describe('host home', () => {
     expect(await screen.findByText('Publicada')).toBeInTheDocument()
   })
 
-  it('changes the price of a live space and refuses one out of range', async () => {
+  it('shows a live space with what the host earns, and no way to change the price', async () => {
     const services = await signedIn()
     verifiedHostWithoutCar()
     testDb().createHostSpace(USER, {
@@ -419,25 +413,14 @@ describe('host home', () => {
       title: 'Cochera con precio',
       description: '',
       photoKeys: ['a', 'b', 'c'],
-      priceCentsPerHour: 5000,
       acceptHostTerms: true,
     })
     testDb().approveAllSpacesNow()
     renderHome(services)
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Cambiar precio' }))
-    const dialog = screen.getByRole('dialog')
-    const field = within(dialog).getByLabelText('Precio por hora (pesos)')
-    await userEvent.clear(field)
-    await userEvent.type(field, '5')
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Guardar precio' }))
-    expect(await within(dialog).findByText(/entre \$20 y \$500/)).toBeInTheDocument()
-
-    await userEvent.clear(field)
-    await userEvent.type(field, '75.50')
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Guardar precio' }))
-    expect(await screen.findByText(/\$75\.50/)).toBeInTheDocument()
-    expect(testDb().listHostSpaces(USER)[0]?.priceCentsPerHour).toBe(7550)
+    expect(await screen.findByText('Ganas $60 por hora')).toBeInTheDocument()
+    expect(screen.getByText(/\+ \$50 por reserva/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Cambiar precio' })).not.toBeInTheDocument()
   })
 
   it('shows a rejected space with the reason and a way to list it again', async () => {
@@ -456,7 +439,6 @@ describe('host home', () => {
       title: 'Cochera rechazada',
       description: '',
       photoKeys: ['a', 'b', 'c'],
-      priceCentsPerHour: 5000,
       acceptHostTerms: true,
     })
     renderHome(services)

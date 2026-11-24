@@ -112,7 +112,6 @@ export const READY_DRAFT = {
   ],
   title: 'Cochera techada junto al estadio',
   description: 'Entrada amplia y portón eléctrico.',
-  price: '60',
   acceptTerms: true,
 }
 

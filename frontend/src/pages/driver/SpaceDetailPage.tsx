@@ -86,6 +86,13 @@ export default function SpaceDetailPage() {
               <PriceTag cents={data.priceCentsPerHour} size="lg" />
               <Rating value={data.rating} count={data.reviewCount} />
             </div>
+            {data.zoneSurchargeCents > 0 && (
+              <p className="-mt-2 text-caption text-ink-muted">
+                {t('driver.detail.zoneNote', {
+                  amount: formatCents(data.zoneSurchargeCents, lang),
+                })}
+              </p>
+            )}
 
             {taken && (
               <p

@@ -41,6 +41,7 @@
   "errors": {
     "code": {
       "space_unavailable": "Someone just booked this garage for part of your time. Pick another or change the time.",
+      "invalid_block": "Bookings are made in whole hours.",
       "too_short": "The minimum booking is 1 hour.",
       "too_long": "The maximum booking is 24 hours.",
       "in_the_past": "Arrival can't be in the past.",
@@ -128,15 +129,14 @@
       "notFoundBody": "Go back to the list and pick another.",
       "backToList": "See garages",
       "createAccount": "Create account to continue",
-      "vehicleNoFit": "None of your cars fits this garage. Pick another."
+      "vehicleNoFit": "None of your cars fits this garage. Pick another.",
+      "zoneNote": "+ {{amount}} per booking: venue zone, close to the event."
     },
     "time": {
       "title": "Your time",
       "arrival": "Arrival",
       "departure": "Departure",
       "duration": "Duration: {{value}}",
-      "subtotal": "Garage",
-      "fee": "Service fee",
       "total": "Total",
       "continue": "Continue to payment",
       "unavailable": "This garage is no longer available at this time.",
@@ -155,6 +155,14 @@
       "freeCancel": "Free cancellation until 10 minutes before you arrive.",
       "addressNote": "You'll see the exact address and your access code once it's confirmed.",
       "pickAnother": "Pick another garage"
+    },
+    "price": {
+      "rent": "Rent",
+      "rentDetail_one": "{{count}} hour × {{rate}}",
+      "rentDetail_other": "{{count}} hours × {{rate}}",
+      "zone": "Venue zone",
+      "commission": "ParkApp commission (15%)",
+      "vat": "VAT on the commission (16%)"
     }
   },
   "bookings": {

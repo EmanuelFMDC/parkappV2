@@ -25,6 +25,17 @@ Estado actual del frontend de ParkApp. El contexto general y las reglas no negoc
 - **Reglas que la simulación ya aplica y la API real debe respetar:** sin doble reserva (409), precios en centavos enteros, fechas en UTC, dirección exacta solo tras confirmar, permisos validados en el servidor.
 - **El precio lo calcula el servidor** (`/quote`); el cliente nunca suma. `formatCents` y los mocks de pago lanzan error con decimales.
 
+## Precios
+
+Fuente: presentación final del proyecto (modelo de negocio).
+
+- **ParkApp fija la tarifa, no el anfitrión.** Dentro de 3 km de un recinto se usa la tarifa por hora del recinto y se suman $50 una vez por reserva. Fuera de esa zona, la tarifa del municipio. Hoy toda cochera debe estar a 3 km de un recinto, así que la tarifa por municipio solo aplica si esa regla cambia.
+- **Fórmula:** tarifa × horas + $50 (zona de recinto) + comisión del 15 % sobre esa suma + IVA del 16 % sobre la comisión. El conductor paga el total; el anfitrión recibe tarifa × horas + $50. Porcentajes en puntos base y redondeo a medio centavo hacia arriba, solo con enteros (`lib/tariffs.ts`).
+- **Montos provisionales** en `lib/tariffs.ts` (Akron $60, Jalisco y Telmex $50, 3 de Marzo, Benito Juárez y Arena VFG $40; municipios de $15 en Tonalá a $30 en Zapopan). Los define el negocio antes de producción.
+- **Reservas por horas completas** (bloques de 60 min). La API responde 422 `invalid_block` a cualquier otra duración. El horario por defecto se amplía a la hora completa en ambos extremos.
+- **El desglose viaja en la API** (`PriceBreakdown`: renta, zona, subtotal, comisión, IVA, total) y el cliente solo lo muestra.
+- **Supuestos a confirmar:** los $50 son por reserva y no por hora; el IVA se cobra solo sobre la comisión; los $50 son para el anfitrión.
+
 ## Design system
 
 - **El ámbar es la acción, el azul es la marca.** Un botón de acción por pantalla.
@@ -33,12 +44,12 @@ Estado actual del frontend de ParkApp. El contexto general y las reglas no negoc
 - **Contraste como prueba:** `styleguide/tokens.ts` refleja `index.css`; una prueba falla si difieren o si alguna de las 17 combinaciones baja de AA. Aro de foco azul (9,4:1) y token `control` (3,5:1) para bordes de campos.
 - **Mapa y fotos son ilustraciones** hasta conectar Google Maps y Cloud Storage. El mapa usa escala de raíz cuadrada para no tapar el marcador del recinto.
 - **Capturas** en `docs/design-system/screenshots/`, sin vistas de página completa por el límite de 500 KB del pre-commit.
-- **Datos de ejemplo:** los recintos usan coordenadas aproximadas; verificarlas antes de producción.
+- **Datos de ejemplo:** los recintos usan coordenadas aproximadas; verificarlas antes de producción. Recintos: Estadio Akron, Estadio Jalisco, Estadio 3 de Marzo, Auditorio Telmex, Auditorio Benito Juárez y Arena VFG.
 
 ## Modo conductor
 
 - **Cuatro pasos:** Recinto, Cochera (lista y detalle), Horario, Pago. El inicio de sesión aparece dentro del pago, solo si hace falta.
-- **El viaje vive en la URL** (recinto y horario). Horario por defecto: llegada 2 horas antes del evento y salida 1 hora después de que termina.
+- **El viaje vive en la URL** (recinto y horario). Horario por defecto: llegada 2 horas antes del evento y salida 1 hora después de que termina, redondeado a horas completas.
 - **La reserva se crea al pagar.** Nace `pending_payment` con apartado de 10 minutos y se confirma solo si el pago tuvo éxito. Dirección exacta y código solo tras confirmar.
 - **Cuenta verificada antes del paso 3.** El paso 2 es abierto; el 3 y el 4 exigen cuenta completa y verificada, y el servidor también lo exige (403). Quien continúa sin ella va a `/account/new` y vuelve al mismo horario.
 - **Cuenta en cuatro etapas:** teléfono, datos personales (nombre legal, fecha de nacimiento, mayoría de edad, correo, aviso de privacidad), auto (placa, marca, modelo, color, tipo) e identidad (INE y selfie, simulada).
@@ -48,14 +59,14 @@ Estado actual del frontend de ParkApp. El contexto general y las reglas no negoc
 
 ## Modo anfitrión
 
-- **Alta en cuatro pasos:** ubicación, dimensiones, fotos, precio. Más "Mis cocheras" (pausar, reactivar, cambiar precio) y "Reservas recibidas".
+- **Alta en cuatro pasos:** ubicación, dimensiones, fotos, precio (solo muestra lo que gana; ver Precios). Más "Mis cocheras" (pausar, reactivar) y "Reservas recibidas".
 - **Identidad:** mismo registro que el conductor, sin pedir auto. Sin identidad verificada no se puede publicar.
 - **Ubicación:** dirección escrita más pin en el mapa ilustrado, con botones de dirección para teclado y lector de pantalla. Sin geocodificación hasta Google Maps.
 - **Revisión antes de publicar.** Una cochera nueva nace `pending_review`; el back-office la aprueba o rechaza con un motivo. Solo las `active` aparecen en las búsquedas.
 - **Un anfitrión no puede reservar su propia cochera** (422 `own_space`).
 - **Qué ve el anfitrión de un conductor:** nombre de pila, insignia, auto y precio; nunca teléfono, correo ni INE.
 - **Autos sugeridos por medidas** con umbrales orientativos y editables (`lib/hostRules.ts`); validar con un anfitrión real.
-- **Precio:** entero en centavos, $20 a $500 por hora. El panel muestra el precio de la reserva antes del cargo por servicio; no se define comisión.
+- **Precio:** lo fija ParkApp por zona. El anfitrión ve "Ganas $X por hora" y, en cada reserva recibida, lo que gana (renta + $50 de zona).
 - **Una cochera sin reseñas dice "Nueva"** en vez de 0.0. Pausar no cancela reservas confirmadas.
 - **El borrador del alta vive en `sessionStorage`** y no sale del navegador hasta publicar.
 - **Diferido:** editar otros datos de una cochera publicada, eliminarla, pagos al anfitrión (Stripe Connect), cancelaciones del anfitrión, reseñas a conductores y mensajería.

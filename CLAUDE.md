@@ -1,6 +1,6 @@
 # Contexto: ParkApp
 
-Plataforma P2P para rentar cocheras y cajones privados por horas cerca de recintos de eventos masivos en la Zona Metropolitana de Guadalajara (Estadio Akron, Estadio Jalisco, Auditorio Telmex, Auditorio Benito Juárez, Arena VFG). Radio de operación: hasta 3 km por recinto. Dos roles: conductor (reserva) y anfitrión (publica el cajón). El conductor debe poder reservar en un máximo de 4 pasos. El anfitrión da de alta su espacio en un flujo secuencial: ubicación, dimensiones, fotos, precio.
+Plataforma P2P para rentar cocheras y cajones privados por horas cerca de recintos de eventos masivos en la Zona Metropolitana de Guadalajara (Estadio Akron, Estadio Jalisco, Estadio 3 de Marzo, Auditorio Telmex, Auditorio Benito Juárez, Arena VFG). Radio de operación: hasta 3 km por recinto. Dos roles: conductor (reserva) y anfitrión (publica el cajón). El conductor debe poder reservar en un máximo de 4 pasos. El anfitrión da de alta su espacio en un flujo secuencial: ubicación, dimensiones, fotos, precio.
 
 ## Tarea inicial
 1. Guarda esta especificación como `CLAUDE.md` en la raíz del repo, para que sea el contexto fijo de todas las sesiones.

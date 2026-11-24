@@ -41,6 +41,7 @@
   "errors": {
     "code": {
       "space_unavailable": "Alguien acaba de reservar esta cochera en parte de tu horario. Elige otra o cambia el horario.",
+      "invalid_block": "Las reservas son por horas completas.",
       "too_short": "La reserva mínima es de 1 hora.",
       "too_long": "La reserva máxima es de 24 horas.",
       "in_the_past": "La llegada no puede ser en el pasado.",
@@ -128,15 +129,14 @@
       "notFoundBody": "Vuelve a la lista y elige otra.",
       "backToList": "Ver cocheras",
       "createAccount": "Crear cuenta para continuar",
-      "vehicleNoFit": "Ninguno de tus autos cabe en esta cochera. Elige otra."
+      "vehicleNoFit": "Ninguno de tus autos cabe en esta cochera. Elige otra.",
+      "zoneNote": "+ {{amount}} por reserva: zona de recinto, cerca del evento."
     },
     "time": {
       "title": "Tu horario",
       "arrival": "Llegada",
       "departure": "Salida",
       "duration": "Duración: {{value}}",
-      "subtotal": "Cochera",
-      "fee": "Cargo por servicio",
       "total": "Total",
       "continue": "Continuar al pago",
       "unavailable": "Esta cochera ya no está disponible en este horario.",
@@ -155,6 +155,14 @@
       "freeCancel": "Cancelación gratis hasta 10 minutos antes de tu llegada.",
       "addressNote": "Verás la dirección exacta y tu código de acceso al confirmar.",
       "pickAnother": "Elegir otra cochera"
+    },
+    "price": {
+      "rent": "Renta",
+      "rentDetail_one": "{{count}} hora × {{rate}}",
+      "rentDetail_other": "{{count}} horas × {{rate}}",
+      "zone": "Zona de recinto",
+      "commission": "Comisión ParkApp (15 %)",
+      "vat": "IVA de la comisión (16 %)"
     }
   },
   "bookings": {
